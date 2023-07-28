@@ -1,5 +1,6 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import styled from "@emotion/styled";
+import {useParams} from "react-router-dom"
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
 import Nav from "../../component/common/Nav";
@@ -17,10 +18,16 @@ import TaemCard from "../../component/card/TeamCard";
 import BasicPagination from "../../component/pagination/Pagination";
 import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
+import { API } from "../../api/api";
 
 function CustomTabPanel(props) {
+    
     const { children, value, index, ...other } = props;
-  
+
+
+    
+
+    
     return (
       <div
         role="tabpanel"
@@ -54,6 +61,28 @@ function CustomTabPanel(props) {
 
 export default function Detail(){
 
+
+    const { boardId } = useParams()
+
+    // details 
+    const [data, setData] = useState([]);
+    const [commentData,setCommentData]=useState([]);
+    //comments.length
+    let [commentCount,setCommentCount]=useState([]);
+
+    useEffect(() => {
+        API.get(`/api/v1/board/${boardId}`).then((res) => {      
+            setData(res.data[0]);            
+            setCommentData(res.data[0].comments);
+        })
+    }, []);
+   
+    useEffect(() => {
+        if (Object.keys(data).length !== 0) {
+            setCommentCount(data.comments.length);
+        }
+      }, [data]);
+    
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -82,55 +111,55 @@ export default function Detail(){
                             <DetailMenu />
                         </SideList>
                         <Content>
-                            <h1>제 10회 물류산업진흥재단 논문 공모전</h1>
+                            <h1>{data.activitiyName}</h1>
                             <ul className="content-wrap">
                                 <li className="thumbnail"> 
-                                    <img src="/img/detail/sample.png" alt="공모전 썸네일" width="100%"></img>
+                                    <img src={data.activityImg} alt="공모전 썸네일" width="100%"></img>
                                 </li>
                                 <li className="detail-list">
                                     <div className="dp-flex space-between">
-                                        <h2>물류산업진흥재단</h2>
+                                        <h2>{data.activitiyName}</h2>
                                         <IconWrap type="noComment" />
                                     </div>
                                     <ol className="detail-info">
                                         <li className="dp-flex space-between">
                                             <div className="col dp-flex">
                                                 <h3>기업형태</h3>
-                                                <p>비영리단체/협회/재단</p>
+                                                <p>{data.companyType}</p>
                                             </div>
                                             <div className="col dp-flex">
                                                 <h3>참여대상</h3>
-                                                <p>대학생,직장인/일반인</p>
+                                                <p>{data.target}</p>
                                             </div>
                                         </li>
                                         <li className="dp-flex space-between">
                                             <div className="col dp-flex">
                                                 <h3>시상규모</h3>
-                                                <p>100만원</p>
+                                                <p>{data.prizeScale}</p>
                                             </div>
                                             <div className="col dp-flex">
                                                 <h3>접수기간</h3>
-                                                <p>23.4.17 - 23.7.31</p>
+                                                <p>{data.recruitmentPeriod}</p>
                                             </div>
                                         </li>
                                         <li className="dp-flex space-between">
                                             <div className="col dp-flex">
                                                 <h3>홈페이지</h3>
-                                                <p>https://www.klip.or.kr</p>
+                                                <p>{data.homepage}</p>
                                             </div>
                                             <div className="col dp-flex">
                                                 <h3>활동혜택</h3>
-                                                <p>기타</p>
+                                                <p>{data.activityBenefits}</p>
                                             </div>
                                         </li>
                                         <li className="dp-flex space-between">
                                             <div className="col dp-flex">
                                                 <h3>공모분야</h3>
-                                                <p>학술</p>
+                                                <p>{data.activityField}</p>
                                             </div>
                                             <div className="col dp-flex">
                                                 <h3>추가혜택</h3>
-                                                <p>-</p>
+                                                <p>{data.activityBenefits}</p>
                                             </div>
                                         </li>
                                         <li className="dp-flex space-between border-none">
@@ -154,20 +183,22 @@ export default function Detail(){
                                     <Tabs value={value} onChange={handleChange} aria-label="basic tabs example">
                                         <Tab label="상세내용" {...a11yProps(0)} sx={{width : '33%'}}/>
                                         <Tab label="팀원 모집" {...a11yProps(1)} sx={{width : '33%'}} />
-                                        <Tab label="댓글 5" {...a11yProps(2)} sx={{width : '33%'}}/>
+                                        <Tab label={`댓글 ${commentCount}`} {...a11yProps(2)} sx={{width : '33%'}}/>
                                     </Tabs>
                                 </Box>
                                 <StyledTabPanel value={value} index={0} >
-                                    <img src="/img/competition/sample.png" alt="공모전 이미지" width="100%"/>
+{/*         
+                                    <img src="/img/competition/sample.png" alt="공모전 이미지" width="100%"/> */}
                                     <ul className="competition-info">
                                         <li>
                                             <div className="title dp-flex">
                                                 <CircleIcon/>
                                                 <h2>모집개요</h2>
                                             </div>
-                                            <p>금융권 취업을 희망하는 분들을 위한 삼성생명에서 주관하는 단기 강의입니다. 현재 금융권의 트렌드 및 현직자의 조언을 얻어 취업에 도움되시길 바랍니다.</p>
+                                            {/* <p>금융권 취업을 희망하는 분들을 위한 삼성생명에서 주관하는 단기 강의입니다. 현재 금융권의 트렌드 및 현직자의 조언을 얻어 취업에 도움되시길 바랍니다.</p> */}
+                                            <div dangerouslySetInnerHTML={{__html: data.activitiyDetail}}></div>
                                         </li>
-                                        <li>
+                                        {/* <li>
                                             <div className="title dp-flex">
                                                 <CircleIcon/>
                                                 <h2>신청기간 및 일정</h2>
@@ -205,7 +236,7 @@ export default function Detail(){
                                             <p>
                                                 - 삼성생명 수료증
                                             </p>
-                                        </li>
+                                        </li> */}
                                     </ul>
                                 </StyledTabPanel>
                                 <StyledTabPanel value={value} index={1}>
@@ -235,12 +266,12 @@ export default function Detail(){
                                     <BasicPagination />
                                 </StyledTabPanel>
                                 <StyledTabPanel value={value} index={2}>
-                                    <Comment />
+                                    <Comment commentData={commentData}/>
                                 </StyledTabPanel>
                             </TabWrap>
                         </Content>
                         <SideScroll>
-                            <ScrollList />
+                            <ScrollList category={data.category}/>
                         </SideScroll>
                     </PaddingWrap>
                 </Container>

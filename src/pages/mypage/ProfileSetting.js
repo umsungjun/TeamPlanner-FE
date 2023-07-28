@@ -39,17 +39,35 @@ ChartJS.register(
   );
 
   export const data = {
-    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품', '연구실 분위기'],
+    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
     datasets: [
       {
-        label: '# of Votes',
-        data: [2, 9, 3, 5, 2, 3],
+        label: '',
+        data: [4, 5, 7, 6, 5],
         backgroundColor: 'rgba(255, 115, 0, 0.2)',
         borderColor: 'rgba(255, 115, 0, 1)',
         borderWidth: 1,
       },
     ],
   };
+
+export const options = {
+    responsive: true,
+    scales: {
+       r: {
+       min: 0, // MIN
+       max: 10, // MAX
+       beginAtZero: true,
+       angleLines: {
+          display: true,
+          // color: 'red',
+       },
+       ticks: {
+        stepSize: 1, // the number of step
+       },
+     },
+   },
+}
 
 export default function ProfileSetting(){
     const theme = createTheme({
@@ -356,6 +374,7 @@ export default function ProfileSetting(){
                                             <div className="chart-box">
                                             <Radar
                                             data={data}
+                                            options={options}
                                             />
                                             </div>
                                             :<></>

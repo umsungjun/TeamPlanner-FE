@@ -1,10 +1,20 @@
-import React, { useState } from "react";
+import React, { useEffect,useState } from "react";
 import styled from "@emotion/styled";
 import {Box, createTheme,ThemeProvider} from '@mui/material';
 import theme from "../../style/theme";
 import CompetitionCard from "../card/CompetitionCard";
+import { API } from "../../api/api";
 
-export default function ScrollList(){
+export default function ScrollList({category}){
+
+
+    const [data, setData] = useState([]);
+    useEffect(() => {
+        API.get(`/api/v1/board?category=${category}&page=0&size=6&sort=view,desc`).then((res) => {      
+            setData(res.data.content);            
+        })
+    }, [data]);
+
 
     const theme = createTheme({
         typography:{
@@ -22,10 +32,35 @@ export default function ScrollList(){
         <>
             <ThemeProvider theme={theme}>
                <ScrollListWrap>
-                    <h3>공모전 대외활동 <strong>인기 소식</strong></h3>
+                    <h3>{category} <strong>인기 소식</strong></h3>
                     <div className="scroll-list">
                         <div className="scroll">
-                            <div className="card">
+
+                        {data.map((item) => {
+                                let title;
+                                if (item.activitiyName.length >= 10) {
+                                    title = item.activitiyName.slice(0,10) + "...";
+                                } else {
+                                    title = item.activitiyName;
+                                }
+                                return (
+                                    
+                                    <div className="card">
+                                        <CompetitionCard  
+                                            id={item.boardId} 
+                                            className={"small"}
+                                            activityImg={item.activityImg} 
+                                            activityName={title} 
+                                            likeCount={item.likeCount} 
+                                            viewCount={item.viewCount}
+                                        
+                                        />
+                                    </div>
+                              
+                                )
+                            })}
+                            
+                            {/* <div className="card">
                                 <CompetitionCard  id={"box1"} className={"small"}/>
                             </div>
                             <div className="card">
@@ -39,10 +74,7 @@ export default function ScrollList(){
                             </div>
                             <div className="card">
                                 <CompetitionCard  id={"box1"} className={"small"}/>
-                            </div>
-                            <div className="card">
-                                <CompetitionCard  id={"box1"} className={"small"}/>
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                </ScrollListWrap>

@@ -5,16 +5,16 @@ import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 import FavoriteIcon from '@mui/icons-material/Favorite';
 import CommentIcon from '@mui/icons-material/Comment';
 
-export default function IconWrap({type}){
+export default function IconWrap({type, likeCount, viewCount,commentCount}){
     return(
         <>
             <IconList>
                 <ul className="icon-wrap">
-                    <li><RemoveRedEyeIcon/><span>128</span></li>
-                    <li><FavoriteIcon/><span>120</span></li>
+                    <li><RemoveRedEyeIcon/><span>{viewCount}</span></li>
+                    <li><FavoriteIcon/><span>{likeCount}</span></li>
                     {
                         type == "noComment" ?
-                        <></> : <li><CommentIcon/><span>5</span></li> 
+                        <></> : <li><CommentIcon/><span>{commentCount}</span></li> 
                     }
                 </ul>
             </IconList>
