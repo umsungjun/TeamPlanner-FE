@@ -14,7 +14,7 @@ import CommentBox from "./CommentBox";
 import TextInput from "./TextInput";
 import BasicPagination from "../pagination/Pagination";
 
-export default function Comment(){
+export default function Comment({commentData}){
 
     const theme = createTheme({
         typography:{
@@ -34,9 +34,12 @@ export default function Comment(){
                     <h2>댓글 입력</h2>
                     <TextInput />
                     <div className="comment-list">
+                    {commentData.map((commentItem) => {
+                        console.log(commentItem);
+                    return (
                         <CommentBoxWrap>
-                            <CommentBox />
-                            <AddComment>
+                            <CommentBox commentData={commentItem}/>
+                            {/* <AddComment>
                                 <StyledAccordionSummary
                                 expandIcon={<ExpandMoreIcon />}
                                 aria-controls="panel1a-content"
@@ -48,9 +51,11 @@ export default function Comment(){
                                     <CommentBox />
                                     <CommentBox />
                                 </StyledAccordionDetails>
-                            </AddComment>
+                            </AddComment> */}
                         </CommentBoxWrap>
-                        <CommentBoxWrap>
+                         )
+                    })}
+                        {/* <CommentBoxWrap>
                             <CommentBox />
                         </CommentBoxWrap>
                         <CommentBoxWrap>
@@ -61,7 +66,7 @@ export default function Comment(){
                         </CommentBoxWrap>
                         <CommentBoxWrap>
                             <CommentBox />
-                        </CommentBoxWrap>
+                        </CommentBoxWrap> */}
                     </div>
                 </CommentWrap>
                 <BasicPagination />

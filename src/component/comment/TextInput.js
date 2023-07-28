@@ -21,7 +21,7 @@ export default function TextInput(){
         <>
                <ThemeProvider theme={theme}>
                     <TextInputWrap>
-                        <StyledTextField id="outlined-basic" variant="outlined" multiline maxRows={1}/>
+                        <StyledTextField id="outlined-basic" variant="outlined" multiline maxRows={3}/>
                         <SolidBtn text={"입력"}/>
                     </TextInputWrap>
                </ThemeProvider>
@@ -31,7 +31,7 @@ export default function TextInput(){
 
 const TextInputWrap = styled(Box)`
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
     margin-top: 1rem;
     button{
@@ -48,7 +48,7 @@ const StyledTextField = styled(TextField)`
     width: 84%;
     .MuiInputBase-root{
         padding: 1.5rem 2rem !important;
-
+        height: 8rem;
     }
     textarea{
         font-size: 1.6rem;

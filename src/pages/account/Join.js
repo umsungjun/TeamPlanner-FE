@@ -223,9 +223,9 @@ const JoinWrap = styled(Box)`
                     display: flex;
                     align-items: center;
                     .sBtn{
-                        width: 35%;
+                        width: 65%;
                         margin-left: 1rem;
-                    }
+                    }.
                 }
             }
             .notice-wrap{

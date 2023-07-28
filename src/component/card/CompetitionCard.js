@@ -4,19 +4,20 @@ import { Box, Link } from "@mui/material";
 import theme from "../../style/theme";
 import IconWrap from "../list/IconWrap";
 
-export default function CompetitionCard({id,className}){
+export default function CompetitionCard({id, className, activityName, activityImg, likeCount, viewCount,deadlineInDays,commentCount}){
     return(
         <>
-        <Link href="/">
-            <CardWrap>
+        
+        <Link href={`/competition/detail/${id}`}>
+            <CardWrap activityImg={activityImg}>
                 <Card id={id} className={className}>
                     <div className="dday">
-                        <h3>D-41</h3>
+                        <h3>D-{deadlineInDays}</h3>
                     </div>
                     <div className="info">
                         <div className="padding-wrap">
-                            <h2>공모전명</h2>
-                            <IconWrap />
+                            <h2>{activityName}</h2>
+                            <IconWrap likeCount={likeCount} viewCount={viewCount} commentCount={commentCount}/>
                         </div>
                     </div>
                 </Card>
@@ -27,6 +28,8 @@ export default function CompetitionCard({id,className}){
 }
 const CardWrap = styled(Box)`
     cursor: pointer;
+    background-image: url(${props => props.activityImg});
+    background-size: contain;
     #box1{
         background-image: url(../img/card/sample.png);
     }

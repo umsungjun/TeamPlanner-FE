@@ -14,13 +14,13 @@ import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
-import Link from '@mui/material/Link';
 
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
+import { Link } from "react-router-dom";
 
 export default function Nav(){
 
@@ -64,16 +64,20 @@ export default function Nav(){
                             </div>
                             <ul>
                                 <li>
-                                    <a href="">공모전</a>
+                                    {/* <a href="">공모전</a> */}
+                                    <Link to="/contest">공모전</Link>
                                 </li>
                                 <li>
-                                    <a href="">대외활동</a>
+                                    <Link to="/externalActivity">대외활동</Link>
+                                    {/* <a href="">대외활동</a> */}
                                 </li>
                                 <li>
-                                    <a href="">동아리</a>
+                                    <Link to="/club">동아리</Link>
+                                    {/* <a href="">동아리</a> */}
                                 </li>
                                 <li>
-                                    <a href="">팀원 모집게시판</a>
+                                    <Link to="/">팀원 모집게시판</Link>
+                                    {/* <a href="">팀원 모집게시판</a> */}
                                 </li>
                             </ul>
                         </div>

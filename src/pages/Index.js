@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import Nav from "../component/common/Nav";
 import { Box } from "@mui/material";
@@ -8,9 +8,42 @@ import CompetitionCard from "../component/card/CompetitionCard";
 import {createTheme,ThemeProvider} from '@mui/material';
 import BasicPagination from "../component/pagination/Pagination";
 import Footer from "../component/common/Footer";
-import theme from "../style/theme";
+import theme from "../style/theme"; 
+import { API } from "../api/api";
+import { useLocation } from "react-router-dom";
 
 export default function Index(){
+
+    //인기 있는 공모전
+    const [data, setData] = useState([]);
+    // 마감 직전 공모전
+    const [data2, setData2] = useState([]);
+    const history = useLocation();
+
+    let translatedPath = '';
+  
+    switch (history.pathname) {
+      case '/contest':
+        translatedPath = '/공모전';
+        break;
+      case '/externalActivity':
+        translatedPath = '/대외활동';
+        break;
+      case '/club':
+        translatedPath = '/동아리';
+        break;
+      case '/':
+        translatedPath = '/공모전';
+        break;
+      default:
+        // Default path in case none of the above conditions match
+        translatedPath = history.pathname;
+        break;
+    }
+    if (translatedPath.startsWith('/')) {
+        translatedPath = translatedPath.slice(1);
+    }
+    
 
     const theme = createTheme({
         typography:{
@@ -22,6 +55,24 @@ export default function Index(){
             },
          },
     })
+
+    // 인기 있는 공모전
+    useEffect(() => {
+        API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=view,desc`).then((res) => {
+            setData(res.data.content);
+        })
+    }, [data]);
+
+    // 최신공모전
+
+    useEffect(() => {
+        API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=recruitmentPeriod,desc`).then((res) => {
+            setData2(res.data.content);
+        })
+    }, [data2]);
+
+    console.log(data);
+    
 
 
     return(
@@ -52,15 +103,36 @@ export default function Index(){
                     <CompetitionList>
                         <ul className="title">
                             <li>
-                                <h2>인기있는 공모전</h2>
-                                <p>인기있는 공모전을 카테고리 별로 확인 하세요</p>
+                                <h2>인기있는 {translatedPath}</h2>
+                                <p>인기있는 {translatedPath}을 카테고리 별로 확인 하세요</p>
                             </li>
                             <li>
                                 <BasicSelect />
                             </li>
                         </ul>
                         <div className="competition-list">
-                            <Card>
+                            {data.map((item) => {
+                                let title;
+                                if (item.activitiyName.length >= 10) {
+                                    title = item.activitiyName.slice(0,10) + "...";
+                                } else {
+                                    title = item.activitiyName;
+                                }
+                                return (
+                                    
+                                    <Card>
+                                        <CompetitionCard id={item.boardId} 
+                                        activityImg={item.activityImg} 
+                                        activityName={title} 
+                                        likeCount={item.likeCount} 
+                                        viewCount={item.viewCount}
+                                        deadlineInDays={item.deadlineInDays}
+                                        commentCount={item.commentCount}
+                                        />
+                                    </Card>
+                                )
+                            })}
+                            {/* <Card>
                                 <CompetitionCard id={"box1"}/>
                             </Card>
                             <Card>
@@ -77,18 +149,44 @@ export default function Index(){
                             </Card>
                             <Card>
                                <CompetitionCard id={"box1"}/>
-                            </Card>
+                            </Card> */}
                         </div>
                     </CompetitionList>
                     <CompetitionList className="mt-5">
                         <ul className="title">
                             <li>
-                                <h2>인기있는 공모전</h2>
-                                <p>인기있는 공모전을 카테고리 별로 확인 하세요</p>
+                                <h2>최신 {translatedPath}</h2>
+                                <p>최신 {translatedPath}을 카테고리 별로 확인 하세요</p>
                             </li>
                         </ul>
                         <div className="competition-list">
-                            <Card>
+
+                        {data2.map((item) => {
+                                let title;
+                                if (item.activitiyName.length >= 10) {
+                                    title = item.activitiyName.slice(0,10) + "...";
+                                } else {
+                                    title = item.activitiyName;
+                                }
+                                return (
+                                    
+                                <Card>
+                                    <CompetitionCard id={item.boardId} 
+                                        activityImg={item.activityImg} 
+                                        activityName={title} 
+                                        likeCount={item.likeCount} 
+                                        viewCount={item.viewCount}
+                                        deadlineInDays={item.deadlineInDays}
+                                        commentCount={item.commentCount}/>
+                                </Card>
+                                )
+                            })}
+
+
+                            {/* <Card>
+                                <CompetitionCard id={"box2"}/>
+                            </Card> */}
+                            {/* <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card>
                             <Card>
@@ -102,10 +200,7 @@ export default function Index(){
                             </Card>
                             <Card>
                                 <CompetitionCard id={"box2"}/>
-                            </Card>
-                            <Card>
-                                <CompetitionCard id={"box2"}/>
-                            </Card>
+                            </Card> */}
                         </div>
                     </CompetitionList>
                     <BasicPagination />

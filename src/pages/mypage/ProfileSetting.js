@@ -18,6 +18,57 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import TextField from '@mui/material/TextField';
 
+import {
+    Chart as ChartJS,
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend,
+  } from 'chart.js';
+import { Radar } from 'react-chartjs-2';
+
+ChartJS.register(
+    RadialLinearScale,
+    PointElement,
+    LineElement,
+    Filler,
+    Tooltip,
+    Legend
+  );
+
+  export const data = {
+    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
+    datasets: [
+      {
+        label: '',
+        data: [4, 5, 7, 6, 5],
+        backgroundColor: 'rgba(255, 115, 0, 0.2)',
+        borderColor: 'rgba(255, 115, 0, 1)',
+        borderWidth: 1,
+      },
+    ],
+  };
+
+export const options = {
+    responsive: true,
+    scales: {
+       r: {
+       min: 0, // MIN
+       max: 10, // MAX
+       beginAtZero: true,
+       angleLines: {
+          display: true,
+          // color: 'red',
+       },
+       ticks: {
+        stepSize: 1, // the number of step
+       },
+     },
+   },
+}
+
 export default function ProfileSetting(){
     const theme = createTheme({
         typography:{
@@ -35,6 +86,9 @@ export default function ProfileSetting(){
     const handleChange = () => {
         setEdit(!edit);
     };
+
+    
+
 
     return(
         <>
@@ -289,14 +343,51 @@ export default function ProfileSetting(){
                                 </div>
                                 <div className="review-box">
                                     <h3 className="sub-title">팀원평가</h3>
-                                    <div className="review-list">
-                                        <h3>성실하고 책임감이 커서 활...</h3>
-                                        <h3>시간을 잘 지켜요</h3>
-                                        <h3>리더십이 뛰어나요</h3>
-                                        <h3>소통이 잘돼요</h3>
-                                        <h3>소통이 잘돼요</h3>
-                                        <h3>소통이 잘돼요</h3>
-                                        <h3>소통이 잘돼요</h3>
+                                    <div className="check-box">
+                                        <h4>공개범위설정</h4>
+                                        <FormControl>
+                                            <RadioGroup
+                                                row
+                                                aria-labelledby="demo-row-radio-buttons-group-label"
+                                                name="row-radio-buttons-group"
+                                            >
+                                                {
+                                                    edit ?
+                                                    <>
+                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
+                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
+                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
+                                                    </>
+                                                    :
+                                                    <>
+                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
+                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
+                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" />
+                                                    </>
+                                                }
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </div>
+                                    <div className="review-wrap">
+                                        {
+                                            edit ? 
+                                            <div className="chart-box">
+                                            <Radar
+                                            data={data}
+                                            options={options}
+                                            />
+                                            </div>
+                                            :<></>
+                                        }
+                                        <div className="review-list">
+                                            <h3>성실하고 책임감이 커서 활...</h3>
+                                            <h3>시간을 잘 지켜요</h3>
+                                            <h3>리더십이 뛰어나요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                        </div>
                                     </div>
                                 </div>
                             </Content>
@@ -633,9 +724,35 @@ const Content = styled(Box)`
         }
     }
     .review-box{
+        .check-box{
+            display: flex;
+            align-items: center;
+            margin-bottom: 2rem;
+            h4{
+                font-size: 1.6rem;
+                color: #3b3b3b;
+                line-height: 150%;
+                font-weight: 500;
+                width: 15rem;
+            }
+            span{
+                    font-size: 1.6rem;
+                }
+        }
+        .review-wrap{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .chart-box{
+            width: 40%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
         .review-list{
-            width: 50%;
-            height: 25rem;
+            width: 55%;
+            height: 30rem;
             overflow-y: scroll;
             border: 1px solid rgba(0,0,0,.1);
             border-radius: 4px;
@@ -671,7 +788,6 @@ const Content = styled(Box)`
                 width: 44%;
             }
         }
-
     }
     @media ${() => theme.device.mobile}{
        .title{
@@ -748,6 +864,13 @@ const Content = styled(Box)`
     .review-box{
         .review-list{
             width: 100%;
+        }
+        .review-wrap{
+            flex-direction : column;
+        }
+        .chart-box{
+            width: 80%;
+            margin: 3rem 0;
         }
     }
 }

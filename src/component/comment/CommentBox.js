@@ -1,12 +1,13 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import {Button, createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import TextInput from "./TextInput";
 import theme from "../../style/theme";
+import axios from "axios";
 
-export default function CommentBox(){
+export default function CommentBox({ commentData }){
 
     const theme = createTheme({
         typography:{
@@ -19,14 +20,32 @@ export default function CommentBox(){
          },
     })
 
-  
     const [open, setOpen] = React.useState(false);
 
     const handleClick = () => {
+        console.log("hello");
+        const data = {
+            boardId: "1",
+            content: "저도 이 공모전 좋은 것 같아요 강추입니다 저두용",
+            memberId: "localMember",
+            isConfidential: "false"
+          };
+      
+          // Perform the POST request using Axios
+          axios.post('/your-api-endpoint', data)
+            .then(response => {
+              // Handle the response (optional)
+              console.log('Reply created:', response.data);
+            })
+            .catch(error => {
+              // Handle errors (optional)
+              console.error('Error creating reply:', error);
+            });
       setOpen(!open);
     };
 
-
+    console.log(commentData)
+   
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -37,9 +56,9 @@ export default function CommentBox(){
                                 <AccountCircleIcon/>
                             </IconButton>
                             <div className="comment-text">
-                                <h3>작성자</h3>
-                                <p>댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용댓글내용</p>
-                                <h4>2023.07.01 15:00</h4>
+                                <h3>{commentData.username}</h3>
+                                <p>{commentData.content}</p>
+                                <h4>{commentData.updatedAt}</h4>
                             </div>
                         </li>
                         <AddBtn onClick={handleClick}>답글</AddBtn>
@@ -56,6 +75,8 @@ export default function CommentBox(){
         </>
     )
 }
+
+
 
 const CommentBoxWrap = styled(Box)`
     padding-bottom: 1rem;
@@ -115,3 +136,4 @@ const AddBtn = styled(Button)`
         padding: 0;
     }
 `;
+
