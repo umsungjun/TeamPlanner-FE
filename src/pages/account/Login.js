@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import styled from "@emotion/styled";
 import { createGlobalStyle } from 'styled-components';
 import {createTheme,ThemeProvider} from '@mui/material';
@@ -7,8 +7,19 @@ import TextField from "@mui/material/TextField";
 import FilledBtn from "../../component/button/FilledBtn";
 import Button from "@mui/material/Button";
 import theme from "../../style/theme";
+import axios, { Axios } from "axios";
+import { useGoogleLogin } from "@react-oauth/google";
+import {Cookies} from 'react-cookie';
+import { API } from "../../api/api";
+import { useCookies } from 'react-cookie'; // useCookies import
+import { useLocation, useNavigate } from 'react-router-dom';
+import { AuthContext } from "../../AuthContext";
 
+// const API_SERVER_PREFIX = "http://3.34.109.248:8080/api/v1"
+const API_SERVER_PREFIX = "http://localhost:8080/api/v1"
 export default function Login(){
+    const navigate = useNavigate();
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -23,6 +34,79 @@ export default function Login(){
          },
     })
 
+    const [inputs, setInputs] = useState({
+        // TODO: make empty
+        username: "localMember",
+        password: "1234",
+    });
+    
+
+    const { username, password } = inputs;
+    // const { isLoggedIn, toggleLogin, setUserInfo } = useContext(AuthContext);
+    const { setUserInfo } = useContext(AuthContext);
+
+    const onChange = (e) => {
+    const { name, value } = e.target;
+        setInputs({
+            ...inputs,
+            [name]: value,
+        });
+    };
+    const location = useLocation();
+
+    const loginRequest = () => {
+        if (!username) return alert("아이디를 입력하세요.");
+        if (!password) return alert("패스워드를 입력하세요.");
+        // URLSearchParams 객체를 사용하여 쿼리 스트링을 추출합니다.
+        const queryParams = new URLSearchParams(location.search);
+        // 쿼리 스트링에서 원하는 파라미터를 가져옵니다.
+        const redirectUrl = queryParams.get('redirect') || '/';
+        console.log(`redirectUrl=${redirectUrl}`)
+        console.log("loginRequest")
+
+        API.post("/api/v1/member/login", {...inputs})
+        .then(resp => {
+            API.get("/api/v1/member/info").then(resp => {
+                localStorage.setItem("userInfo", JSON.stringify(resp.data))
+                setUserInfo(resp.data)
+                navigate(redirectUrl);
+            });
+        })
+        .catch (err => {
+            console.log(err);
+            return alert(err.response.data.message)
+        })
+    }
+
+    const onOauthLogin_G = () => {
+        // TODO:
+        // let target = "http://ec2-3-34-109-248.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/code/"
+        let target = "http://localhost:8080/oauth2/authorization"
+        target += "/google"
+        // navigate(target);
+        // API.get(target)
+        // .then(resp => {
+        //     console.log(`resp = ${resp}`)
+        // }).catch(err => {
+        //     console.log(`err = ${err}`)
+        // })
+        window.location.href = target;
+    }
+    const onOauthLogin_K = () => {
+        // TODO:
+        // let target = "http://ec2-3-34-109-248.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/code/"
+        let target = "http://localhost:8080/oauth2/authorization"
+        target += "/kakao"
+        // navigate(target);
+        // API.get(target)
+        // .then(resp => {
+        //     console.log(`resp = ${resp}`)
+        // }).catch(err => {
+        //     console.log(`err = ${err}`)
+        // })
+        window.location.href = target;
+    }
+
     return(
         <>
             <GlobalStyle />
@@ -35,11 +119,19 @@ export default function Login(){
                         <ul className="input-wrap">
                             <li>
                                 <h4>아이디</h4>
-                                <TextField id="outlined-basic" variant="outlined" fullWidth placeholder="아이디를 입력하세요"/>
+                                <TextField 
+                                    name = "username"
+                                    onChange={onChange}
+                                    value = {username}
+                                id="outlined-basic" variant="outlined" fullWidth placeholder="아이디를 입력하세요"/>
                             </li>
                             <li>
                                 <h4>비밀번호</h4>
-                                <TextField id="outlined-basic" variant="outlined" type="password" fullWidth placeholder="비밀번호를 입력하세요"/>
+                                <TextField 
+                                    name = "password"
+                                    onChange={onChange}
+                                    value = {password}
+                                id="outlined-basic" variant="outlined" type="password" fullWidth placeholder="비밀번호를 입력하세요"/>
                             </li>
                         </ul>
                         <ul className="a-wrap">
@@ -52,10 +144,10 @@ export default function Login(){
                                 <a href="" className="joinBtn">회원가입</a>
                             </li>
                         </ul>
-                        <FilledBtn text={"로그인"}/>
+                        <FilledBtn text={"로그인"} handle={loginRequest}/>
                         <div className="social-login">
-                            <Button variant="outlined" color="secondary" fullWidth><img src="/img/icon/google.svg" alt="카카오" />구글로 로그인</Button>
-                            <Button variant="outlined" color="secondary" fullWidth><img src="/img/icon/kakao.svg" alt="카카오" />카카오로 로그인</Button>
+                            <Button variant="outlined" color="secondary" fullWidth onClick={onOauthLogin_G}><img src="/img/icon/google.svg" alt="구글" />구글로 로그인</Button>
+                            <Button variant="outlined" color="secondary" fullWidth onClick={onOauthLogin_K}><img src="/img/icon/kakao.svg" alt="카카오" />카카오로 로그인</Button>
                         </div>
                     </div>
                 </LoginWrap>

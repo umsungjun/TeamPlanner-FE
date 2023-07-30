@@ -7,9 +7,13 @@ import Index from "./pages/Index";
 import TeamDetail from "./pages/team/TeamDetail";
 import AccountSetting from "./pages/mypage/AccountSetting";
 import ProfileSetting from "./pages/mypage/ProfileSetting";
+import { AuthProvider } from './AuthContext';
+import axios from "axios";
+axios.defaults.withCredentials = true;
 
 function App() {
   return (
+    <AuthProvider>
       <>
         <GlobalStyle/>
         <Routes>
@@ -25,6 +29,7 @@ function App() {
           <Route path="/mypage/profileSetting" element={ <ProfileSetting /> }></Route>
         </Routes>
       </>
+    </AuthProvider>
   );
 }
 

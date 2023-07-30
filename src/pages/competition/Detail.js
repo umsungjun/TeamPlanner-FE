@@ -1,6 +1,6 @@
 import React, { useEffect,useState } from "react";
 import styled from "@emotion/styled";
-import {useParams} from "react-router-dom"
+import {Navigate, useNavigate, useParams} from "react-router-dom"
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
 import Nav from "../../component/common/Nav";
@@ -67,6 +67,7 @@ export default function Detail(){
     // details 
     const [data, setData] = useState([]);
     const [commentData,setCommentData]=useState([]);
+    const navigate = useNavigate();
     //comments.length
     let [commentCount,setCommentCount]=useState([]);
 
@@ -77,11 +78,11 @@ export default function Detail(){
         })
     }, []);
    
-    useEffect(() => {
-        if (Object.keys(data).length !== 0) {
-            setCommentCount(data.comments.length);
-        }
-      }, [data]);
+    // useEffect(() => {
+    //     if (Object.keys(data).length !== 0) {
+    //         setCommentCount(data.comments.length);
+    //     }
+    //   }, []);
     
     const theme = createTheme({
         typography:{
@@ -261,7 +262,7 @@ export default function Detail(){
                                         </Card>
                                     </TeamCardWrap>
                                     <div className="dp-end">
-                                        <FilledBtn text={"글쓰기"}/>
+                                        <FilledBtn text={"글쓰기"} handle={() => navigate("recruitment/write")}/>
                                     </div>
                                     <BasicPagination />
                                 </StyledTabPanel>

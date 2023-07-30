@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext, useEffect } from "react";
 import styled from "@emotion/styled";
 import theme from "../../style/theme";
 import {createTheme,Divider,Icon,ThemeProvider} from '@mui/material';
@@ -21,6 +21,8 @@ import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Link } from "react-router-dom";
+import FilledBtn from "../button/FilledBtn";
+import { AuthContext } from "../../AuthContext";
 
 export default function Nav(){
 
@@ -35,7 +37,20 @@ export default function Nav(){
          },
     })
 
+    // const { isLoggedIn, toggleLogin, userInfo } = useContext(AuthContext);
+    const {  userInfo, setUserInfo } = useContext(AuthContext);
 
+    const handleLogout = () => {
+        // toggleLogin();
+        deleteCookie("accessToken")
+        deleteCookie("refreshToken")
+        localStorage.removeItem("userInfo")
+        setUserInfo(null);
+    };
+    
+    function deleteCookie(name) {
+        document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;`;
+    }
     const [open, setOpen] = React.useState(false);
 
     const handleClick = () => {
@@ -93,7 +108,23 @@ export default function Nav(){
                                 </IconButton>
                             </div>
                             <ProfileBtn>
-                                <AccountCircleIcon />
+                                { userInfo ? 
+                                (
+                                    <div>
+                                        {/* <AccountCircleIcon src={userInfo.username}/> */}
+                                        <img src={userInfo?.profileImg} height={40}/>
+                                        <div>{userInfo?.username}</div>
+                                        <button onClick={handleLogout}>log out</button>
+                                    </div>
+                                )
+                                : 
+                                (
+                                    <div>
+                                        <FilledBtn text= {"로그인"} handle={() => window.location.href = `/login?redirect=${window.location.pathname}`}></FilledBtn> 
+                                    </div>
+                                ) 
+                                
+                                }
                             </ProfileBtn>
                             <Button
                                 id="basic-button"

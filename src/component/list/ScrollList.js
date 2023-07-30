@@ -9,11 +9,11 @@ export default function ScrollList({category}){
 
 
     const [data, setData] = useState([]);
-    useEffect(() => {
-        API.get(`/api/v1/board?category=${category}&page=0&size=6&sort=view,desc`).then((res) => {      
-            setData(res.data.content);            
-        })
-    }, [data]);
+    // useEffect(() => {
+    //     API.get(`/api/v1/board?category=${category}&page=0&size=6&sort=view,desc`).then((res) => {      
+    //         setData(res.data.content);            
+    //     })
+    // }, [data]);
 
 
     const theme = createTheme({

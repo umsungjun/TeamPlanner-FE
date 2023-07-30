@@ -55,23 +55,29 @@ export default function Index(){
             },
          },
     })
-
-    // 인기 있는 공모전
     useEffect(() => {
-        API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=view,desc`).then((res) => {
+        console.log("index.js")
+        API.get(`/api/v1/board`).then((res) => {
             setData(res.data.content);
         })
-    }, [data]);
+    }, []);
 
-    // 최신공모전
+    // 인기 있는 공모전
+    // useEffect(() => {
+    //     API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=view,desc`).then((res) => {
+    //         setData(res.data.content);
+    //     })
+    // }, [data]);
 
-    useEffect(() => {
-        API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=recruitmentPeriod,desc`).then((res) => {
-            setData2(res.data.content);
-        })
-    }, [data2]);
+    // // 최신공모전
 
-    console.log(data);
+    // useEffect(() => {
+    //     API.get(`/api/v1/board?category=${translatedPath}&page=0&size=6&sort=recruitmentPeriod,desc`).then((res) => {
+    //         setData2(res.data.content);
+    //     })
+    // }, [data2]);
+
+    // console.log(data);
     
 
 
