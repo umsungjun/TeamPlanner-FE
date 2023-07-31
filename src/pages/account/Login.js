@@ -7,25 +7,16 @@ import TextField from "@mui/material/TextField";
 import FilledBtn from "../../component/button/FilledBtn";
 import Button from "@mui/material/Button";
 import theme from "../../style/theme";
-import axios, { Axios } from "axios";
-import { useGoogleLogin } from "@react-oauth/google";
-import { Cookies } from "react-cookie";
 import { API } from "../../api/api";
 import { useCookies } from "react-cookie"; // useCookies import
 import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../AuthContext";
+import moment from "moment";
+import { API_BASE_URL } from "../../common/constant/constant";
 
-const API_SERVER_PREFIX = "http://3.34.109.248:8080/api/v1";
-// const API_SERVER_PREFIX = "http://localhost:8080/api/v1";
 export default function Login() {
-  function getCookie(name) {
-    const value = `; ${document.cookie}`;
-    const parts = value.split(`; ${name}=`);
-    if (parts.length === 2) return parts.pop().split(";").shift();
-  }
 
   const navigate = useNavigate();
-
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -47,7 +38,7 @@ export default function Login() {
 
   const { username, password } = inputs;
   const [cookies, setCookie] = useCookies(["id"]); // 쿠키 훅
-  const { isLoggedIn, toggleLogin } = useContext(AuthContext);
+  const { userInfo, setUserInfo } = useContext(AuthContext);
 
   const onChange = (e) => {
     const { name, value } = e.target;
@@ -57,7 +48,6 @@ export default function Login() {
     });
   };
   const location = useLocation();
-
   const loginRequest = () => {
     // URLSearchParams 객체를 사용하여 쿼리 스트링을 추출합니다.
     const queryParams = new URLSearchParams(location.search);
@@ -66,38 +56,34 @@ export default function Login() {
     console.log(`redirectUrl=${redirectUrl}`);
 
     console.log("loginRequest");
-    axios
-      .post(API_SERVER_PREFIX + "/member/login", {
-        withCredentials: true, // 쿠키를 포함하여 요청 보내기 위한 옵션
-        // 기타 요청 헤더 설정
-        "Content-Type": "application/json",
-        ...inputs,
+      API.post("/api/v1/member/login", {...inputs})
+        .then(resp1 => {
+          setCookie("accessToken", resp1.data.accessToken, {path: '/', expires: moment().add('30','m').toDate()});
+          setCookie("refreshToken", resp1.data.refreshToken, {path: '/', expires: moment().add('14','d').toDate()});
+            API.get("/api/v1/member/info").then(resp => {
+                localStorage.setItem("userInfo", JSON.stringify({...resp.data, ...resp1.data}))
+                setUserInfo({...resp.data, ...resp1.data})
+                navigate(redirectUrl);
+            });
+        })
+        .catch (err => {
+            console.log(err);
+            return alert(err.response.data.message)
       })
-      .then(function (response) {
-        const accessToken = getCookie("accessToken");
-        const refreshToken = getCookie("refreshToken");
-        console.log(accessToken);
-        console.log(refreshToken);
-        console.log(response);
-        // toggleLogin();
-        // window.location.href = redirectUrl
-        // navigate(redirectUrl);
-      })
-      .catch(function (error) {
-        console.log(error);
-      });
   };
 
   const onOauthLogin_G = () => {
-    let target =
-      "http://ec2-3-34-109-248.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/code/";
-    target += "google";
-  };
-  const onOauthLogin_K = () => {
-    let target =
-      "http://ec2-3-34-109-248.ap-northeast-2.compute.amazonaws.com:8080/login/oauth2/code/";
-    target += "kakao";
-  };
+    // TODO:
+    let target = API_BASE_URL + "/oauth2/authorization"
+    target += "/google"
+    window.location.href = target;
+}
+const onOauthLogin_K = () => {
+    // TODO:
+    let target = API_BASE_URL + "/oauth2/authorization"
+    target += "/kakao"
+    window.location.href = target;
+}
 
   return (
     <>
