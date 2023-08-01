@@ -20,7 +20,7 @@ export default function KeywordBtn({text}){
     return(
         <>
             <ThemeProvider theme={theme}>
-                <input type="radio" id={text} name="keyword" />
+                <input type="radio" id={text} name={text} />
                 <Keyword htmlFor={text} variant="outlined" color="primary">{text}</Keyword>
             </ThemeProvider>
         </>

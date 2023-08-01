@@ -59,23 +59,19 @@ export default function Detail() {
   // details
   const [data, setData] = useState([]);
   const [commentData, setCommentData] = useState([]);
-  const [checkFlag, setCheckFlag] = useState(false);
   //comments.length
   let [commentCount, setCommentCount] = useState([]);
+  const [flag, setChangeFlag] = useState(false);
 
   useEffect(() => {
     API.get(`/api/v1/board/${boardId}`).then((res) => {
       setData(res.data[0]);
       setCommentData(res.data[0].comments);
-      setCheckFlag(false);
+      if (Object.keys(res.data[0].comments).length !== 0) {
+        setCommentCount(res.data[0].comments.length);
+      }
     });
-  }, [checkFlag]);
-
-  useEffect(() => {
-    if (Object.keys(data).length !== 0) {
-      setCommentCount(data.comments.length);
-    }
-  }, [data]);
+  }, [flag]);
 
   const theme = createTheme({
     typography: {
@@ -295,7 +291,7 @@ export default function Detail() {
                   <BasicPagination />
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={2}>
-                  <Comment commentData={commentData} />
+                  <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
                 </StyledTabPanel>
               </TabWrap>
             </Content>

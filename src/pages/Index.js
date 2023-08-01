@@ -115,16 +115,16 @@ export default function Index() {
   //   });
   // }, [translatedPath, currentPage]);
 
-  // // 최신공모전
-  // useEffect(() => {
-  //   API.get(
-  //     `/api/v1/board?category=${translatedPath}&page=${
-  //       currentPage - 1
-  //     }&size=6&sort=recruitmentPeriod,desc`
-  //   ).then((res) => {
-  //     setData2(res.data.content);
-  //   });
-  // }, [translatedPath, currentPage]);
+  // 최신공모전
+  useEffect(() => {
+    API.get(
+      `/api/v1/board?category=${translatedPath}&page=${
+        currentPage - 1
+      }&size=12&sort=recruitmentPeriod,desc`
+    ).then((res) => {
+      setData2(res.data.content);
+    });
+  }, [translatedPath, currentPage]);
 
   console.log(data);
 
@@ -134,25 +134,69 @@ export default function Index() {
         <Nav />
         <Container>
           <PaddingWrap>
+          {history.pathname === "/contest" && (
             <div className="scroll">
               <KeywordWrap>
-                <KeywordBtn text={"기획 아이디어"} />
-                <KeywordBtn text={"광고 · 마케팅"} />
-                <KeywordBtn text={"사진 · 영상 · UCC"} />
-                <KeywordBtn text={"디자인 · 순수미술 · 공예"} />
-                <KeywordBtn text={"네이밍 · 슬로건"} />
-                <KeywordBtn text={"캐릭터 · 만화 · 게임"} />
-                <KeywordBtn text={"건축 건설 인테리어"} />
-                <KeywordBtn text={"과학 공학"} />
-                <KeywordBtn text={"예처능 패션"} />
-                <KeywordBtn text={"전시 페스티벌"} />
-                <KeywordBtn text={"문학 시나리오"} />
+                <KeywordBtn text={"기획/아이디어"} />
+                <KeywordBtn text={"광고/마케팅"} />
+                <KeywordBtn text={"사진/영상/UCC"} />
+                <KeywordBtn text={"디자인/순수미술/공예"} />
+                <KeywordBtn text={"네이밍/슬로건"} />
+                <KeywordBtn text={"캐릭터/만화/게임"} />
+                <KeywordBtn text={"건축/건설/인테리어"} />
+                <KeywordBtn text={"과학/공학"} />
+                <KeywordBtn text={"예체능/패션"} />
+                <KeywordBtn text={"전시/페스티벌"} />
+                <KeywordBtn text={"문학/시나리오"} />
                 <KeywordBtn text={"해외"} />
                 <KeywordBtn text={"학술"} />
                 <KeywordBtn text={"창업"} />
                 <KeywordBtn text={"기타"} />
               </KeywordWrap>
             </div>
+            )}
+            {history.pathname === "/externalActivity" && (
+            <div className="scroll">
+              <KeywordWrap>
+                <KeywordBtn text={"서포터즈"} />
+                <KeywordBtn text={"해외탐방-무료"} />
+                <KeywordBtn text={"해외탐방-유료"} />
+                <KeywordBtn text={"봉사단-해외"} />
+                <KeywordBtn text={"봉사단-국내"} />
+                <KeywordBtn text={"마케터"} />
+                <KeywordBtn text={"기자단"} />
+                <KeywordBtn text={"강연"} />
+                <KeywordBtn text={"멘토링"} />
+                <KeywordBtn text={"기타"} />
+                <KeywordBtn text={"문학/시나리오"} />
+                <KeywordBtn text={"해외"} />
+                <KeywordBtn text={"학술"} />
+                <KeywordBtn text={"창업"} />
+              </KeywordWrap>
+            </div>
+            )}
+            {history.pathname === "/club" && (
+            <div className="scroll">
+              <KeywordWrap>
+                <KeywordBtn text={"연합"} />
+                <KeywordBtn text={"교내"} />
+                <KeywordBtn text={"문화생활"} />
+                <KeywordBtn text={"친목"} />
+                <KeywordBtn text={"어학"} />
+                <KeywordBtn text={"예술"} />
+                <KeywordBtn text={"음악/공연"} />
+                <KeywordBtn text={"스터디/연구"} />
+                <KeywordBtn text={"스포츠/레저"} />
+                <KeywordBtn text={"창업"} />
+                <KeywordBtn text={"종교"} />
+                <KeywordBtn text={"신문/잡지"} />
+                <KeywordBtn text={"기획단"} />
+                <KeywordBtn text={"여행"} />
+                <KeywordBtn text={"봉사"} />
+                <KeywordBtn text={"기타"} />
+              </KeywordWrap>
+            </div>
+            )}
             <CompetitionList>
               <ul className="title">
                 <li>
@@ -160,7 +204,9 @@ export default function Index() {
                   <p>인기있는 {translatedPath}을 카테고리 별로 확인 하세요</p>
                 </li>
                 <li>
+                {history.pathname !== "/" && (
                   <BasicSelect onChange={setSelectedSort} />
+                )}
                 </li>
               </ul>
               <div className="competition-list">
@@ -205,7 +251,8 @@ export default function Index() {
                             </Card> */}
               </div>
             </CompetitionList>
-            {/* <CompetitionList className="mt-5">
+            {history.pathname === "/" && (
+            <CompetitionList className="mt-5">
               <ul className="title">
                 <li>
                   <h2>최신 {translatedPath}</h2>
@@ -237,8 +284,8 @@ export default function Index() {
 
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
-                            </Card> */}
-            {/* <Card>
+                            </Card>
+                <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card>
                             <Card>
@@ -253,13 +300,16 @@ export default function Index() {
                             <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card> */}
-            {/* </div>
-            </CompetitionList> */}{" "}
+              </div>
+            </CompetitionList>
+            )}
+             {history.pathname !== "/" && (
             <BasicPagination
               totalPages={totalPages}
               currentPage={currentPage}
               onChange={setCurrentPage}
             />
+             )}
           </PaddingWrap>
         </Container>
         <Footer />

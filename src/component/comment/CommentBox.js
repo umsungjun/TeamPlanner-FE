@@ -5,10 +5,8 @@ import Box from "@mui/material/Box";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import TextInput from "./TextInput";
 import theme from "../../style/theme";
-import axios from "axios";
 
 export default function CommentBox({ commentData, changeFlag, flag }) {
-  console.log(commentData);
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -19,7 +17,6 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
       },
     },
   });
-
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
@@ -45,7 +42,11 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           </ul>
           {open ? (
             <div className="add-text">
-              <TextInput parentId={commentData.commentId} />
+              <TextInput
+                parentId={commentData.commentId}
+                changeFlag={changeFlag}
+                flag={flag}
+              />
             </div>
           ) : (
             <></>

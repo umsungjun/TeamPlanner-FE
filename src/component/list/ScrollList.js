@@ -13,7 +13,7 @@ export default function ScrollList({ category }) {
     ).then((res) => {
       setData(res.data.content);
     });
-  }, [data]);
+  }, [category]);
 
   const theme = createTheme({
     typography: {
@@ -52,6 +52,7 @@ export default function ScrollList({ category }) {
                       likeCount={item.likeCount}
                       viewCount={item.viewCount}
                       deadlineInDays={item.deadlineInDays}
+                      commentCount={item.commentCount}
                     />
                   </div>
                 );

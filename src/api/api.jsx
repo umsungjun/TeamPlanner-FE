@@ -10,9 +10,9 @@ export const API = axios.create({
 
 API.interceptors.request.use(
   function (config) {
-    console.log(`function(config=${config})`);
-    console.log("asd" + getCookie("accessToken"));
-    console.log("qwer" + getCookie("refreshToken"));
+    // console.log(`function(config=${config})`);
+    // console.log("asd" + getCookie("accessToken"));
+    // console.log("qwer" + getCookie("refreshToken"));
     // 1년짜리 토큰
     const accessToken = `eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsb2NhbE1lbWJlciIsImV4cCI6MTcyMDYyNzE5MiwidXNlcm5hbWUiOiJsb2NhbE1lbWJlciJ9.xmhoU2wsMRLlkkhziZe_vmJuXkYgZOXrdX1at71_2X_qKrUClCmKKkPbqnGMRWSHBsNUC4Z-nxQ7K8rFzuPzgQ`;
     if (accessToken) {
