@@ -71,7 +71,7 @@ export default function Detail() {
         setCommentCount(res.data[0].comments.length);
       }
     });
-  }, [flag]);
+  }, [flag]); 
 
   const theme = createTheme({
     typography: {
@@ -112,7 +112,7 @@ export default function Detail() {
                 <li className="detail-list">
                   <div className="dp-flex space-between">
                     <h2>{data.activitiyName}</h2>
-                    <IconWrap type="noComment" />
+                    <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">

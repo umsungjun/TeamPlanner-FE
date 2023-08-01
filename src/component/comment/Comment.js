@@ -84,7 +84,7 @@ export default function Comment({ commentData, changeFlag, flag }) {
                       id="panel1a-header"
                     >
                       <Typography>
-                        답글 <span>{commentItem.commentCount}개</span>
+                          답글 <span>{commentItem.commentCount ? commentItem.commentCount : 0}개</span>
                       </Typography>
                     </StyledAccordionSummary>
                     <StyledAccordionDetails>
