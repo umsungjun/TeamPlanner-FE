@@ -505,19 +505,28 @@ const TabWrap = styled(Box)`
 `;
 
 const StyledTabPanel = styled(CustomTabPanel)`
-  .dp-end {
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    button {
+.dp-end{
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  /*수정*/
+  button{
+      /* width: 15%; */
+  }
+  a{
       width: 15%;
-    }
   }
-  @media ${() => theme.device.mobile} {
-    & > div {
+}
+@media ${() => theme.device.mobile} {
+  &>div{
       padding: 2rem 1rem 1rem 1rem;
-    }
   }
+  .dp-end{
+      a{
+          width: 100%;
+      }
+  }
+}
 `;
 
 const TeamCardWrap = styled(Box)`

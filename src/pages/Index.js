@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import Nav from "../component/common/Nav";
-import { Box } from "@mui/material";
+import { Box , Grid } from "@mui/material";
 import KeywordBtn from "../component/button/KeywordBtn";
 import BasicSelect from "../component/select/Select";
 import CompetitionCard from "../component/card/CompetitionCard";
@@ -11,6 +11,15 @@ import Footer from "../component/common/Footer";
 import theme from "../style/theme";
 import { API } from "../api/api";
 import { useLocation } from "react-router-dom";
+
+const Item = styled(Box)(({ theme }) => ({
+  // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  // ...theme.typography.body2,
+  padding: theme.spacing(1),
+  // textAlign: 'center',
+  // color: theme.palette.text.secondary,
+  // boxShadow : 0
+}));
 
 export default function Index() {
   //인기 있는 공모전
@@ -22,6 +31,7 @@ export default function Index() {
 
   // 현재페이지
   const [currentPage, setCurrentPage] = useState(1);
+
   //전체페이지
   const [totalPages, setTotalPages] = useState(0);
 
@@ -54,8 +64,33 @@ export default function Index() {
     translatedPath = translatedPath.slice(1);
   }
 
-  // Define a function to handle the Axios call based on the selected value
-  // Define a function to fetch data based on the selected value
+  useEffect(() => {
+    let sortParam;
+    
+    switch (selectedSort) {
+      case 10:
+        sortParam = "view,desc";
+        break;
+      case 20:
+        sortParam = "recruitmentPeriod,desc";
+        break;
+      case 30:
+        sortParam = "likeCount,desc";
+        break;
+      default:
+        sortParam = "view,desc";
+        break;
+    }
+
+    API.get(
+      `/api/v1/board?category=${translatedPath}&page=0&size=12&sort=${sortParam}`
+    ).then((res) => {
+      setTotalPages(res.data.totalPages);
+      setCurrentPage(1);
+    })
+  }, [translatedPath]);
+
+
   const fetchData = async () => {
     try {
       let sortParam = "";
@@ -73,15 +108,15 @@ export default function Index() {
           sortParam = "view,desc";
           break;
       }
-      console.log("!!", sortParam);
 
       const response = await API.get(
         `/api/v1/board?category=${translatedPath}&page=${
           currentPage - 1
         }&size=12&sort=${sortParam}`
       );
+      console.log(response.data.content);
       setData(response.data.content);
-      setTotalPages(response.data.totalPages);
+      // setTotalPages(response.data.totalPages);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -90,7 +125,7 @@ export default function Index() {
   // useEffect hook to fetch initial data on component mount and whenever selectedSort changes
   useEffect(() => {
     fetchData();
-  }, [selectedSort, currentPage, translatedPath]);
+  }, [selectedSort, translatedPath, currentPage]);
 
   const theme = createTheme({
     typography: {
@@ -126,7 +161,6 @@ export default function Index() {
     });
   }, [translatedPath, currentPage]);
 
-  console.log(data);
 
   return (
     <>
@@ -210,27 +244,35 @@ export default function Index() {
                 </li>
               </ul>
               <div className="competition-list">
-                {data.map((item) => {
+              <Grid container spacing={1}>
+                {data.length > 0 && data.map((item) => {
                   let title;
                   if (item.activitiyName.length >= 10) {
                     title = item.activitiyName.slice(0, 10) + "...";
                   } else {
                     title = item.activitiyName;
                   }
+                  {/*수정*/}
                   return (
-                    <Card>
-                      <CompetitionCard
-                        id={item.boardId}
-                        activityImg={item.activityImg}
-                        activityName={title}
-                        likeCount={item.likeCount}
-                        viewCount={item.viewCount}
-                        deadlineInDays={item.deadlineInDays}
-                        commentCount={item.commentCount}
-                      />
-                    </Card>
+                     
+                           
+                        <Card item xs={6} md={2}>
+                        <Item><CompetitionCard  
+                            id={item.boardId}
+                            activityImg={item.activityImg}
+                            activityName={title}
+                            likeCount={item.likeCount}
+                            viewCount={item.viewCount}
+                            deadlineInDays={item.deadlineInDays}
+                            commentCount={item.commentCount}/>
+                        </Item>
+                          
+                        </Card>     
+                    
+                    
                   );
                 })}
+                  </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
                             </Card>
@@ -260,6 +302,7 @@ export default function Index() {
                 </li>
               </ul>
               <div className="competition-list">
+              <Grid container spacing={1}>
                 {data2.map((item) => {
                   let title;
                   if (item.activitiyName.length >= 10) {
@@ -268,20 +311,25 @@ export default function Index() {
                     title = item.activitiyName;
                   }
                   return (
-                    <Card>
-                      <CompetitionCard
+                    
+                   
+                           
+                    <Card item xs={6} md={2}>
+                      <Item><CompetitionCard  
                         id={item.boardId}
                         activityImg={item.activityImg}
                         activityName={title}
                         likeCount={item.likeCount}
                         viewCount={item.viewCount}
                         deadlineInDays={item.deadlineInDays}
-                        commentCount={item.commentCount}
-                      />
-                    </Card>
+                        commentCount={item.commentCount}/>
+                      </Item>
+                      
+                    </Card>     
+                  
                   );
                 })}
-
+                </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card>
@@ -304,11 +352,11 @@ export default function Index() {
             </CompetitionList>
             )}
              {history.pathname !== "/" && (
-            <BasicPagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onChange={setCurrentPage}
-            />
+              <BasicPagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onChange={(event) => setCurrentPage(event)}
+              />
              )}
           </PaddingWrap>
         </Container>
@@ -351,20 +399,21 @@ const KeywordWrap = styled(Box)`
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 3rem;
-  input[type="radio"] {
-    display: none;
+  /*수정 */
+  /* input[type="radio"]{
+      display: none;
+  } */
+  label{
+      margin: 0 1rem 1.5rem 0;
   }
-  label {
-    margin: 0 1rem 1.5rem 0;
-  }
-  input[type="radio"]:checked + label {
-    background-color: #ff7300;
-    color: #fff;
-  }
+  /* input[type="radio"]:checked+label {
+      background-color: #FF7300;
+      color: #fff;
+  }    */
   @media ${() => theme.device.tablet} {
-    flex-wrap: nowrap;
-    width: 100%;
-    margin-bottom: 1rem;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin-bottom: 1rem;
   }
 `;
 
@@ -408,15 +457,6 @@ const CompetitionList = styled(Box)`
   }
 `;
 
-const Card = styled(Box)`
-  width: 16%;
-
-  @media ${() => theme.device.tablet} {
-    width: 32%;
-    margin-bottom: 2rem;
-  }
-
-  @media ${() => theme.device.mobile2} {
-    width: 49%;
-  }
+{/*수정*/}
+const Card = styled(Grid)`
 `;

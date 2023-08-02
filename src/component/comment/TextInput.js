@@ -11,6 +11,7 @@ import { useParams } from "react-router-dom";
 export default function TextInput({ changeFlag, flag, parentId }) {
   const { boardId } = useParams();
   const [content, setContent] = useState("");
+  const [isSubmmited, setIsSubmited] = useState(false);
 
   const muiTheme = createTheme({
     typography: {
@@ -23,7 +24,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
     },
   });
 
-  
+
   const EnrollChildComment = () => {
     if (parentId) {
       // 대댓글일 경우 해당 로직을 진행합니다.
@@ -35,6 +36,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
       }).then((res) => {
         setContent(""); // Reset the content state to clear the input field
         changeFlag(!flag);
+        setIsSubmited(false);
         // console.log(res);
       });
     } else {
@@ -49,6 +51,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
         .then((response) => {
           setContent(""); // Reset the content state to clear the input field
           changeFlag(!flag);
+          setIsSubmited(false);
         })
         .catch((error) => {
           // Handle errors (optional)
@@ -59,7 +62,12 @@ export default function TextInput({ changeFlag, flag, parentId }) {
 
   /** 댓글 창의 입력 버튼을 눌렀을 때의 함수입니다. */
   const handleClick = () => {
-    EnrollChildComment();
+    if (content.length > 0) {
+      setIsSubmited(true);
+      EnrollChildComment();
+    } else {
+      alert("내용을 입력해주세요!");
+    }
   };
 
   return (
@@ -74,7 +82,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
             onChange={(event) => setContent(event.target.value)}
             value={content} // Add value prop to the TextField
           />
-          <SolidBtn text={"입력"} handle={handleClick} />
+          <SolidBtn text={!isSubmmited ? "입력" : "등록 중.."} handle={handleClick} disabled={isSubmmited}/>
         </TextInputWrap>
       </ThemeProvider>
     </>
