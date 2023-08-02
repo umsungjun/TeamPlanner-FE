@@ -9,6 +9,10 @@ import AccountSetting from "./pages/mypage/AccountSetting";
 import ProfileSetting from "./pages/mypage/ProfileSetting";
 import { AuthProvider } from './AuthContext';
 import axios from "axios";
+import TeamManagement from "./pages/mypage/TeamManagement";
+import Participation from "./pages/mypage/Participation";
+import Writing from "./pages/team/Writing";
+
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -27,6 +31,9 @@ function App() {
           <Route path="/team/detail" element={ <TeamDetail /> }></Route>
           <Route path="/mypage/acountSetting" element={ <AccountSetting /> }></Route>
           <Route path="/mypage/profileSetting" element={ <ProfileSetting /> }></Route>
+          <Route path="/mypage/teamManagement" element={ <TeamManagement /> }></Route>
+          <Route path="/mypage/participation" element={ <Participation /> }></Route>
+          <Route path="/team/writing" element={ <Writing /> }></Route>
         </Routes>
       </>
     </AuthProvider>

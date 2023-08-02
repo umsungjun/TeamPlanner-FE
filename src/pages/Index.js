@@ -168,8 +168,8 @@ export default function Index() {
         <Nav />
         <Container>
           <PaddingWrap>
+          <div className="scroll">
           {history.pathname === "/contest" && (
-            <div className="scroll">
               <KeywordWrap>
                 <KeywordBtn text={"기획/아이디어"} />
                 <KeywordBtn text={"광고/마케팅"} />
@@ -187,10 +187,12 @@ export default function Index() {
                 <KeywordBtn text={"창업"} />
                 <KeywordBtn text={"기타"} />
               </KeywordWrap>
-            </div>
+            
             )}
-            {history.pathname === "/externalActivity" && (
+            </div>
             <div className="scroll">
+            {history.pathname === "/externalActivity" && (
+            
               <KeywordWrap>
                 <KeywordBtn text={"서포터즈"} />
                 <KeywordBtn text={"해외탐방-무료"} />
@@ -207,10 +209,12 @@ export default function Index() {
                 <KeywordBtn text={"학술"} />
                 <KeywordBtn text={"창업"} />
               </KeywordWrap>
-            </div>
+            
             )}
-            {history.pathname === "/club" && (
+            </div>
             <div className="scroll">
+            {history.pathname === "/club" && (
+            
               <KeywordWrap>
                 <KeywordBtn text={"연합"} />
                 <KeywordBtn text={"교내"} />
@@ -229,8 +233,9 @@ export default function Index() {
                 <KeywordBtn text={"봉사"} />
                 <KeywordBtn text={"기타"} />
               </KeywordWrap>
-            </div>
+            
             )}
+            </div>
             <CompetitionList>
               <ul className="title">
                 <li>
@@ -367,19 +372,19 @@ export default function Index() {
 }
 
 const Container = styled(Box)`
-  width: 100%;
-  margin-top: 13rem;
-  @media ${() => theme.device.tablet} {
-    margin-top: 16rem;
-    .scroll {
-      overflow-x: scroll;
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
+    width: 100%;
+    margin-top: 13rem;
+    @media ${() => theme.device.tablet} {
+        margin-top: 16rem;
+        .scroll{
+            overflow-x: scroll;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera*/
+        }
     }
-    .scroll::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera*/
-    }
-  }
 `;
 
 const PaddingWrap = styled(Box)`

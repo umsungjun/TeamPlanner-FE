@@ -3,8 +3,8 @@ import styled from "@emotion/styled";
 import theme from "../../style/theme";
 import {createTheme,Radio,ThemeProvider} from '@mui/material';
 import Button from '@mui/material/Button';
-import FormControlLabel from '@mui/material/FormControlLabel';
 import Box from "@mui/material/Box";
+import FormControlLabel from '@mui/material/FormControlLabel';
 export default function KeywordBtn({text}){
 
     const theme = createTheme({
@@ -18,20 +18,18 @@ export default function KeywordBtn({text}){
          },
     })
 
-
     return(
         <>
-        <ThemeProvider theme={theme}>
-            {/*수정*/}
-            <CheckBtn>
-                <input type="checkbox" id={text} name="keyword" />
-                <Keyword htmlFor={text} variant="outlined" color="primary">{text}</Keyword>
-            </CheckBtn>
-        </ThemeProvider>
-    </>
+            <ThemeProvider theme={theme}>
+                {/*수정*/}
+                <CheckBtn>
+                    <input type="checkbox" id={text} name="keyword" />
+                    <Keyword htmlFor={text} variant="outlined" color="primary">{text}</Keyword>
+                </CheckBtn>
+            </ThemeProvider>
+        </>
     )
 }
-
 {/*수정*/}
 const CheckBtn= styled(Box)`
     input{
@@ -49,16 +47,12 @@ const Keyword = styled.label`
     border: 1px solid rgba(255,115,0,.5);
     color: #FF7300;
     font-weight: 600;
+    background-color: #fff;
     cursor: pointer;
     border-radius: 100px;
     transition: background-color .2s ease-in-out;
     min-width: max-content;
-
-    -ms-user-select: none;
-    -moz-user-select: -moz-none;
-    -webkit-user-select: none;
-    -khtml-user-select: none;
-    user-select: none;
+    display: inline-block;
 
     @media ${() => theme.device.mobile} {
         font-size: 1.4rem;
