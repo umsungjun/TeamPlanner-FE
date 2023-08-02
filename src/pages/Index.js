@@ -35,7 +35,7 @@ export default function Index() {
   //전체페이지
   const [totalPages, setTotalPages] = useState(0);
 
-  console.log("현재페이지", currentPage);
+  // console.log("현재페이지", currentPage);
 
   const history = useLocation();
 
@@ -109,14 +109,22 @@ export default function Index() {
           break;
       }
 
-      const response = await API.get(
+      // const response = await API.get(
+      //   `/api/v1/board?category=${translatedPath}&page=${
+      //     currentPage - 1
+      //   }&size=12&sort=${sortParam}`
+      // );
+      API.get(
         `/api/v1/board?category=${translatedPath}&page=${
           currentPage - 1
         }&size=12&sort=${sortParam}`
-      );
-      console.log(response.data.content);
-      setData(response.data.content);
-      // setTotalPages(response.data.totalPages);
+      ).then(response => {
+        setData(response.data.content || []);
+        setTotalPages(response.data.totalPages);
+      })
+      // .catch(err => {
+      //   console.log('err', err)
+      // }) 
     } catch (error) {
       console.error("Error fetching data:", error);
     }
