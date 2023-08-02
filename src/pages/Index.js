@@ -11,6 +11,7 @@ import Footer from "../component/common/Footer";
 import theme from "../style/theme";
 import { API } from "../api/api";
 import { useLocation } from "react-router-dom";
+import { contest } from "./category";
 
 const Item = styled(Box)(({ theme }) => ({
   // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -24,6 +25,8 @@ const Item = styled(Box)(({ theme }) => ({
 export default function Index() {
   //인기 있는 공모전
   const [data, setData] = useState([]);
+  // 활동분야 필터링
+  const[activityField,setActivityField]=useState([]);
   // 마감 직전 공모전
   const [data2, setData2] = useState([]);
   // 10 조회순 , 20 최신순 , 30 좋아요 순
@@ -34,6 +37,8 @@ export default function Index() {
 
   //전체페이지
   const [totalPages, setTotalPages] = useState(0);
+
+  const [currentChecked, setCurrentChecked] = useState([]);
 
   console.log("현재페이지", currentPage);
 
@@ -65,6 +70,12 @@ export default function Index() {
   }
 
   useEffect(() => {
+    const result = currentChecked.join('/');
+    setActivityField(result);
+    console.log(activityField);
+  }, [currentChecked])
+
+  useEffect(() => {
     let sortParam;
     
     switch (selectedSort) {
@@ -83,12 +94,12 @@ export default function Index() {
     }
 
     API.get(
-      `/api/v1/board?category=${translatedPath}&page=0&size=12&sort=${sortParam}`
+      `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=0&size=12&sort=${sortParam}`
     ).then((res) => {
       setTotalPages(res.data.totalPages);
       setCurrentPage(1);
     })
-  }, [translatedPath]);
+  }, [translatedPath,activityField]);
 
 
   const fetchData = async () => {
@@ -110,7 +121,7 @@ export default function Index() {
       }
 
       const response = await API.get(
-        `/api/v1/board?category=${translatedPath}&page=${
+        `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=${
           currentPage - 1
         }&size=12&sort=${sortParam}`
       );
@@ -125,7 +136,7 @@ export default function Index() {
   // useEffect hook to fetch initial data on component mount and whenever selectedSort changes
   useEffect(() => {
     fetchData();
-  }, [selectedSort, translatedPath, currentPage]);
+  }, [selectedSort, translatedPath, currentPage,activityField]);
 
   const theme = createTheme({
     typography: {
@@ -171,21 +182,11 @@ export default function Index() {
           <div className="scroll">
           {history.pathname === "/contest" && (
               <KeywordWrap>
-                <KeywordBtn text={"기획/아이디어"} />
-                <KeywordBtn text={"광고/마케팅"} />
-                <KeywordBtn text={"사진/영상/UCC"} />
-                <KeywordBtn text={"디자인/순수미술/공예"} />
-                <KeywordBtn text={"네이밍/슬로건"} />
-                <KeywordBtn text={"캐릭터/만화/게임"} />
-                <KeywordBtn text={"건축/건설/인테리어"} />
-                <KeywordBtn text={"과학/공학"} />
-                <KeywordBtn text={"예체능/패션"} />
-                <KeywordBtn text={"전시/페스티벌"} />
-                <KeywordBtn text={"문학/시나리오"} />
-                <KeywordBtn text={"해외"} />
-                <KeywordBtn text={"학술"} />
-                <KeywordBtn text={"창업"} />
-                <KeywordBtn text={"기타"} />
+                {contest.map((item, key) => {
+                  return (
+                    <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+                  )
+                })}
               </KeywordWrap>
             
             )}
@@ -195,10 +196,10 @@ export default function Index() {
             
               <KeywordWrap>
                 <KeywordBtn text={"서포터즈"} />
-                <KeywordBtn text={"해외탐방-무료"} />
-                <KeywordBtn text={"해외탐방-유료"} />
-                <KeywordBtn text={"봉사단-해외"} />
-                <KeywordBtn text={"봉사단-국내"} />
+                <KeywordBtn text={"해외탐방/무료"} />
+                <KeywordBtn text={"해외탐방/유료"} />
+                <KeywordBtn text={"봉사단/해외"} />
+                <KeywordBtn text={"봉사단/국내"} />
                 <KeywordBtn text={"마케터"} />
                 <KeywordBtn text={"기자단"} />
                 <KeywordBtn text={"강연"} />
