@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { Button, createTheme, IconButton, ThemeProvider } from "@mui/material";
+import { Button, createTheme, IconButton, ThemeProvider ,Avatar } from "@mui/material";
 import Box from "@mui/material/Box";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import TextInput from "./TextInput";
@@ -30,7 +30,8 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           <ul className="comment">
             <li>
               <IconButton sx={{ p: 0 }}>
-                <AccountCircleIcon />
+                <Avatar src={commentData.profileImage} alt="Profile" />
+                {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">
                 <h3>{commentData.username}</h3>

@@ -26,6 +26,11 @@ export default function TextInput({ changeFlag, flag, parentId }) {
 
 
   const EnrollChildComment = () => {
+
+    const userInfoJSON = localStorage.getItem("userInfo");
+    const userInfoObject = JSON.parse(userInfoJSON);
+    const username = userInfoObject.username;
+
     if (parentId) {
       // 대댓글일 경우 해당 로직을 진행합니다.
       API.post(`/api/v1/board/${boardId}/comment/${parentId}/comment`, {
@@ -44,7 +49,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
       API.post(`/api/v1/board/${boardId}/comment`, {
         boardId: boardId,
         content: content,
-        memberId: "localMember",
+        memberId: username,
         isConfidential: "false",
         }
       )
@@ -70,6 +75,13 @@ export default function TextInput({ changeFlag, flag, parentId }) {
     }
   };
 
+  /** 엔터 키 눌렀을 때의 함수입니다. */
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleClick();
+    }
+  };
+
   return (
     <>
       <ThemeProvider theme={muiTheme}>
@@ -79,6 +91,7 @@ export default function TextInput({ changeFlag, flag, parentId }) {
             variant="outlined"
             multiline
             maxRows={3}
+            onKeyPress={handleKeyPress} 
             onChange={(event) => setContent(event.target.value)}
             value={content} // Add value prop to the TextField
           />
