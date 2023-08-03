@@ -12,6 +12,8 @@ import theme from "../style/theme";
 import { API } from "../api/api";
 import { useLocation } from "react-router-dom";
 import { contest } from "./category";
+import { externalActivity } from "./category";
+import { club } from "./category";
 
 const Item = styled(Box)(({ theme }) => ({
   // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
@@ -76,7 +78,6 @@ export default function Index() {
   useEffect(() => {
     const result = currentChecked.join('/');
     setActivityField(result);
-    console.log(activityField);
   }, [currentChecked])
 
   useEffect(() => {
@@ -129,6 +130,7 @@ export default function Index() {
           currentPage - 1
         }&size=12&sort=${sortParam}`
       ).then(response => {
+        console.log(activityField);
         setData(response.data.content || []);
         setTotalPages(response.data.totalPages);
       })
@@ -201,46 +203,26 @@ export default function Index() {
             <div className="scroll">
             {history.pathname === "/externalActivity" && (
             
-              <KeywordWrap>
-                <KeywordBtn text={"서포터즈"} />
-                <KeywordBtn text={"해외탐방/무료"} />
-                <KeywordBtn text={"해외탐방/유료"} />
-                <KeywordBtn text={"봉사단/해외"} />
-                <KeywordBtn text={"봉사단/국내"} />
-                <KeywordBtn text={"마케터"} />
-                <KeywordBtn text={"기자단"} />
-                <KeywordBtn text={"강연"} />
-                <KeywordBtn text={"멘토링"} />
-                <KeywordBtn text={"기타"} />
-                <KeywordBtn text={"문학/시나리오"} />
-                <KeywordBtn text={"해외"} />
-                <KeywordBtn text={"학술"} />
-                <KeywordBtn text={"창업"} />
-              </KeywordWrap>
+            <KeywordWrap>
+            {externalActivity.map((item, key) => {
+              return (
+                <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+              )
+            })}
+          </KeywordWrap>
             
             )}
             </div>
             <div className="scroll">
             {history.pathname === "/club" && (
             
-              <KeywordWrap>
-                <KeywordBtn text={"연합"} />
-                <KeywordBtn text={"교내"} />
-                <KeywordBtn text={"문화생활"} />
-                <KeywordBtn text={"친목"} />
-                <KeywordBtn text={"어학"} />
-                <KeywordBtn text={"예술"} />
-                <KeywordBtn text={"음악/공연"} />
-                <KeywordBtn text={"스터디/연구"} />
-                <KeywordBtn text={"스포츠/레저"} />
-                <KeywordBtn text={"창업"} />
-                <KeywordBtn text={"종교"} />
-                <KeywordBtn text={"신문/잡지"} />
-                <KeywordBtn text={"기획단"} />
-                <KeywordBtn text={"여행"} />
-                <KeywordBtn text={"봉사"} />
-                <KeywordBtn text={"기타"} />
-              </KeywordWrap>
+            <KeywordWrap>
+            {club.map((item, key) => {
+              return (
+                <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+              )
+            })}
+          </KeywordWrap>
             
             )}
             </div>
