@@ -8,8 +8,21 @@ import Button from '@mui/material/Button';
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import AssessmentModal from "../modal/AssessmentModal";
+import ArrowRightIcon from '@mui/icons-material/ArrowRight';
+import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
+
+// Import Swiper React components
+import { Swiper, SwiperSlide } from 'swiper/react';
+import SwiperCore, { Pagination, Navigation, Autoplay } from "swiper";
+import "swiper/css";
+import "swiper/css/navigation";
+import "swiper/css/pagination";
+import "swiper/css/scrollbar";
+
+SwiperCore.use([Pagination, Navigation, Autoplay]);
 
 export default function TeamCard2({type}){
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -29,17 +42,12 @@ export default function TeamCard2({type}){
     const handleClose = () => {
       setAnchorEl(null);
     };
-  
+
 
     return(
         <>
           <ThemeProvider theme={theme}>
             <TeamCard2Wrap
-                id="basic-button"
-                aria-controls={open ? 'basic-menu' : undefined}
-                aria-haspopup="true"
-                aria-expanded={open ? 'true' : undefined}
-                onClick={handleClick}
             >
                 <div className="padding-wrap">
                     <div className="info-text">
@@ -60,22 +68,121 @@ export default function TeamCard2({type}){
                         <h2>공모전</h2>
                         <p>2023.08.21 ~ 2023.08.26</p>
                     </div>
+                    {/**수정 */}
                     <div className="profile-img">
-                        <div className="img-box">
+                        <Swiper
+                            slidesPerView={5}
+                            spaceBetween={5}
+                            navigation
+                            loop={true}
+                            breakpoints={{
+                                0: {
+                                slidesOffsetBefore: 0,
+                                slidesPerView: 2,
+                                spaceBetween: 5,
+                                centeredSlides: false,
+                                },
+                                500: {
+                                    slidesOffsetBefore: 0,
+                                    slidesPerView: 3 ,
+                                    spaceBetween: 5,
+                                    centeredSlides: false,
+                                    },
+                                800: {
+                                slidesOffsetBefore: 0,
+                                slidesPerView: 4 ,
+                                spaceBetween: 5,
+                                centeredSlides: false,
+                                },
+                                1200: {
+                                slidesOffsetBefore: 0,
+                                slidesPerView: 5,
+                                spaceBetween: 5,
+                                centeredSlides: false,
+                                },
+                            }}
+                            >
+                        <SwiperSlide>
+                            <div className="img-box"
+                                aria-controls={open ? 'basic-menu' : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={open ? 'true' : undefined}
+                                onClick={handleClick}
+                            >
                             <img src="/img/card/sample3.png"/>
                         </div>
-                        <div className="img-box">
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
                             <img src="/img/card/sample3.png"/>
                         </div>
-                        <div className="img-box">
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
                             <img src="/img/card/sample3.png"/>
                         </div>
-                        <div className="img-box">
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
                             <img src="/img/card/sample3.png"/>
                         </div>
-                        <div className="img-box">
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
                             <img src="/img/card/sample3.png"/>
                         </div>
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
+                            <img src="/img/card/sample3.png"/>
+                        </div>
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
+                            <img src="/img/card/sample3.png"/>
+                        </div>
+                        </SwiperSlide>
+                        <SwiperSlide>
+                        <div className="img-box"
+                            aria-controls={open ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open ? 'true' : undefined}
+                            onClick={handleClick}
+                        >
+                            <img src="/img/card/sample3.png"/>
+                        </div>
+                        </SwiperSlide>
+                        </Swiper>
                     </div>
                 </div>
             </TeamCard2Wrap>
@@ -86,11 +193,11 @@ export default function TeamCard2({type}){
                 open={open}
                 onClose={handleClose}
                 anchorOrigin={{
-                vertical: 'center',
+                vertical: 'bottom',
                 horizontal: 'right',
                 }}
                 transformOrigin={{
-                vertical: 'center',
+                vertical: 'bottom',
                 horizontal: 'right',
                 }}
             >
@@ -105,6 +212,7 @@ export default function TeamCard2({type}){
 const TeamCard2Wrap = styled(Box)`
     border: 1px solid rgba(0,0,0,.1);
     border-radius: 1rem;
+    
     .padding-wrap{
         display: flex;
         align-items: center;
@@ -165,7 +273,8 @@ const TeamCard2Wrap = styled(Box)`
         align-items: center;
         .img-box{
             margin-right: 1rem;
-            width: 20%;
+            width: 100%;
+            cursor: pointer;
         }
         .img-box:last-of-type{
             margin: 0;
@@ -177,6 +286,33 @@ const TeamCard2Wrap = styled(Box)`
         }
 
     }
+      /*수정 */
+    .swiper-button-prev, .swiper-rtl .swiper-button-next{
+        height: 40px;
+        width: 10px;
+    }
+    .swiper-button-next, .swiper-rtl .swiper-button-prev{
+        height: 40px;
+        width: 10px;
+    }
+    .swiper-button-next:after, .swiper-rtl .swiper-button-prev:after{
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        background-color: rgba(0,0,0,.6);
+        padding: 8px 10px;
+        border-radius: 100px;
+        
+    }
+    .swiper-button-prev:after, .swiper-rtl .swiper-button-next:after{
+        color: #fff;
+        font-size: 10px;
+        font-weight: bold;
+        background-color: rgba(0,0,0,.6);
+        padding: 8px 10px;
+        border-radius: 100px;
+    }
+
     @media ${() => theme.device.tablet} {
         .padding-wrap{
             flex-direction: column;
@@ -189,25 +325,13 @@ const TeamCard2Wrap = styled(Box)`
                 margin: 0;
             }
         }
+        /*수정 */
         .profile-img{
             width: 100%;
             margin-top: 1rem;
-        }
-    }
-    @media ${() => theme.device.mobile} {
-        .profile-img{
             .img-box{
                 img{
-                    height: 100px;
-                }
-            }
-        }
-    }
-    @media ${() => theme.device.mobile3} {
-        .profile-img{
-            .img-box{
-                img{
-                    height: 50px;
+                    height: auto;
                 }
             }
         }
@@ -215,9 +339,19 @@ const TeamCard2Wrap = styled(Box)`
 `;
 
 const StyledMenu = styled(Menu)`
+    ul{
+        padding: 0;
+    }
     li{
         font-size: 1.6rem;
         font-weight: 400;
+        height: 4rem;
+        width: 10rem;
+    }
+    li:last-of-type{
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
 `;
 
