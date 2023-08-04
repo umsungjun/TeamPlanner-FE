@@ -19,6 +19,7 @@ import BasicPagination from "../../component/pagination/Pagination";
 import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
+import KakaoButton from "./kakaoButton";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -175,7 +176,7 @@ export default function Detail() {
                             <img src="/img/icon/sns/kakaostory.png"></img>
                           </IconButton>
                           <IconButton>
-                            <img src="/img/icon/sns/kakao.png"></img>
+                            <KakaoButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
                         </div>
                       </div>
