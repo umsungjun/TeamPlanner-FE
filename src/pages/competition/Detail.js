@@ -92,6 +92,18 @@ export default function Detail() {
     setValue(newValue);
   };
 
+  const ContentDiv = styled.div`
+    width: 100%;
+
+    div {
+      width: 100%;
+    }
+
+    img {
+      width: 100%;
+    }
+  `
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -220,11 +232,12 @@ export default function Detail() {
                         <h2>모집개요</h2>
                       </div>
                       {/* <p>금융권 취업을 희망하는 분들을 위한 삼성생명에서 주관하는 단기 강의입니다. 현재 금융권의 트렌드 및 현직자의 조언을 얻어 취업에 도움되시길 바랍니다.</p> */}
-                      <div
+                      <ContentDiv
                         dangerouslySetInnerHTML={{
                           __html: data.activitiyDetail,
                         }}
-                      ></div>
+                        >
+                      </ContentDiv>
                     </li>
                     {/* <li>
                                             <div className="title dp-flex">

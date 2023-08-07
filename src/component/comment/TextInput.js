@@ -27,9 +27,19 @@ export default function TextInput({ changeFlag, flag, parentId }) {
 
   const EnrollChildComment = () => {
 
+
     const userInfoJSON = localStorage.getItem("userInfo");
     const userInfoObject = JSON.parse(userInfoJSON);
+
+    if(!userInfoObject){
+        alert("로그인 후 이용해주세요");
+        setIsSubmited(false);
+        return;
+    }
     const username = userInfoObject.username;
+    
+    
+    
 
     if (parentId) {
       // 대댓글일 경우 해당 로직을 진행합니다.
