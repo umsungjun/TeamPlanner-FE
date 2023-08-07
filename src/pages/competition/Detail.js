@@ -139,7 +139,7 @@ export default function Detail() {
                     <li className="dp-flex space-between">
                       <div className="col dp-flex">
                         <h3>홈페이지</h3>
-                        <p>{data.homepage}</p>
+                        <p>{data.activityUrl}</p>
                       </div>
                       <div className="col dp-flex">
                         <h3>활동혜택</h3>

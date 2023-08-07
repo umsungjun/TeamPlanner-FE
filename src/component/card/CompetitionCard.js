@@ -29,7 +29,8 @@ export default function CompetitionCard({id, className, activityName, activityIm
 const CardWrap = styled(Box)`
     cursor: pointer;
     background-image: url(${props => props.activityImg});
-    background-size: contain;
+    background-size: cover;
+    background-repeat: no-repeat;
     #box1{
         background-image: url(../img/card/sample.png);
     }
