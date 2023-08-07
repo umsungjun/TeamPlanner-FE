@@ -20,6 +20,7 @@ import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
 import KakaoButton from "./kakaoButton";
+import { Opacity } from "@mui/icons-material";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -139,7 +140,8 @@ export default function Detail() {
                     <li className="dp-flex space-between">
                       <div className="col dp-flex">
                         <h3>홈페이지</h3>
-                        <p>{data.activityUrl}</p>
+                        <a href={data.activityUrl} target="_blank">
+                          <p style={{ color: "#FF7300", opacity: "80%", fontWeight: "bold"}}>지원하러 바로가기</p></a>
                       </div>
                       <div className="col dp-flex">
                         <h3>활동혜택</h3>
