@@ -23,7 +23,6 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Link } from "react-router-dom";
 import FilledBtn from "../button/FilledBtn";
 import { AuthContext } from "../../AuthContext";
-
 import { useRef } from "react";
 import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
 import Notice from "./Notcie";
@@ -202,17 +201,17 @@ export default function Nav(){
                             </div>
                             <StyledCollapse in={open} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding sx={{mt : 2}}>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/contest" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="공모전" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/externalActivity" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="대외활동" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/club" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="동아리" />
                                         </ListItemButton>
