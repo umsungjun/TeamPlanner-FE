@@ -86,6 +86,39 @@ export default function Detail() {
     },
   });
 
+  const [recruitmentList, setRecruitmentList] = useState([]);
+  // 현재페이지
+  const [currentPage, setCurrentPage] = useState(1);
+  //전체페이지
+  const [totalPages, setTotalPages] = useState(10);
+
+  useEffect(() => {
+    fetchRecruitmentList();
+  }, [currentPage]);
+
+  useEffect(() => {
+    API.get(`/api/v1/recruitment?page=${currentPage}&size=5&boardIdContain=${boardId}`,
+      )
+      .then(res => {
+        setTotalPages(res.data.totalPages);
+        // console.log(res);
+      }).catch(err => {
+        console.log(err);
+      })
+  }, [])
+  
+
+  const fetchRecruitmentList = () => {
+    API.get(`/api/v1/recruitment?page=${currentPage - 1}&size=5&boardIdContain=${boardId}`,
+      )
+        .then(res => {
+          setRecruitmentList(res.data.content);
+          // console.log(res.data.content);
+        }).catch(err => {
+          console.log(err);
+        })
+  }
+
   const [value, setValue] = React.useState(0);
 
   const handleChange = (event, newValue) => {
@@ -281,8 +314,16 @@ export default function Detail() {
                   </ul>
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={1}>
+                  {/* 팀원 모집글 탭 */}
                   <TeamCardWrap>
-                    <Card>
+                    {
+                      recruitmentList.map(r => 
+                        <Card>
+                          <TaemCard {...r}/>
+                        </Card>
+                      )
+                    }
+                    {/* <Card>
                       <TaemCard />
                     </Card>
                     <Card>
@@ -296,15 +337,18 @@ export default function Detail() {
                     </Card>
                     <Card>
                       <TaemCard />
-                    </Card>
-                    <Card>
-                      <TaemCard />
-                    </Card>
+                    </Card> */}
                   </TeamCardWrap>
                   <div className="dp-end">
-                    <FilledBtn text={"글쓰기"} />
+                    <FilledBtn text={"글쓰기"} handle={() => {console.log("/recruitment/write?boardId=" + boardId); window.location.href=`/recruitment/write?boardId=${boardId}`}}/>
                   </div>
-                  <BasicPagination />
+
+                  <BasicPagination
+                    totalPages={totalPages}
+                    currentPage={currentPage}
+                    onChange={(event) => setCurrentPage(event)}
+                  />
+
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={2}>
                   <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
