@@ -5,8 +5,21 @@ import Box from "@mui/material/Box";
 import theme from "../../style/theme";
 import IconWrap from "../list/IconWrap";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import { borderRadius, display } from "@mui/system";
 
-export default function TaemCard(){
+export default function TaemCard({
+    id,
+    title,
+    content,
+    viewCount,
+    likeCount,
+    currentMemberSize,
+    maxMemberSize,
+    createdAt,
+    authorNickname,
+    authorProfileImg,
+    commentCount
+}){
 
     const theme = createTheme({
         typography:{
@@ -23,26 +36,26 @@ export default function TaemCard(){
     return(
         <>
             <ThemeProvider theme={theme}>
-                <a href="">
+                <a href={`/recruitment/${id}`}>
                     <CardWrap>
                         <ul className="card-wrap">
                             <li className="card-info">
-                                <h2>팀</h2>
+                                <h2>{title}</h2>
                                 <div className="name">
-                                    <AccountCircleIcon/>
-                                    <h3>유저 1</h3>
+                                    <img src={authorProfileImg} width={25} style={{borderRadius: 12.5}}/>
+                                    <h3>{authorNickname}</h3>
                                 </div>
-                                <p>
-                                국내 여름철 대표 지역농산물 축제인 화천 토마토 축제로 여러분을 초대합니다!
+                                <p style={{textOverflow:"ellipsis", wordWrap: "break-word", display: "inline-block", overflow: "hidden"}}>
+                                {content}
                                 </p>
-                                <IconWrap />
+                                <IconWrap likeCount={likeCount} viewCount={viewCount} commentCount={commentCount}/>
                             </li>
                             <li className="img-box">
                                 <div className="img-cover">
                                     <h4>강원</h4>
                                     <div className="personnel">
                                         <h5>최소인원 / 최대인원</h5>
-                                        <strong>3/5</strong>
+                                        <strong>{currentMemberSize}/{maxMemberSize}</strong>
                                     </div>
                                 </div>
                             </li>

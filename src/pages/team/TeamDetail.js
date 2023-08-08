@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import {createTheme,Icon,IconButton,ThemeProvider} from '@mui/material';
 import Nav from "../../component/common/Nav"
@@ -12,10 +12,12 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import Comment from "../../component/comment/Comment";
 import Button from "@mui/material/Button";
 import ApplicationModal from "../../component/modal/ApplicationModal";
+import { useParams } from "react-router";
+import { API } from "../../api/api";
 
 
 export default function TeamDetail({done}){
-
+    const {recruitmentId} = useParams();
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -26,6 +28,35 @@ export default function TeamDetail({done}){
             },
          },
     })
+    const [commentData, setCommentData] = useState([]);
+    const [flag, setChangeFlag] = useState(false);
+    const [data, setData] = useState({
+        commentList: []
+    });
+    const {
+        id,
+        title,
+        content,
+        currentMemberSize,
+        maxMemberSize,
+        likeCount,
+        viewCount,
+        commentList = [],
+    } = data;
+
+
+    useEffect(() => {
+        fetchData();
+    },[])
+
+    const fetchData = () => {
+        API.get(`/api/v1/recruitment/${recruitmentId}`)
+        .then(resp => {
+            console.log(resp)
+            setData(resp.data)
+            setCommentData(resp.data.commentList);
+        })
+    }
 
 
     return(
@@ -39,8 +70,8 @@ export default function TeamDetail({done}){
                                 <div className="title-wrap">
                                     <IconButton className="prev-btn"><KeyboardArrowLeftIcon/></IconButton>
                                     <div className="title">
-                                        <h1>제 10회 물류산업진흥재단 논문 공모전</h1>
-                                        <IconWrap />
+                                        <h1>- 공모전</h1>
+                                        <IconWrap viewCount={viewCount} likeCount={likeCount} commentCount={commentList.length}/>
                                     </div>
                                     <ul className="team-info">
                                         <li className="info-wrap">
@@ -48,7 +79,7 @@ export default function TeamDetail({done}){
                                                 <h2>모집 마감까지 <strong>D-10</strong></h2>
                                             </div>
                                             <div className="info-box">
-                                                <h2>현재인원/최대인원 : <strong>2/5</strong></h2>
+                                                <h2>현재인원/최대인원 : <strong>{currentMemberSize}/{maxMemberSize}</strong></h2>
                                             </div>
                                         </li>
                                         <li className="button-wrap">
@@ -69,14 +100,13 @@ export default function TeamDetail({done}){
                                         <h3>유저 1</h3>
                                     </div>
                                     <div className="text-wrap">
-                                        <h4>좋은 팀원구합니다</h4>
-                                        <p>
-                                            안녕하세요 팀원모집합니다 성실하게 하실 분 구합니다 제 프로필 보고 같이하실분은 참여신청 눌러주세요안녕하세요 팀원모집합니다 성실하게 하실 분 구합니다 제 프로필 보고 같이하실분은 참여신청 눌러주세요안녕하세요 팀원모집합니다 성실하게 하실 분 구합니다 제 프로필 보고 같이하실분은 참여신청 눌러주세요안녕하세요 팀원모집합니다 성실하게 하실 분 구합니다 제 프로필 보고 같이하실분은 참여신청 눌러주세요안녕하세요 팀원모집합니다 성실하게 하실 분 구합니다 제 프로필 보고 같이하실분은 참여신청 눌러주세요
-                                        </p>
+                                        <h4>{title}</h4>
+                                        {content?.split('\n').map(l => <p>{l}</p>)}
                                     </div>
                                 </div>
                                 <div className="comment-wrap">
-                                    <Comment />
+                                    {/* <Comment /> */}
+                                    <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
                                 </div>
                             </div>
                         </Content>

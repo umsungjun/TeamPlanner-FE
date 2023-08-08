@@ -28,12 +28,12 @@ function App() {
           <Route path="/login" element={ <Login /> }></Route>
           <Route path="/join" element={ <Join /> }></Route>
           <Route path="/competition/detail/:boardId" element={ <Detail /> }></Route>
-          <Route path="/team/detail" element={ <TeamDetail /> }></Route>
+          <Route path="/recruitment/:recruitmentId" element={ <TeamDetail /> }></Route>
           <Route path="/mypage/acountSetting" element={ <AccountSetting /> }></Route>
           <Route path="/mypage/profileSetting" element={ <ProfileSetting /> }></Route>
           <Route path="/mypage/teamManagement" element={ <TeamManagement /> }></Route>
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
-          <Route path="/team/writing" element={ <Writing /> }></Route>
+          <Route path="/recruitment/write" element={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
         </Routes>
       </>

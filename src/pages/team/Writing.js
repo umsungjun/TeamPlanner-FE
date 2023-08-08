@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import {createTheme,Icon,IconButton,ThemeProvider,Box} from '@mui/material';
 import Button from "@mui/material/Button";
@@ -12,6 +12,8 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import FilledBtn from "../../component/button/FilledBtn";
+import { useLocation, useNavigate } from "react-router";
+import { API } from "../../api/api";
 
 export default function Writing(){
     
@@ -25,16 +27,50 @@ export default function Writing(){
             },
          },
     })
+    const location = useLocation();
+    const navigate = useNavigate();
 
-    const [person, setPerson] = React.useState(10);
+    const queryParams = new URLSearchParams(location.search);
+    const boardId = queryParams.get("boardId") || 1;
+    useEffect(() => {
+        console.log("write hello")
 
-    const handleChange = (event) => {
-        setPerson(event.target.value);
+        console.log(queryParams.get("boardId"));
+        
+    }, [])
+    
+    const [inputs, setInputs] = useState({
+        title: "",
+        content: "",
+        currentMemberSize: 1,
+        maxMemberSize: 3,
+    });
+    const { title, content, currentMemberSize, maxMemberSize } = inputs;
+
+    const onInputChange = (e) => {
+        const { name, value } = e.target;
+        setInputs({
+          ...inputs,
+          [name]: value,
+        });
     };
-    const [person2, setPerson2] = React.useState(10);
 
-    const handleChange2 = (event) => {
-        setPerson2(event.target.value);
+    const handleWriteButton = (event) => {
+        console.log("handle write button")
+        console.log(`input = ${inputs}`)
+        console.log('inputs', JSON.stringify(inputs, null, 2))
+        API.post("/api/v1/recruitment", {
+            ...inputs,
+            boardId: boardId
+        }).then(resp => {
+            console.log(`resp ${resp}`);
+            navigate(`/competition/detail/${boardId}`)
+        }).catch(err => {
+            console.log(`err = ${err}`);
+        })
+    };
+    const handleCancelButton = (event) => {
+        console.log("handle cancel button")
     };
     return(
         <>
@@ -46,9 +82,9 @@ export default function Writing(){
                             <div className="content-wrap">
                                 <div className="title-wrap">
                                     <IconButton className="prev-btn"><KeyboardArrowLeftIcon/></IconButton>
-                                    <div className="title">
+                                    {/* <div className="title">
                                         <h1>제 10회 물류산업진흥재단 논문 공모전</h1>
-                                    </div>
+                                    </div> */}
                                 </div>
                                 <div className="select-wrap">
                                     <div className="select">
@@ -57,14 +93,22 @@ export default function Writing(){
                                             <Select
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
-                                                value={person}
-                                                onChange={handleChange}
+                                                name="currentMemberSize"
+                                                value={currentMemberSize}
+                                                onChange={onInputChange}
                                                 fullWidth
                                                 sx={{fontSize : "1.4rem"}}
                                             >
-                                                <MenuItem sx={{fontSize : "1.4rem"}} value={10}>1</MenuItem>
-                                                <MenuItem sx={{fontSize : "1.4rem"}} value={20}>2</MenuItem>
-                                                <MenuItem sx={{fontSize : "1.4rem"}} value={30}>3</MenuItem>
+
+                                                {
+                                                    [...Array(10).keys()].map(i => {
+                                                        return (
+                                                        <MenuItem sx={{fontSize : "1.4rem"}} value={i}>{i}</MenuItem>
+                                                        )
+                                                    })
+                                                }
+                                                {/* <MenuItem sx={{fontSize : "1.4rem"}} value={20}>2</MenuItem>
+                                                <MenuItem sx={{fontSize : "1.4rem"}} value={30}>3</MenuItem> */}
                                             </Select>
                                         </FormControl>
                                     </div>
@@ -74,14 +118,24 @@ export default function Writing(){
                                             <Select
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
-                                                value={person2}
-                                                onChange={handleChange2}
+                                                name="maxMemberSize"
+                                                value={maxMemberSize}
+                                                onChange={onInputChange}
                                                 fullWidth
                                                 sx={{fontSize : "1.4rem"}}
                                             >
+                                                {
+                                                    [...Array(10).keys()].map(i => {
+                                                        return (
+                                                        <MenuItem sx={{fontSize : "1.4rem"}} value={i}>{i}</MenuItem>
+                                                        )
+                                                    })
+                                                }
+{/* 
                                                 <MenuItem sx={{fontSize : "1.4rem"}} value={10}>1</MenuItem>
                                                 <MenuItem sx={{fontSize : "1.4rem"}} value={20}>2</MenuItem>
                                                 <MenuItem sx={{fontSize : "1.4rem"}} value={30}>3</MenuItem>
+                                                 */}
                                             </Select>
                                         </FormControl>
                                     </div>
@@ -89,17 +143,27 @@ export default function Writing(){
                                 <div className="input-wrap">
                                     <div className="name">
                                         <h3>제목</h3>
-                                        <TextField id="outlined-basic" variant="outlined" fullWidth />
+                                        <TextField 
+                                        name="title"
+                                        value={title}
+                                        onChange={onInputChange}
+                                        placeholder="제목을 입력해주세요..."
+                                        id="outlined-basic" variant="outlined" fullWidth />
                                     </div>
                                     <div className="content">
                                         <h3>내용</h3>
-                                        <TextField id="outlined-basic" variant="outlined" fullWidth multiline />
+                                        <TextField 
+                                        name="content"
+                                        value={content}
+                                        onChange={onInputChange}
+                                        placeholder="내용을 입력해주세요..."
+                                        id="outlined-basic" variant="outlined" fullWidth multiline />
                                     </div>
                                 </div>
                                 <div className="dp-end">
                                     <div className="btn-wrap">
-                                        <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
-                                        <FilledBtn text={"참여신청"} handle={handleChange2}></FilledBtn>
+                                        <FilledBtn text={"취소"} handle={handleCancelButton} color={"gray"}></FilledBtn>
+                                        <FilledBtn text={"모집글 작성"} handle={handleWriteButton}></FilledBtn>
                                     </div>
                                 </div>
                             </div>
