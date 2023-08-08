@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import styled from "@emotion/styled";
-import {createTheme,IconButton,ThemeProvider} from '@mui/material';
+import {Avatar, createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
 import theme from "../../style/theme";
 import IconWrap from "../list/IconWrap";
@@ -18,7 +18,8 @@ export default function TaemCard({
     createdAt,
     authorNickname,
     authorProfileImg,
-    commentCount
+    commentCount,
+    
 }){
 
     const theme = createTheme({
@@ -42,7 +43,7 @@ export default function TaemCard({
                             <li className="card-info">
                                 <h2>{title}</h2>
                                 <div className="name">
-                                    <img src={authorProfileImg} width={25} style={{borderRadius: 12.5}}/>
+                                    <Avatar src={authorProfileImg}  style={{}}/>
                                     <h3>{authorNickname}</h3>
                                 </div>
                                 <p style={{textOverflow:"ellipsis", wordWrap: "break-word", display: "inline-block", overflow: "hidden"}}>
