@@ -57,11 +57,6 @@ export default function Comment({ commentData, changeFlag, flag }) {
   //   }, []);
   // };
 
-  useMemo(() => {
-    
-  }, [commentData]);
-
-
   return (
     <>
       <ThemeProvider theme={theme}>
