@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Nav from "../../component/common/Nav";
@@ -17,10 +17,15 @@ import TeamCard2 from "../../component/card/TeamCard2";
 import BasicPagination from "../../component/pagination/Pagination";
 import AttendCard from "../../component/card/AttendCard";
 import ProduceModal from "../../component/modal/ProduceModal";
+import { API } from "../../api/api";
 
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
+
+
+    
+  
   
     return (
       <div
@@ -54,6 +59,23 @@ function CustomTabPanel(props) {
 
 
 export default function TeamManagement(){
+
+    const [teams, setTeams] = useState([]); // Initialize as an empty array
+
+
+    useEffect(() => {
+      API.get("/api/v1/member/applicant-list")
+      .then(res => {
+          setTeams(res.data);
+          
+      })
+      .catch (err => {
+          console.log(err);
+          return alert(err.response.data.message)
+    });
+    }, []);
+
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -121,9 +143,6 @@ export default function TeamManagement(){
                                 <StyledTabPanel value={value} index={0} sx={{p : 0}}>
                                     <ul>
                                         <li>
-                                            <TeamCard2  type={"ing"}/>
-                                        </li>
-                                        <li>
                                             <TeamCard2 type={"ing"}/>
                                         </li>
                                         <li>
@@ -159,32 +178,72 @@ export default function TeamManagement(){
                                     <BasicPagination />
                                 </StyledTabPanel>
                                 <StyledTabPanel value={value} index={2} >
-                                    <TeamList>
-                                        <div className="team-name">
-                                            <h2>공모전 1</h2>
-                                            {
-                                                edit ? 
-                                                <FilledBtn text={"팀 생성하기"} handle={handleChange2}></FilledBtn> 
-                                                :
-                                                <div className="btn-wrap">
-                                                    <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
-                                                    <ProduceModal />
+                                    
+
+                                    {teams.map((team) => {
+                                        return (
+                                            <TeamList>
+                                                <div className="team-name">
+                                                    <h2>{team.activityName}</h2>
+                                                    {
+                                                    edit ? 
+                                                    <FilledBtn text={"팀 생성하기"} handle={handleChange2}></FilledBtn> 
+                                                        :
+                                                        <div className="btn-wrap">
+                                                            <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
+                                                            <ProduceModal />
+                                                        </div>
+                                                    }
                                                 </div>
-                                            }
-                                        </div>
-                                        <ul>
-                                            <li>
-                                                <AttendCard edit={edit}/>
-                                            </li>
-                                            <li>
-                                                <AttendCard edit={edit}/>
-                                            </li>
-                                            <li>
-                                                <AttendCard edit={edit}/>
-                                            </li>
-                                        </ul>
-                                    </TeamList>
-                                    <TeamList>
+                                                {team.applicantIntro .filter(applyMember => applyMember.state === "STAND_BY")
+                                                .map((applyMember) => 
+
+                                                    <ul>
+                                                        <li>
+                                                            <AttendCard applyMember={applyMember}/>
+                                                        </li>
+                                            
+                                                    </ul>
+                                        
+                                                )}
+                                            </TeamList>
+                                        )
+                                    })};
+
+                                        {/* {
+                                        teams.map((team) => 
+                                        <TeamList>
+                                                <div className="team-name">
+                                                <h2>{team.activityName}</h2>
+                                                {
+                                                edit ? 
+                                                 <FilledBtn text={"팀 생성하기"} handle={handleChange2}></FilledBtn> 
+                                                    :
+                                                    <div className="btn-wrap">
+                                                        <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
+                                                        <ProduceModal />
+                                                    </div>
+                                                }
+                                            </div>
+                                        {
+                                        team.applicantIntro.map((applyMember) => 
+                                        
+                                            <ul>
+                                                 <li>
+                                                    <AttendCard applyMember={applyMember}/>
+                                                </li>
+                                     
+                                            </ul>
+                                        
+                                        )}
+
+                                            
+                                        </TeamList>
+                                            )
+                                        }
+                                        */}
+                                        
+                                    {/* <TeamList>
                                         <div className="team-name">
                                             <h2>공모전 2</h2>
                                             {
@@ -205,7 +264,7 @@ export default function TeamManagement(){
                                                 <AttendCard edit={edit2}/>
                                             </li>
                                         </ul>
-                                    </TeamList>
+                                    </TeamList> */}
                                 </StyledTabPanel>
                                 </TabWrap>
                             </Content>

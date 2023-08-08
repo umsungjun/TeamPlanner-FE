@@ -8,7 +8,10 @@ import Checkbox from '@mui/material/Checkbox';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function AttendCard(state){
+export default function AttendCard({applyMember}){
+
+    console.log(applyMember);
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -18,7 +21,8 @@ export default function AttendCard(state){
               main: "#FF7300",
             },
          },
-    })
+    });
+
 
     return(
         <>
@@ -26,24 +30,24 @@ export default function AttendCard(state){
                 <AttendCardWrap>
                     <div className="profile-box">
                         <div className="img">
-                            <AccountCircleIcon />
+                        <img src={applyMember.userProfile}></img>
+
                         </div>
-                        <h2>닉네임</h2>
+                        <h2>{applyMember.userNickName.length > 10 ? `${applyMember.userNickName.substring(0, 10)}...` : applyMember.userNickName}</h2>
                     </div>
                     <div className="text-box">
                         <div className="padding">
                             {
-                                !state.edit ?
+                                !applyMember.edit ?
                                 <div className="dp-flex">
-                                    <h3>활동명</h3>
+                                     <h3>참여 메세지</h3>
                                     <StyledCheckbox {...label} defaultChecked size="large"/>
                                 </div>
                                 :
                                 <h3>활동명</h3>
                             }
-                            <h4>모집제목 : 정보통신어쩌구 공모전 실력파 모집합니다.</h4>
                             <p>
-                            안녕하세요 열심히할 자신 있습니다 뽑아주세요 열심히 하겠습니다 제발요 안녕하세요 열심히할 자신 있습니다 뽑아주세요 제발요 안녕하세요 열심히할 자신 있습니다 뽑아주세요 열심히 하겠습니다 제발요 ...(더보기)
+                                {applyMember.content}
                             </p>
                         </div>
                     </div>

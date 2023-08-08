@@ -23,6 +23,7 @@ SwiperCore.use([Pagination, Navigation, Autoplay]);
 
 export default function TeamCard2({type}){
 
+    
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"

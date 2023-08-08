@@ -128,7 +128,7 @@ export default function Nav(){
                                 (
                                     <div>
                                         {/* <AccountCircleIcon src={userInfo.username}/> */}
-                                        <img src={userInfo?.profileImg} height={40}/>
+                                        <Link to="/mypage/profileSetting"><img src={userInfo?.profileImg} height={40}/></Link>
                                         {/* <div>{userInfo?.username}</div> */}
                                         <button onClick={handleLogout}>log out</button>
                                     </div>
