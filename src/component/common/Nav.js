@@ -23,6 +23,9 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import { Link } from "react-router-dom";
 import FilledBtn from "../button/FilledBtn";
 import { AuthContext } from "../../AuthContext";
+import { useRef } from "react";
+import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
+import Notice from "./Notcie";
 
 export default function Nav(){
 
@@ -65,6 +68,19 @@ export default function Nav(){
     const handleClose2 = () => {
       setAnchorEl(null);
     };
+
+     {/*수정 */}
+     const dropdownRef = useRef(null); // Create a reference for dropdown container
+     const [isMenuDropDownOpen, setMenuDropDownOpen] = useState(false);
+   
+     // Function to close dropdown
+     const closeHoverMenu = () => {
+       setMenuDropDownOpen(false);
+     };
+   
+     useOnHoverOutside(dropdownRef, closeHoverMenu); // Call the hook
+     
+ 
 
 
     return(
@@ -126,81 +142,18 @@ export default function Nav(){
                                 
                                 }
                             </ProfileBtn>
-                            <Button
-                                id="basic-button"
-                                aria-controls={open2 ? 'basic-menu' : undefined}
-                                aria-haspopup="true"
-                                aria-expanded={open2 ? 'true' : undefined}
-                                onClick={handleClick2}
-                            >
-                                <NotificationBadge badgeContent={4} color="primary">
-                                    <NotificationsIcon color="action" />
-                                </NotificationBadge>
-                            </Button>
-                            <NotificationMenu
-                                id="basic-menu"
-                                anchorEl={anchorEl}
-                                open={open2}
-                                onClose={handleClose2}
-                                MenuListProps={{
-                                'aria-labelledby': 'basic-button',
-                                }}
-                            >
-                                <div className="close_btn">
-                                    <IconButton onClick={handleClose2}>
-                                        <CloseIcon />
-                                    </IconButton>
-                                </div>
-                                <ul className="notification-list">
-                                    <h3>7월 14일 (금)</h3>
-                                    <Divider />
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                </ul>
-                                <ul className="notification-list">
-                                    <h3>7월 13일 (목)</h3>
-                                    <Divider />
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                </ul>
-
-                            </NotificationMenu>
+                           {/*수정 */}
+                           <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                    <NotificationBadge badgeContent={4} color="primary">
+                                        <NotificationsIcon color="action" />
+                                    </NotificationBadge>
+                                </Button>
+                                {
+                                    isMenuDropDownOpen &&
+                                    <div onMouseLeave={() => setMenuDropDownOpen(false)}>
+                                        <Notice/> 
+                                    </div>
+                                }
                         </div>
                     </div>
                 </PC>
@@ -222,81 +175,18 @@ export default function Nav(){
                                     <MenuBtn onClick={handleClick}>
                                         <MenuIcon />
                                     </MenuBtn>
-                                    <Button
-                                        id="basic-button"
-                                        aria-controls={open2 ? 'basic-menu' : undefined}
-                                        aria-haspopup="true"
-                                        aria-expanded={open2 ? 'true' : undefined}
-                                        onClick={handleClick2}
-                                    >
-                                    <NotificationBadge badgeContent={4} color="primary">
-                                        <NotificationsIcon color="action" />
-                                    </NotificationBadge>
-                                </Button>
-                            <NotificationMenu
-                                id="basic-menu"
-                                anchorEl={anchorEl}
-                                open={open2}
-                                onClose={handleClose2}
-                                MenuListProps={{
-                                'aria-labelledby': 'basic-button',
-                                }}
-                            >
-                                <div className="close_btn">
-                                    <IconButton onClick={handleClose2}>
-                                        <CloseIcon />
-                                    </IconButton>
-                                </div>
-                                <ul className="notification-list">
-                                    <h3>7월 14일 (금)</h3>
-                                    <Divider />
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
+                                    {/*수정 */}
+                                    <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                        <NotificationBadge badgeContent={4} color="primary">
+                                            <NotificationsIcon color="action" />
+                                        </NotificationBadge>
+                                    </Button>
+                                    {
+                                        isMenuDropDownOpen &&
+                                        <div onMouseLeave={() => setMenuDropDownOpen(false)}>
+                                            <Notice/> 
                                         </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                </ul>
-                                <ul className="notification-list">
-                                    <h3>7월 13일 (목)</h3>
-                                    <Divider />
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <div className="img-box">
-                                            <img src="/img/team/sample.png"></img>
-                                        </div>
-                                        <div className="text-box">
-                                            <h4>~~~님께서 <br/>
-                                            ~~공고에 참여신청을 하셨습니다.</h4>
-                                            <p>오전 10시 52분</p>
-                                        </div>
-                                    </li>
-                                </ul>
-
-                            </NotificationMenu>
+                                     }
                                 </div>
                             </div>
                             <div className="search-bar">
@@ -311,17 +201,17 @@ export default function Nav(){
                             </div>
                             <StyledCollapse in={open} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding sx={{mt : 2}}>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/contest" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="공모전" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/externalActivity" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="대외활동" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/club" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="동아리" />
                                         </ListItemButton>

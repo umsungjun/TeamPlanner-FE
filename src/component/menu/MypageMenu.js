@@ -30,44 +30,63 @@ export default function MyPageMenu({select}){
                     <div className="scroll">
                         <MenuWrap>
                             <ListItem disablePadding>
+                                {/*수정*/}
                                 {
                                     select == "계정설정" ?
-                                    <ListItemButton component="a" href="" className="select">
+                                    <ListItemButton component="a" href="/mypage/acountSetting" className="select">
                                         <ListItemText primary="계정 설정" />
                                     </ListItemButton>
                                     :
-                                    <ListItemButton component="a" href="" >
+                                    <ListItemButton component="a" href="/mypage/acountSetting" >
                                         <ListItemText primary="계정 설정" />
                                     </ListItemButton>
                                 }
                             </ListItem>
                             <Divider />
                             <ListItem disablePadding>
+                                  {/*수정*/}
                                 {
                                     select == "프로필관리" ?
-                                    <ListItemButton component="a" href="" className="select">
+                                    <ListItemButton component="a" href="/mypage/profileSetting" className="select">
                                         <ListItemText primary="프로필 관리" />
                                     </ListItemButton>
                                     :
-                                    <ListItemButton component="a" href="" >
+                                    <ListItemButton component="a" href="/mypage/profileSetting" >
                                         <ListItemText primary="프로필 관리" />
                                     </ListItemButton>
                                 }
                             </ListItem>
                             <Divider />
                             <ListItem disablePadding>
+                                  {/*수정*/}
                                 {
                                     select == "팀관리" ?
-                                    <ListItemButton component="a" href="" className="select">
+                                    <ListItemButton component="a" href="/mypage/teamManagement" className="select">
                                         <ListItemText primary="팀 관리" />
                                     </ListItemButton>
                                     :
-                                    <ListItemButton component="a" href="" >
+                                    <ListItemButton component="a" href="/mypage/teamManagement" >
                                         <ListItemText primary="팀 관리" />
                                     </ListItemButton>
                                 }
                             </ListItem>
                             <Divider />
+
+                            {/*  수정 */}
+                            <ListItem disablePadding>
+                                {
+                                    select == "참여신청" ?
+                                    <ListItemButton component="a" href="/mypage/participation" className="select">
+                                        <ListItemText primary="참여신청" />
+                                    </ListItemButton>
+                                    :
+                                    <ListItemButton component="a" href="/mypage/participation" >
+                                        <ListItemText primary="참여신청" />
+                                    </ListItemButton>
+                                }
+                            </ListItem>
+                            <Divider />
+
                             <ListItem disablePadding>
                                 {
                                     select == "고객지원" ?
@@ -119,7 +138,8 @@ const MenuWrap = styled(List)`
         }
     }
     @media ${() => theme.device.mobile3} {
-        width: 380px;
+        /* 수정 */
+        width: 460px;
         overflow-y: scroll;
     }
 `;

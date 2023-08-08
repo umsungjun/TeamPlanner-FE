@@ -4,7 +4,8 @@ import { createTheme, ThemeProvider } from "@mui/material";
 import Button from "@mui/material/Button";
 import theme from "../../style/theme";
 
-export default function SolidBtn({ text, handle }) {
+export default function SolidBtn({ text, handle, disabled }) {
+
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -23,6 +24,7 @@ export default function SolidBtn({ text, handle }) {
           color="primary"
           fullWidth
           onClick={handle}
+          disabled={disabled}
         >
           {text}
         </SolidButton>

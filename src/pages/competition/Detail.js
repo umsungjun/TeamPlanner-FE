@@ -19,6 +19,8 @@ import BasicPagination from "../../component/pagination/Pagination";
 import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
+import KakaoButton from "./kakaoButton";
+import { Opacity } from "@mui/icons-material";
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -59,23 +61,19 @@ export default function Detail() {
   // details
   const [data, setData] = useState([]);
   const [commentData, setCommentData] = useState([]);
-  const [checkFlag, setCheckFlag] = useState(false);
   //comments.length
   let [commentCount, setCommentCount] = useState([]);
+  const [flag, setChangeFlag] = useState(false);
 
   useEffect(() => {
     API.get(`/api/v1/board/${boardId}`).then((res) => {
       setData(res.data[0]);
       setCommentData(res.data[0].comments);
-      setCheckFlag(false);
+      if (Object.keys(res.data[0].comments).length !== 0) {
+        setCommentCount(res.data[0].comments.length);
+      }
     });
-  }, [checkFlag]);
-
-  useEffect(() => {
-    if (Object.keys(data).length !== 0) {
-      setCommentCount(data.comments.length);
-    }
-  }, [data]);
+  }, [flag]); 
 
   const theme = createTheme({
     typography: {
@@ -93,6 +91,18 @@ export default function Detail() {
   const handleChange = (event, newValue) => {
     setValue(newValue);
   };
+
+  const ContentDiv = styled.div`
+    width: 100%;
+
+    div {
+      width: 100%;
+    }
+
+    img {
+      width: 100%;
+    }
+  `
 
   return (
     <>
@@ -116,7 +126,7 @@ export default function Detail() {
                 <li className="detail-list">
                   <div className="dp-flex space-between">
                     <h2>{data.activitiyName}</h2>
-                    <IconWrap type="noComment" />
+                    <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">
@@ -142,7 +152,8 @@ export default function Detail() {
                     <li className="dp-flex space-between">
                       <div className="col dp-flex">
                         <h3>홈페이지</h3>
-                        <p>{data.homepage}</p>
+                        <a href={data.activityUrl} target="_blank">
+                          <p style={{ color: "#FF7300", opacity: "80%", fontWeight: "bold"}}>지원하러 바로가기</p></a>
                       </div>
                       <div className="col dp-flex">
                         <h3>활동혜택</h3>
@@ -179,7 +190,7 @@ export default function Detail() {
                             <img src="/img/icon/sns/kakaostory.png"></img>
                           </IconButton>
                           <IconButton>
-                            <img src="/img/icon/sns/kakao.png"></img>
+                            <KakaoButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
                         </div>
                       </div>
@@ -221,11 +232,12 @@ export default function Detail() {
                         <h2>모집개요</h2>
                       </div>
                       {/* <p>금융권 취업을 희망하는 분들을 위한 삼성생명에서 주관하는 단기 강의입니다. 현재 금융권의 트렌드 및 현직자의 조언을 얻어 취업에 도움되시길 바랍니다.</p> */}
-                      <div
+                      <ContentDiv
                         dangerouslySetInnerHTML={{
                           __html: data.activitiyDetail,
                         }}
-                      ></div>
+                        >
+                      </ContentDiv>
                     </li>
                     {/* <li>
                                             <div className="title dp-flex">
@@ -295,7 +307,7 @@ export default function Detail() {
                   <BasicPagination />
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={2}>
-                  <Comment commentData={commentData} />
+                  <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
                 </StyledTabPanel>
               </TabWrap>
             </Content>
@@ -509,19 +521,28 @@ const TabWrap = styled(Box)`
 `;
 
 const StyledTabPanel = styled(CustomTabPanel)`
-  .dp-end {
-    display: flex;
-    align-items: flex-end;
-    justify-content: flex-end;
-    button {
+.dp-end{
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-end;
+  /*수정*/
+  button{
+      /* width: 15%; */
+  }
+  a{
       width: 15%;
-    }
   }
-  @media ${() => theme.device.mobile} {
-    & > div {
+}
+@media ${() => theme.device.mobile} {
+  &>div{
       padding: 2rem 1rem 1rem 1rem;
-    }
   }
+  .dp-end{
+      a{
+          width: 100%;
+      }
+  }
+}
 `;
 
 const TeamCardWrap = styled(Box)`

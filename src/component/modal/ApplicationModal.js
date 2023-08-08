@@ -31,6 +31,7 @@ export default function ApplicationModal(){
             },
          },
     })
+
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('md'));
 
@@ -42,7 +43,7 @@ export default function ApplicationModal(){
 
     return(
         <>
-            <ThemeProvider theme={theme2}>
+            <ThemeProvider theme={theme}>
                 <ApplicationBtn>
                     <FilledBtn text={"참여신청"} handle={handleOpen}></FilledBtn>
                 </ApplicationBtn>
@@ -134,9 +135,14 @@ const ApplicationModalWrap = styled(Dialog)`
         align-items: center;
         justify-content: space-between;
         margin: 2rem 0;
+        /*수정 */
         button{
             padding:.3em 0;
-            width: 49%;
+            /* width: 49%; */
+        }
+        /*수정 */
+        button:first-of-type{
+            margin-right: 1rem;
         }
     }
     @media ${() => theme.device.mobile} {

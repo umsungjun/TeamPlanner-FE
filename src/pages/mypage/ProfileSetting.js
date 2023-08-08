@@ -455,9 +455,10 @@ const Content = styled(Box)`
             font-weight: bold;
             line-height: 150%;
         }
+        /*수정 */
         button{
-            width: 13%;
-            padding: 5px 0;
+            width: 15%;
+            /* padding: 5px 0; */
         }
     }
     .sub-title{

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import Nav from "../component/common/Nav";
-import { Box } from "@mui/material";
+import { Box , Grid } from "@mui/material";
 import KeywordBtn from "../component/button/KeywordBtn";
 import BasicSelect from "../component/select/Select";
 import CompetitionCard from "../component/card/CompetitionCard";
@@ -11,10 +11,26 @@ import Footer from "../component/common/Footer";
 import theme from "../style/theme";
 import { API } from "../api/api";
 import { useLocation } from "react-router-dom";
+import { contest } from "./category";
+import { externalActivity } from "./category";
+import { club } from "./category";
+
+const Item = styled(Box)(({ theme }) => ({
+  // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+  // ...theme.typography.body2,
+  padding: theme.spacing(1),
+  // textAlign: 'center',
+  // color: theme.palette.text.secondary,
+  // boxShadow : 0
+}));
+
+
 
 export default function Index() {
   //인기 있는 공모전
   const [data, setData] = useState([]);
+  // 활동분야 필터링
+  const[activityField,setActivityField]=useState([]);
   // 마감 직전 공모전
   const [data2, setData2] = useState([]);
   // 10 조회순 , 20 최신순 , 30 좋아요 순
@@ -22,14 +38,19 @@ export default function Index() {
 
   // 현재페이지
   const [currentPage, setCurrentPage] = useState(1);
+
   //전체페이지
   const [totalPages, setTotalPages] = useState(0);
+
+  const [currentChecked, setCurrentChecked] = useState([]);
 
   // console.log("현재페이지", currentPage);
 
   const history = useLocation();
 
   let translatedPath = "";
+
+  console.log(data);
 
   switch (history.pathname) {
     case "/contest":
@@ -54,8 +75,38 @@ export default function Index() {
     translatedPath = translatedPath.slice(1);
   }
 
-  // Define a function to handle the Axios call based on the selected value
-  // Define a function to fetch data based on the selected value
+  useEffect(() => {
+    const result = currentChecked.join('/');
+    setActivityField(result);
+  }, [currentChecked])
+
+  useEffect(() => {
+    let sortParam;
+    
+    switch (selectedSort) {
+      case 10:
+        sortParam = "view,desc";
+        break;
+      case 20:
+        sortParam = "recruitmentPeriod,desc";
+        break;
+      case 30:
+        sortParam = "likeCount,desc";
+        break;
+      default:
+        sortParam = "view,desc";
+        break;
+    }
+
+    API.get(
+      `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=0&size=12&sort=${sortParam}`
+    ).then((res) => {
+      setTotalPages(res.data.totalPages);
+      setCurrentPage(1);
+    })
+  }, [translatedPath,activityField]);
+
+
   const fetchData = async () => {
     try {
       let sortParam = "";
@@ -73,26 +124,19 @@ export default function Index() {
           sortParam = "view,desc";
           break;
       }
-      // console.log("!!", sortParam);
 
-      // const response = await API.get(
-      //   `/api/v1/board?category=${translatedPath}&page=${
-      //     currentPage - 1
-      //   }&size=12&sort=${sortParam}`
-      // );
-      API.get(
-        `/api/v1/board?category=${translatedPath}&page=${
+      const response = await API.get(
+        `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=${
           currentPage - 1
         }&size=12&sort=${sortParam}`
       ).then(response => {
+        console.log(activityField);
         setData(response.data.content || []);
         setTotalPages(response.data.totalPages);
       })
       // .catch(err => {
       //   console.log('err', err)
       // }) 
-
-      
     } catch (error) {
       console.error("Error fetching data:", error);
     }
@@ -101,7 +145,7 @@ export default function Index() {
   // useEffect hook to fetch initial data on component mount and whenever selectedSort changes
   useEffect(() => {
     fetchData();
-  }, [selectedSort, currentPage, translatedPath]);
+  }, [selectedSort, translatedPath, currentPage,activityField]);
 
   const theme = createTheme({
     typography: {
@@ -126,18 +170,17 @@ export default function Index() {
   //   });
   // }, [translatedPath, currentPage]);
 
-  // // 최신공모전
-  // useEffect(() => {
-  //   API.get(
-  //     `/api/v1/board?category=${translatedPath}&page=${
-  //       currentPage - 1
-  //     }&size=6&sort=recruitmentPeriod,desc`
-  //   ).then((res) => {
-  //     setData2(res.data.content);
-  //   });
-  // }, [translatedPath, currentPage]);
+  // 최신공모전
+  useEffect(() => {
+    API.get(
+      `/api/v1/board?category=${translatedPath}&page=${
+        currentPage - 1
+      }&size=12&sort=recruitmentPeriod,desc`
+    ).then((res) => {
+      setData2(res.data.content);
+    });
+  }, [translatedPath, currentPage]);
 
-  // console.log(data);
 
   return (
     <>
@@ -145,24 +188,43 @@ export default function Index() {
         <Nav />
         <Container>
           <PaddingWrap>
-            <div className="scroll">
+          <div className="scroll">
+          {history.pathname === "/contest" && (
               <KeywordWrap>
-                <KeywordBtn text={"기획 아이디어"} />
-                <KeywordBtn text={"광고 · 마케팅"} />
-                <KeywordBtn text={"사진 · 영상 · UCC"} />
-                <KeywordBtn text={"디자인 · 순수미술 · 공예"} />
-                <KeywordBtn text={"네이밍 · 슬로건"} />
-                <KeywordBtn text={"캐릭터 · 만화 · 게임"} />
-                <KeywordBtn text={"건축 건설 인테리어"} />
-                <KeywordBtn text={"과학 공학"} />
-                <KeywordBtn text={"예처능 패션"} />
-                <KeywordBtn text={"전시 페스티벌"} />
-                <KeywordBtn text={"문학 시나리오"} />
-                <KeywordBtn text={"해외"} />
-                <KeywordBtn text={"학술"} />
-                <KeywordBtn text={"창업"} />
-                <KeywordBtn text={"기타"} />
+                {contest.map((item, key) => {
+                  return (
+                    <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+                  )
+                })}
               </KeywordWrap>
+            
+            )}
+            </div>
+            <div className="scroll">
+            {history.pathname === "/externalActivity" && (
+            
+            <KeywordWrap>
+            {externalActivity.map((item, key) => {
+              return (
+                <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+              )
+            })}
+          </KeywordWrap>
+            
+            )}
+            </div>
+            <div className="scroll">
+            {history.pathname === "/club" && (
+            
+            <KeywordWrap>
+            {club.map((item, key) => {
+              return (
+                <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+              )
+            })}
+          </KeywordWrap>
+            
+            )}
             </div>
             <CompetitionList>
               <ul className="title">
@@ -171,31 +233,41 @@ export default function Index() {
                   <p>인기있는 {translatedPath}을 카테고리 별로 확인 하세요</p>
                 </li>
                 <li>
+                {history.pathname !== "/" && (
                   <BasicSelect onChange={setSelectedSort} />
+                )}
                 </li>
               </ul>
               <div className="competition-list">
-                {data.map((item) => {
+              <Grid container spacing={1}>
+                {data.length > 0 && data.map((item) => {
                   let title;
                   if (item.activitiyName.length >= 10) {
                     title = item.activitiyName.slice(0, 10) + "...";
                   } else {
                     title = item.activitiyName;
                   }
+                  {/*수정*/}
                   return (
-                    <Card>
-                      <CompetitionCard
-                        id={item.boardId}
-                        activityImg={item.activityImg}
-                        activityName={title}
-                        likeCount={item.likeCount}
-                        viewCount={item.viewCount}
-                        deadlineInDays={item.deadlineInDays}
-                        commentCount={item.commentCount}
-                      />
-                    </Card>
+                     
+                           
+                        <Card item xs={6} md={2}>
+                        <Item><CompetitionCard  
+                            id={item.boardId}
+                            activityImg={item.activityImg}
+                            activityName={title}
+                            likeCount={item.likeCount}
+                            viewCount={item.viewCount}
+                            deadlineInDays={item.deadlineInDays}
+                            commentCount={item.commentCount}/>
+                        </Item>
+                          
+                        </Card>     
+                    
+                    
                   );
                 })}
+                  </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
                             </Card>
@@ -216,7 +288,8 @@ export default function Index() {
                             </Card> */}
               </div>
             </CompetitionList>
-            {/* <CompetitionList className="mt-5">
+            {history.pathname === "/" && (
+            <CompetitionList className="mt-5">
               <ul className="title">
                 <li>
                   <h2>최신 {translatedPath}</h2>
@@ -224,6 +297,7 @@ export default function Index() {
                 </li>
               </ul>
               <div className="competition-list">
+              <Grid container spacing={1}>
                 {data2.map((item) => {
                   let title;
                   if (item.activitiyName.length >= 10) {
@@ -232,24 +306,29 @@ export default function Index() {
                     title = item.activitiyName;
                   }
                   return (
-                    <Card>
-                      <CompetitionCard
+                    
+                   
+                           
+                    <Card item xs={6} md={2}>
+                      <Item><CompetitionCard  
                         id={item.boardId}
                         activityImg={item.activityImg}
                         activityName={title}
                         likeCount={item.likeCount}
                         viewCount={item.viewCount}
                         deadlineInDays={item.deadlineInDays}
-                        commentCount={item.commentCount}
-                      />
-                    </Card>
+                        commentCount={item.commentCount}/>
+                      </Item>
+                      
+                    </Card>     
+                  
                   );
                 })}
-
+                </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
-                            </Card> */}
-            {/* <Card>
+                            </Card>
+                <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card>
                             <Card>
@@ -264,13 +343,16 @@ export default function Index() {
                             <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card> */}
-            {/* </div>
-            </CompetitionList> */}{" "}
-            <BasicPagination
-              totalPages={totalPages}
-              currentPage={currentPage}
-              onChange={setCurrentPage}
-            />
+              </div>
+            </CompetitionList>
+            )}
+             {history.pathname !== "/" && (
+              <BasicPagination
+                totalPages={totalPages}
+                currentPage={currentPage}
+                onChange={(event) => setCurrentPage(event)}
+              />
+             )}
           </PaddingWrap>
         </Container>
         <Footer />
@@ -280,19 +362,19 @@ export default function Index() {
 }
 
 const Container = styled(Box)`
-  width: 100%;
-  margin-top: 13rem;
-  @media ${() => theme.device.tablet} {
-    margin-top: 16rem;
-    .scroll {
-      overflow-x: scroll;
-      -ms-overflow-style: none; /* IE and Edge */
-      scrollbar-width: none; /* Firefox */
+    width: 100%;
+    margin-top: 13rem;
+    @media ${() => theme.device.tablet} {
+        margin-top: 16rem;
+        .scroll{
+            overflow-x: scroll;
+            -ms-overflow-style: none; /* IE and Edge */
+            scrollbar-width: none; /* Firefox */
+        }
+        .scroll::-webkit-scrollbar {
+            display: none; /* Chrome, Safari, Opera*/
+        }
     }
-    .scroll::-webkit-scrollbar {
-      display: none; /* Chrome, Safari, Opera*/
-    }
-  }
 `;
 
 const PaddingWrap = styled(Box)`
@@ -312,20 +394,21 @@ const KeywordWrap = styled(Box)`
   align-items: center;
   flex-wrap: wrap;
   margin-bottom: 3rem;
-  input[type="radio"] {
-    display: none;
+  /*수정 */
+  /* input[type="radio"]{
+      display: none;
+  } */
+  label{
+      margin: 0 1rem 1.5rem 0;
   }
-  label {
-    margin: 0 1rem 1.5rem 0;
-  }
-  input[type="radio"]:checked + label {
-    background-color: #ff7300;
-    color: #fff;
-  }
+  /* input[type="radio"]:checked+label {
+      background-color: #FF7300;
+      color: #fff;
+  }    */
   @media ${() => theme.device.tablet} {
-    flex-wrap: nowrap;
-    width: 100%;
-    margin-bottom: 1rem;
+      flex-wrap: nowrap;
+      width: 100%;
+      margin-bottom: 1rem;
   }
 `;
 
@@ -369,15 +452,6 @@ const CompetitionList = styled(Box)`
   }
 `;
 
-const Card = styled(Box)`
-  width: 16%;
-
-  @media ${() => theme.device.tablet} {
-    width: 32%;
-    margin-bottom: 2rem;
-  }
-
-  @media ${() => theme.device.mobile2} {
-    width: 49%;
-  }
+{/*수정*/}
+const Card = styled(Grid)`
 `;

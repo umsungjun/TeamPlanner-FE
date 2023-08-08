@@ -1,14 +1,12 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { Button, createTheme, IconButton, ThemeProvider } from "@mui/material";
+import { Button, createTheme, IconButton, ThemeProvider ,Avatar } from "@mui/material";
 import Box from "@mui/material/Box";
 import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import TextInput from "./TextInput";
 import theme from "../../style/theme";
-import axios from "axios";
 
 export default function CommentBox({ commentData, changeFlag, flag }) {
-  console.log(commentData);
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -19,7 +17,6 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
       },
     },
   });
-
   const [open, setOpen] = React.useState(false);
 
   const handleClick = () => {
@@ -33,7 +30,8 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           <ul className="comment">
             <li>
               <IconButton sx={{ p: 0 }}>
-                <AccountCircleIcon />
+                <Avatar src={commentData.profileImage} alt="Profile" />
+                {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">
                 <h3>{commentData.username}</h3>
@@ -45,7 +43,11 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           </ul>
           {open ? (
             <div className="add-text">
-              <TextInput parentId={commentData.commentId} />
+              <TextInput
+                parentId={commentData.commentId}
+                changeFlag={changeFlag}
+                flag={flag}
+              />
             </div>
           ) : (
             <></>

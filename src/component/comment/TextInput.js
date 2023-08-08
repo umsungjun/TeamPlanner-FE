@@ -11,9 +11,7 @@ import { useParams } from "react-router-dom";
 export default function TextInput({ changeFlag, flag, parentId }) {
   const { boardId } = useParams();
   const [content, setContent] = useState("");
-  const [isSubmitted, setIsSubmitted] = useState(false); // Track submission status
-
-  console.log(parentId);
+  const [isSubmmited, setIsSubmited] = useState(false);
 
   const muiTheme = createTheme({
     typography: {
@@ -26,48 +24,73 @@ export default function TextInput({ changeFlag, flag, parentId }) {
     },
   });
 
-  useEffect(() => {
-    if (isSubmitted) {
-      const data = {
+
+  const EnrollChildComment = () => {
+
+
+    const userInfoJSON = localStorage.getItem("userInfo");
+    const userInfoObject = JSON.parse(userInfoJSON);
+
+    // if(!userInfoObject){
+    //     alert("로그인 후 이용해주세요");
+    //     setIsSubmited(false);
+    //     return;
+    // }
+    const username = userInfoObject.username;
+    
+    
+    
+
+    if (parentId) {
+      // 대댓글일 경우 해당 로직을 진행합니다.
+      API.post(`/api/v1/board/${boardId}/comment/${parentId}/comment`, {
+        parentCommentId: parentId,
         boardId: boardId,
         content: content,
-        memberId: "localMember",
+        isConfidential: false,
+      }).then((res) => {
+        setContent(""); // Reset the content state to clear the input field
+        changeFlag(!flag);
+        setIsSubmited(false);
+        // console.log(res);
+      });
+    } else {
+      // 일반 댓글일 경우 해당 로직을 진행합니다.
+      API.post(`/api/v1/board/${boardId}/comment`, {
+        boardId: boardId,
+        content: content,
+        memberId: username,
         isConfidential: "false",
-      };
-      API.post(`/api/v1/board/${boardId}/comment`, data)
+        }
+      )
         .then((response) => {
-          // Handle the response (optional)
-          console.log("Reply created:", response.data);
-          setIsSubmitted(false); // Reset the state after submitting
           setContent(""); // Reset the content state to clear the input field
+          changeFlag(!flag);
+          setIsSubmited(false);
         })
         .catch((error) => {
           // Handle errors (optional)
-          console.error("Error creating reply:", error);
+          // console.error("Error creating reply:", error);
         });
     }
-  }, [isSubmitted, boardId, content]);
-
-  const EnrollChildComment = () => {
-    API.post(`/api/v1/board/${boardId}/comment/${parentId}/comment`, {
-      parentCommentId: parentId,
-      boardId: boardId,
-      content: content,
-      isConfidential: false,
-    }).then((res) => {
-      console.log(res);
-    });
   };
 
+  /** 댓글 창의 입력 버튼을 눌렀을 때의 함수입니다. */
   const handleClick = () => {
-    if (parentId) {
+    if (content.length > 0) {
+      setIsSubmited(true);
       EnrollChildComment();
     } else {
-      changeFlag(!flag);
-      setIsSubmitted(true); // This will trigger the useEffect to execute after state update
+      alert("내용을 입력해주세요!");
     }
   };
-  console.log(content);
+
+  /** 엔터 키 눌렀을 때의 함수입니다. */
+  const handleKeyPress = (event) => {
+    if (event.key === "Enter") {
+      handleClick();
+    }
+  };
 
   return (
     <>
@@ -78,10 +101,11 @@ export default function TextInput({ changeFlag, flag, parentId }) {
             variant="outlined"
             multiline
             maxRows={3}
+            onKeyPress={handleKeyPress} 
             onChange={(event) => setContent(event.target.value)}
             value={content} // Add value prop to the TextField
           />
-          <SolidBtn text={"입력"} handle={handleClick} />
+          <SolidBtn text={!isSubmmited ? "입력" : "등록 중.."} handle={handleClick} disabled={isSubmmited}/>
         </TextInputWrap>
       </ThemeProvider>
     </>

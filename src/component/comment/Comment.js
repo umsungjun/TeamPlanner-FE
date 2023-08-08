@@ -1,9 +1,9 @@
-import React, { useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import styled from "@emotion/styled";
 import { Button, createTheme, IconButton, ThemeProvider } from "@mui/material";
 import Box from "@mui/material/Box";
 import theme from "../../style/theme";
-
+import { API } from "../../api/api";
 import Accordion from "@mui/material/Accordion";
 import AccordionSummary from "@mui/material/AccordionSummary";
 import AccordionDetails from "@mui/material/AccordionDetails";
@@ -12,8 +12,16 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import CommentBox from "./CommentBox";
 import TextInput from "./TextInput";
 import BasicPagination from "../pagination/Pagination";
+import { useParams } from "react-router-dom";
 
 export default function Comment({ commentData, changeFlag, flag }) {
+  //대댓글 데이터
+
+  const [childCommentData, setChildCommentData] = useState([]);
+  const [commentId, setCommentId] = useState([]);
+  const { boardId } = useParams();
+
+
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -25,6 +33,30 @@ export default function Comment({ commentData, changeFlag, flag }) {
     },
   });
 
+  // const handleClick = (commentId) => {
+  //   // commentId 상태를 업데이트합니다.
+  //   alert(commentId);
+  //   if (commentId) {
+  //     API.get(`/api/v1/board/${boardId}/comment/${commentId}`)
+  //       .then((res) => {
+  //         setChildCommentData(res.data);
+  //       })
+  //       .catch((error) => {
+  //         console.error(error);
+  //       });
+  //   }
+  // };
+
+  // const handleClick = (commentId) => {
+  //   console.log(commentId, "!!");
+  //   useEffect(() => {
+  //     API.get(`/api/v1/board/${boardId}/comment/${commentId}`).then((res) => {
+  //       console.log(res);
+  //       // setChildCommentData(res.data.content);
+  //     });
+  //   }, []);
+  // };
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -33,27 +65,31 @@ export default function Comment({ commentData, changeFlag, flag }) {
           <TextInput changeFlag={changeFlag} flag={flag} />
           <div className="comment-list">
             {commentData.map((commentItem) => {
-              console.log("댓글:", commentItem);
               return (
                 <CommentBoxWrap>
                   <CommentBox
                     commentData={commentItem}
-                    // changeFlag={changeFlag}
-                    // flag={flag}
+                    changeFlag={changeFlag}
+                    flag={flag}
                   />
-                  <AddComment>
+                  <AddComment> 
                     <StyledAccordionSummary
                       expandIcon={<ExpandMoreIcon />}
                       aria-controls="panel1a-content"
                       id="panel1a-header"
                     >
                       <Typography>
-                        답글 <span>2개</span>
+                          답글 <span>{commentItem.commentCount ? commentItem.commentCount : 0}개</span>
                       </Typography>
                     </StyledAccordionSummary>
                     <StyledAccordionDetails>
-                      <CommentBox commentData={commentItem} />
-                      <CommentBox commentData={commentItem} />
+                      
+                      {commentItem.childCommentList.map((childCommentData) => {
+                        
+                        return <CommentBox commentData={childCommentData} changeFlag={changeFlag} flag={flag} />;
+                      })}
+                      {/* <CommentBox commentData={childCommentData} />
+                      <CommentBox commentData={childCommentData} /> */}
                     </StyledAccordionDetails>
                   </AddComment>
                 </CommentBoxWrap>
