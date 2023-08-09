@@ -31,6 +31,7 @@ export default function TeamDetail({done}){
     })
     const [commentData, setCommentData] = useState([]);
     const [flag, setChangeFlag] = useState(false);
+    const [commentCount, setCommentCount] = useState(0)
     const [data, setData] = useState({
         commentList: []
     });
@@ -62,6 +63,7 @@ export default function TeamDetail({done}){
             // console.log()
             
             const tmpList = resp.data.commentList;
+            setCommentCount(tmpList.length);
             let parents = tmpList.filter(c => c.parentCommentId === null);
             const childs = tmpList.filter(c => c.parentCommentId !== null);
 
@@ -106,7 +108,7 @@ export default function TeamDetail({done}){
                                     <IconButton className="prev-btn"><KeyboardArrowLeftIcon/></IconButton>
                                     <div className="title">
                                         <h1>{boardActivityName}</h1>
-                                        <IconWrap viewCount={viewCount} likeCount={likeCount} commentCount={commentList.length}/>
+                                        <IconWrap viewCount={viewCount} likeCount={likeCount} commentCount={commentCount}/>
                                     </div>
                                     <ul className="team-info">
                                         <li className="info-wrap">

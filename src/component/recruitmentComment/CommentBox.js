@@ -45,7 +45,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           {open ? (
             <div className="add-text">
               <TextInput
-                parentId={commentData.id}
+                parentId={commentData.parentCommentId ? commentData.parentCommentId : commentData.id}
                 changeFlag={changeFlag}
                 flag={flag}
               />
