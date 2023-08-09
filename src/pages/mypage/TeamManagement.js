@@ -23,6 +23,8 @@ import { API } from "../../api/api";
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
 
+    
+
 
     
   
@@ -61,6 +63,9 @@ function CustomTabPanel(props) {
 export default function TeamManagement(){
 
     const [teams, setTeams] = useState([]); // Initialize as an empty array
+    const [selectedMembers,setSelectedMembers] =useState([]);
+
+    console.log(selectedMembers);
 
 
     useEffect(() => {
@@ -185,13 +190,14 @@ export default function TeamManagement(){
                                             <TeamList>
                                                 <div className="team-name">
                                                     <h2>{team.activityName}</h2>
+
                                                     {
                                                     edit ? 
                                                     <FilledBtn text={"팀 생성하기"} handle={handleChange2}></FilledBtn> 
                                                         :
                                                         <div className="btn-wrap">
                                                             <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
-                                                            <ProduceModal />
+                                                            <ProduceModal selectedMember={selectedMembers} recruitmentId={team.recruitmentId} />
                                                         </div>
                                                     }
                                                 </div>
@@ -200,7 +206,7 @@ export default function TeamManagement(){
 
                                                     <ul>
                                                         <li>
-                                                            <AttendCard applyMember={applyMember}/>
+                                                            <AttendCard applyMember={applyMember} selectedMembers={selectedMembers} setSelectedMembers={setSelectedMembers}/>
                                                         </li>
                                             
                                                     </ul>

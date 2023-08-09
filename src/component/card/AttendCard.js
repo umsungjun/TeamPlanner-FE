@@ -8,9 +8,18 @@ import Checkbox from '@mui/material/Checkbox';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function AttendCard({applyMember}){
+export default function AttendCard({applyMember, selectedMembers, setSelectedMembers}){
 
-    console.log(applyMember);
+    const handleCheckboxChange = (event) => {
+        if (event.target.checked) {
+          setSelectedMembers((prevSelected) => [...prevSelected, applyMember.memberId]);
+        } else {
+          setSelectedMembers((prevSelected) =>
+            prevSelected.filter((memberId) => memberId !== applyMember.memberId)
+          );
+        }
+      };
+
 
     const theme = createTheme({
         typography:{
@@ -41,7 +50,8 @@ export default function AttendCard({applyMember}){
                                 !applyMember.edit ?
                                 <div className="dp-flex">
                                      <h3>참여 메세지</h3>
-                                    <StyledCheckbox {...label} defaultChecked size="large"/>
+                                    <StyledCheckbox {...label} defaultChecked size="large"  checked={selectedMembers.includes(applyMember.memberId)}
+                                        onChange={handleCheckboxChange}/>
                                 </div>
                                 :
                                 <h3>활동명</h3>
