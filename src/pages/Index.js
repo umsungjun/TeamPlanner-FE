@@ -16,6 +16,9 @@ import { externalActivity } from "./category";
 import { club } from "./category";
 
 const Item = styled(Box)(({ theme }) => ({
+
+
+
   // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   // ...theme.typography.body2,
   padding: theme.spacing(1),
@@ -44,13 +47,9 @@ export default function Index() {
 
   const [currentChecked, setCurrentChecked] = useState([]);
 
-  // console.log("현재페이지", currentPage);
-
   const history = useLocation();
 
   let translatedPath = "";
-
-  console.log(data);
 
   switch (history.pathname) {
     case "/contest":
@@ -78,6 +77,7 @@ export default function Index() {
   useEffect(() => {
     const result = currentChecked.join('/');
     setActivityField(result);
+    
   }, [currentChecked])
 
   useEffect(() => {
@@ -102,10 +102,8 @@ export default function Index() {
       `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=0&size=12&sort=${sortParam}`
     ).then((res) => {
       setTotalPages(res.data.totalPages);
-      setCurrentPage(1);
     })
-  }, [translatedPath,activityField]);
-
+  }, [activityField]);
 
   const fetchData = async () => {
     try {
@@ -130,7 +128,6 @@ export default function Index() {
           currentPage - 1
         }&size=12&sort=${sortParam}`
       ).then(response => {
-        console.log(activityField);
         setData(response.data.content || []);
         setTotalPages(response.data.totalPages);
       })
@@ -145,7 +142,7 @@ export default function Index() {
   // useEffect hook to fetch initial data on component mount and whenever selectedSort changes
   useEffect(() => {
     fetchData();
-  }, [selectedSort, translatedPath, currentPage,activityField]);
+  }, [selectedSort, translatedPath, currentPage, activityField]);
 
   const theme = createTheme({
     typography: {
@@ -181,6 +178,11 @@ export default function Index() {
     });
   }, [translatedPath, currentPage]);
 
+  useEffect(() => {
+    setActivityField([]);
+    setCurrentPage(1);
+  }, [translatedPath]);
+
 
   return (
     <>
@@ -193,7 +195,7 @@ export default function Index() {
               <KeywordWrap>
                 {contest.map((item, key) => {
                   return (
-                    <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+                    <KeywordBtn key={key} text={item} translatedPath={ translatedPath} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
                   )
                 })}
               </KeywordWrap>
@@ -242,8 +244,8 @@ export default function Index() {
               <Grid container spacing={1}>
                 {data.length > 0 && data.map((item) => {
                   let title;
-                  if (item.activitiyName.length >= 10) {
-                    title = item.activitiyName.slice(0, 10) + "...";
+                  if (item.activitiyName.length >= 8) {
+                    title = item.activitiyName.slice(0, 8) + "...";
                   } else {
                     title = item.activitiyName;
                   }
@@ -300,8 +302,8 @@ export default function Index() {
               <Grid container spacing={1}>
                 {data2.map((item) => {
                   let title;
-                  if (item.activitiyName.length >= 10) {
-                    title = item.activitiyName.slice(0, 10) + "...";
+                  if (item.activitiyName.length >= 8) {
+                    title = item.activitiyName.slice(0, 8) + "...";
                   } else {
                     title = item.activitiyName;
                   }

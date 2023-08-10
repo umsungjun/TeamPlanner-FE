@@ -62,7 +62,8 @@ function CustomTabPanel(props) {
 
 export default function TeamManagement(){
 
-    const [teams, setTeams] = useState([]); // Initialize as an empty array
+    const [teams,setTeams] = useState([]);
+    const [applicant, setApplicant] = useState([]); 
     const [selectedMembers,setSelectedMembers] =useState([]);
 
     console.log(selectedMembers);
@@ -71,7 +72,7 @@ export default function TeamManagement(){
     useEffect(() => {
       API.get("/api/v1/member/applicant-list")
       .then(res => {
-          setTeams(res.data);
+        setApplicant(res.data);
           
       })
       .catch (err => {
@@ -79,6 +80,18 @@ export default function TeamManagement(){
           return alert(err.response.data.message)
     });
     }, []);
+
+    useEffect(() => {
+        API.get("/api/v1/team/my-team")
+        .then(res => {
+            setTeams(res.data);
+            
+        })
+        .catch (err => {
+            console.log(err);
+            return alert(err.response.data.message)
+      });
+      }, []);
 
 
     const theme = createTheme({
@@ -147,7 +160,17 @@ export default function TeamManagement(){
                                 </Box>
                                 <StyledTabPanel value={value} index={0} sx={{p : 0}}>
                                     <ul>
-                                        <li>
+
+                                    {teams.map((team) => {
+                                        return (
+                                            <li>
+                                                <TeamCard2 type={team}/>
+                                            </li>
+                                        )
+                                    })};
+
+                                       
+                                        {/* <li>
                                             <TeamCard2 type={"ing"}/>
                                         </li>
                                         <li>
@@ -155,10 +178,7 @@ export default function TeamManagement(){
                                         </li>
                                         <li>
                                             <TeamCard2 type={"ing"}/>
-                                        </li>
-                                        <li>
-                                            <TeamCard2 type={"ing"}/>
-                                        </li>
+                                        </li> */}
                                     </ul>
                                     <BasicPagination />
                                 </StyledTabPanel>
@@ -185,11 +205,11 @@ export default function TeamManagement(){
                                 <StyledTabPanel value={value} index={2} >
                                     
 
-                                    {teams.map((team) => {
+                                    {applicant.map((applicantMap) => {
                                         return (
                                             <TeamList>
                                                 <div className="team-name">
-                                                    <h2>{team.activityName}</h2>
+                                                    <h2>{applicantMap.activityName}</h2>
 
                                                     {
                                                     edit ? 
@@ -197,11 +217,11 @@ export default function TeamManagement(){
                                                         :
                                                         <div className="btn-wrap">
                                                             <FilledBtn text={"취소"} handle={handleChange2} color={"gray"}></FilledBtn>
-                                                            <ProduceModal selectedMember={selectedMembers} recruitmentId={team.recruitmentId} />
+                                                            <ProduceModal selectedMember={selectedMembers} recruitmentId={applicantMap.recruitmentId} />
                                                         </div>
                                                     }
                                                 </div>
-                                                {team.applicantIntro .filter(applyMember => applyMember.state === "STAND_BY")
+                                                {applicantMap.applicantIntro .filter(applyMember => applyMember.state === "STAND_BY")
                                                 .map((applyMember) => 
 
                                                     <ul>

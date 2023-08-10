@@ -55,18 +55,18 @@ export default function TeamCard2({type}){
                         <ul className="name">
                             <li>
                                 <AccountCircleIcon/>
-                                <h3>유저</h3>
+                                <h3>{type.teamLeader}</h3>
                             </li>
                             <li>
                                 {
-                                    type == "ing" ?
-                                    <h4 className="ing">참여중</h4>
+                                    new Date(type.endDate) > new Date() ?
+                                    <h4 className="ing">진행 중</h4>
                                     :
                                     <h4>마감</h4>
                                 }
                             </li>
                         </ul>
-                        <h2>공모전</h2>
+                        <h2> 활동명 {type.activityName}</h2>
                         <p>2023.08.21 ~ 2023.08.26</p>
                     </div>
                     {/**수정 */}

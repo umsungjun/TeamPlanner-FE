@@ -22,7 +22,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { API } from "../../api/api";
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function ProduceModal({selectedMember,recruitmentId}){
+export default function     ProduceModal({selectedMember,recruitmentId}){
 
 
       
@@ -45,26 +45,13 @@ export default function ProduceModal({selectedMember,recruitmentId}){
         const formatDateToString = (date) => {
             return date.format("YYYY-MM-DD HH:mm:ss");
           };
-
-        setInputs({
-          ...inputs,
-          [name]: formatDateToString(date),
-        });
+        const updatedInputs = {
+            ...inputs,
+            [name]: formatDateToString(date), // 해당 name에 따라 변환된 날짜 값을 업데이트
+        };
+        
+        setInputs(updatedInputs);
       };
-
-
-
-    // localhost:8080/api/v1/team
-
-//   "selectedUserIds": [104],
-//   "recruitId": 2,
-//   "teamName": "삼백사점",
-//   "maxTeamSize": 5,
-//   "startDate": "2023-07-18 21:46:50",
-//   "endDate": "2023-08-18 21:46:50"
-
-
-
 
       const handleCreate = () => {
         console.log({...inputs})
@@ -106,7 +93,18 @@ export default function ProduceModal({selectedMember,recruitmentId}){
 
     const [openModal, setOpenModal] = React.useState(false);
     const handleOpen = () => setOpenModal(true);
-    const handleClose = () => setOpenModal(false);
+    const handleClose = () => {
+     
+        setInputs({
+            selectedUserIds: selectedMember,
+            recruitId: recruitmentId,
+            teamName: "",
+            startDate: "",
+            endDate: "",
+            maxTeamSize: "",
+        });
+        setOpenModal(false);   
+    }
 
     return(
         <>
