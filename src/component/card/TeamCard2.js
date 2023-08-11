@@ -10,7 +10,7 @@ import MenuItem from '@mui/material/MenuItem';
 import AssessmentModal from "../modal/AssessmentModal";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
-
+import moment from "moment"; // Moment.js 라이브러리
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
 import SwiperCore, { Pagination, Navigation, Autoplay } from "swiper";
@@ -23,6 +23,8 @@ SwiperCore.use([Pagination, Navigation, Autoplay]);
 
 export default function TeamCard2({type}){
 
+    
+    
     
     const theme = createTheme({
         typography:{
@@ -44,7 +46,6 @@ export default function TeamCard2({type}){
       setAnchorEl(null);
     };
 
-
     return(
         <>
           <ThemeProvider theme={theme}>
@@ -53,21 +54,22 @@ export default function TeamCard2({type}){
                 <div className="padding-wrap">
                     <div className="info-text">
                         <ul className="name">
-                            <li>
-                                <AccountCircleIcon/>
-                                <h3>{type.teamLeader}</h3>
-                            </li>
-                            <li>
-                                {
-                                    new Date(type.endDate) > new Date() ?
-                                    <h4 className="ing">진행 중</h4>
-                                    :
-                                    <h4>마감</h4>
-                                }
-                            </li>
-                        </ul>
-                        <h2> 활동명 {type.activityName}</h2>
-                        <p>2023.08.21 ~ 2023.08.26</p>
+                        <li>
+                                    {/* <AccountCircleIcon color="black"/> */}
+                                    <img src={type.leaderProfileImage} width="30rem" height="30rem" style={{borderRadius:"50px", marginRight : "0.5rem"}}></img>
+                                    <h3>팀장 : {type.teamLeader}</h3>
+                                </li>
+                                <li>
+                                    {
+                                        new Date(type.endDate) > new Date() ?
+                                        <h4 className="ing">진행 중</h4>
+                                        :
+                                        <h4>마감</h4>
+                                    }
+                                </li>
+                            </ul>
+                            <h2>활동명 : {type.activityName}</h2>
+                            <p>{moment(type.startDate).format("YYYY-MM-DD")} ~ {moment(type.endDate).format("YYYY-MM-DD")}</p>
                     </div>
                     {/**수정 */}
                     <div className="profile-img">
@@ -103,7 +105,24 @@ export default function TeamCard2({type}){
                                 },
                             }}
                             >
-                        <SwiperSlide>
+
+                            {type.memberInfos.map((member) => (
+                            
+                            <SwiperSlide>
+                            <div className="img-box"
+                                key={member.memberId}
+                                aria-controls={open ? 'basic-menu' : undefined}
+                                aria-haspopup="true"
+                                aria-expanded={open ? 'true' : undefined}
+                                onClick={handleClick}
+                            >
+                                 <img src={member.profileImage} alt={`Profile ${member.memberId + 1}`} />
+                            </div>
+                            </SwiperSlide>
+                        
+                        
+                            ))}
+                        {/* <SwiperSlide>
                             <div className="img-box"
                                 aria-controls={open ? 'basic-menu' : undefined}
                                 aria-haspopup="true"
@@ -182,7 +201,7 @@ export default function TeamCard2({type}){
                         >
                             <img src="/img/card/sample3.png"/>
                         </div>
-                        </SwiperSlide>
+                        </SwiperSlide> */}
                         </Swiper>
                     </div>
                 </div>

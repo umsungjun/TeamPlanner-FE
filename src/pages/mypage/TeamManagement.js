@@ -18,6 +18,7 @@ import BasicPagination from "../../component/pagination/Pagination";
 import AttendCard from "../../component/card/AttendCard";
 import ProduceModal from "../../component/modal/ProduceModal";
 import { API } from "../../api/api";
+import TeamCard2Less from "../../component/card/TeamCard2Less";
 
 
 function CustomTabPanel(props) {
@@ -65,8 +66,6 @@ export default function TeamManagement(){
     const [teams,setTeams] = useState([]);
     const [applicant, setApplicant] = useState([]); 
     const [selectedMembers,setSelectedMembers] =useState([]);
-
-    console.log(selectedMembers);
 
 
     useEffect(() => {
@@ -162,11 +161,22 @@ export default function TeamManagement(){
                                     <ul>
 
                                     {teams.map((team) => {
-                                        return (
-                                            <li>
-                                                <TeamCard2 type={team}/>
-                                            </li>
-                                        )
+                                        if(new Date(team.endDate) >= new Date()){
+                                                
+                                            if(team.memberInfos.length >=5){
+                                                return (
+                                                    <li>
+                                                        <TeamCard2 type={team}/>
+                                                    </li>
+                                                )
+                                            }else{
+                                                return (
+                                                    <li>
+                                                        <TeamCard2Less type={team} />
+                                                    </li>
+                                                )
+                                            }
+                                        }
                                     })};
 
                                        
@@ -184,21 +194,30 @@ export default function TeamManagement(){
                                 </StyledTabPanel>
                                 <StyledTabPanel value={value} index={1} >
                                     <ul>
-                                        <li>
-                                            <TeamCard2 />
-                                        </li>
-                                        <li>
-                                            <TeamCard2 />
-                                        </li>
-                                        <li>
-                                            <TeamCard2 />
-                                        </li>
-                                        <li>
-                                            <TeamCard2 />
-                                        </li>
-                                        <li>
-                                            <TeamCard2 />
-                                        </li>
+                                    {teams.map((team) => {
+
+            
+
+                                    if(new Date(team.endDate) < new Date()){
+                                        if(team.memberInfos.length >=5){
+                                            return (
+                                                <li>
+                                                    <TeamCard2 type={team}/>
+                                                </li>
+                                            )
+                                        }
+                                        else{
+                                            return (
+                                                <li>
+                                                    <TeamCard2Less type={team} />
+                                                </li>
+                                            )
+                                        }
+                                    }
+                                        
+                                        
+                                    })};
+
                                     </ul>
                                     <BasicPagination />
                                 </StyledTabPanel>
@@ -228,14 +247,12 @@ export default function TeamManagement(){
                                                         <li>
                                                             <AttendCard applyMember={applyMember} selectedMembers={selectedMembers} setSelectedMembers={setSelectedMembers}/>
                                                         </li>
-                                            
                                                     </ul>
                                         
                                                 )}
                                             </TeamList>
                                         )
                                     })};
-
                                         {/* {
                                         teams.map((team) => 
                                         <TeamList>
