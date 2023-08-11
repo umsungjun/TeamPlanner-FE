@@ -177,15 +177,18 @@ export default function Nav(){
                                         <MenuIcon />
                                     </MenuBtn>
                                     {/*수정 */}
-                                    <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                    {/*0809 수정 */}
+                                    <Button onClick={() => setMenuDropDownOpen(!isMenuDropDownOpen)}>
                                         <NotificationBadge badgeContent={4} color="primary">
                                             <NotificationsIcon color="action" />
                                         </NotificationBadge>
                                     </Button>
+                                    {/*0809 수정 */}
                                     {
                                         isMenuDropDownOpen &&
-                                        <div onMouseLeave={() => setMenuDropDownOpen(false)}>
-                                            <Notice/> 
+                                        <div onClick={() => setMenuDropDownOpen(false)}>
+                                            {/*0808 수정 */}
+                                            <Notice handle={setMenuDropDownOpen}/> 
                                         </div>
                                      }
                                 </div>
