@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from "react";
 import styled from "@emotion/styled";
 import theme from "../../style/theme";
-import {createTheme,Divider,Icon,ThemeProvider} from '@mui/material';
+import {Avatar, createTheme,Divider,Icon,ThemeProvider} from '@mui/material';
 
 import { Box, IconButton,Button } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
@@ -26,6 +26,7 @@ import { AuthContext } from "../../AuthContext";
 import { useRef } from "react";
 import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
 import Notice from "./Notcie";
+import { API } from "../../api/api";
 
 export default function Nav(){
 
@@ -128,7 +129,9 @@ export default function Nav(){
                                 (
                                     <div>
                                         {/* <AccountCircleIcon src={userInfo.username}/> */}
+
                                         <Link to="/mypage/profileSetting"><img src={userInfo?.profileImg} height={40}/></Link>
+                                        <Avatar src={userInfo?.profileImg}/>
                                         {/* <div>{userInfo?.username}</div> */}
                                         <button onClick={handleLogout}>log out</button>
                                     </div>
@@ -176,15 +179,18 @@ export default function Nav(){
                                         <MenuIcon />
                                     </MenuBtn>
                                     {/*수정 */}
-                                    <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                    {/*0809 수정 */}
+                                    <Button onClick={() => setMenuDropDownOpen(!isMenuDropDownOpen)}>
                                         <NotificationBadge badgeContent={4} color="primary">
                                             <NotificationsIcon color="action" />
                                         </NotificationBadge>
                                     </Button>
+                                    {/*0809 수정 */}
                                     {
                                         isMenuDropDownOpen &&
-                                        <div onMouseLeave={() => setMenuDropDownOpen(false)}>
-                                            <Notice/> 
+                                        <div onClick={() => setMenuDropDownOpen(false)}>
+                                            {/*0808 수정 */}
+                                            <Notice handle={setMenuDropDownOpen}/> 
                                         </div>
                                      }
                                 </div>
