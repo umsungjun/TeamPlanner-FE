@@ -19,6 +19,7 @@ export default function TaemCard({
     authorNickname,
     authorProfileImg,
     commentCount,
+    boardId
     
 }){
 
@@ -53,7 +54,7 @@ export default function TaemCard({
                             </li>
                             <li className="img-box">
                                 <div className="img-cover">
-                                    <h4>강원</h4>
+                                    {/* <h4>강원</h4> */}
                                     <div className="personnel">
                                         <h5>최소인원 / 최대인원</h5>
                                         <strong>{currentMemberSize}/{maxMemberSize}</strong>
@@ -127,8 +128,8 @@ const CardWrap = styled(Box)`
                 left: 0;
                 width: 100%;
                 height: 100%;
-                background: rgb(255,255,255);
-                background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,.7) 100%);
+                // background: rgb(255,255,255);
+                // background: linear-gradient(180deg, rgba(255,255,255,0) 0%, rgba(0,0,0,.7) 100%);
                 border-radius: 10px;
                 display: flex;
                 flex-direction: column;
@@ -151,7 +152,8 @@ const CardWrap = styled(Box)`
                     align-items: flex-end;
                     margin: 1rem;
                     h5{
-                        color: #fff;
+                        // color: #fff;
+                        color: #3b3b3b;
                         font-size: 1.4rem;
                         font-weight: 400;
                         line-height: 130%;
@@ -160,7 +162,8 @@ const CardWrap = styled(Box)`
                     strong{
                         font-size: 3rem;
                         font-weight: bold;
-                        color: #fff;
+                        // color: #fff;
+                        color: #3b3b3b;
                         line-height: 130%;
                         text-align: right;
                     }
