@@ -14,6 +14,7 @@ import { useLocation } from "react-router-dom";
 import { contest } from "./category";
 import { externalActivity } from "./category";
 import { club } from "./category";
+import loader from '../loader.gif';
 
 const Item = styled(Box)(({ theme }) => ({
 
@@ -48,6 +49,10 @@ export default function Index() {
   const [currentChecked, setCurrentChecked] = useState([]);
 
   const history = useLocation();
+
+  // 로딩
+  const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(true);
 
   let translatedPath = "";
 
@@ -129,6 +134,7 @@ export default function Index() {
         }&size=12&sort=${sortParam}`
       ).then(response => {
         setData(response.data.content || []);
+        setLoading(false);
         setTotalPages(response.data.totalPages);
       })
       // .catch(err => {
@@ -175,6 +181,7 @@ export default function Index() {
       }&size=12&sort=recruitmentPeriod,desc`
     ).then((res) => {
       setData2(res.data.content);
+      setLoading2(false);
     });
   }, [translatedPath, currentPage]);
 
@@ -182,6 +189,13 @@ export default function Index() {
     setActivityField([]);
     setCurrentPage(1);
   }, [translatedPath]);
+
+  const Loading = styled.img`
+    position: absolute;
+    left: 50%;
+    transform: translate(0, -50%);
+    width: 5%;
+  `
 
 
   return (
@@ -198,7 +212,7 @@ export default function Index() {
                     <KeywordBtn key={key} text={item} translatedPath={ translatedPath} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
                   )
                 })}
-              </KeywordWrap>
+              </KeywordWrap>  
             
             )}
             </div>
@@ -242,7 +256,8 @@ export default function Index() {
               </ul>
               <div className="competition-list">
               <Grid container spacing={1}>
-                {data.length > 0 && data?.map((item) => {
+                {data.length > 0 ? data.map((item) => {
+
                   let title;
                   if (item.activitiyName.length >= 8) {
                     title = item.activitiyName.slice(0, 8) + "...";
@@ -268,7 +283,7 @@ export default function Index() {
                     
                     
                   );
-                })}
+                }) : <Loading src={loader}/>}
                   </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
@@ -300,7 +315,8 @@ export default function Index() {
               </ul>
               <div className="competition-list">
               <Grid container spacing={1}>
-                {data2?.map((item) => {
+                {!loading2 ? data2.map((item) => {
+
                   let title;
                   if (item.activitiyName.length >= 8) {
                     title = item.activitiyName.slice(0, 8) + "...";
@@ -308,9 +324,6 @@ export default function Index() {
                     title = item.activitiyName;
                   }
                   return (
-                    
-                   
-                           
                     <Card item xs={6} md={2}>
                       <Item><CompetitionCard  
                         id={item.boardId}
@@ -325,7 +338,7 @@ export default function Index() {
                     </Card>     
                   
                   );
-                })}
+                }): <Loading src={loader}/>}
                 </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
