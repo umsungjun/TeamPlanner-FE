@@ -8,6 +8,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InputBase from '@mui/material/InputBase';
 
+
+import MySVG from '../../logo.svg';
+
 import MenuIcon from '@mui/icons-material/Menu';
 
 import List from '@mui/material/List';
@@ -92,7 +95,7 @@ export default function Nav(){
                     <div className="nav-wrap">
                         <div className="left-box">
                             <div className="logo">
-                                <a href="/"><img src="/logo.svg"></img></a>
+                                <a href="/"><img src={MySVG} width="140px" height="20%" style={{ marginTop: '20px', display: 'block' }}></img></a>
                             </div>
                             <ul>
                                 <li>
@@ -169,7 +172,7 @@ export default function Nav(){
                         >
                             <div className="dp-flex mobileNav">
                                 <div className="logo">
-                                    <a href="/"><img src="/logo.svg"></img></a>
+                                    <a href="/"><img src={MySVG} width="80px" height="20%" style={{ marginTop: '20px', display: 'block' }}></img></a>
                                 </div>
                                 <div className="dp-flex">
                                     <ProfileBtn sx={{ml : 1}}>
