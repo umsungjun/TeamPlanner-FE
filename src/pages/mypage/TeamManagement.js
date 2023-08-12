@@ -242,7 +242,6 @@ export default function TeamManagement(){
                                                 </div>
                                                 {applicantMap.applicantIntro .filter(applyMember => applyMember.state === "STAND_BY")
                                                 .map((applyMember) => 
-
                                                     <ul>
                                                         <li>
                                                             <AttendCard applyMember={applyMember} selectedMembers={selectedMembers} setSelectedMembers={setSelectedMembers}/>

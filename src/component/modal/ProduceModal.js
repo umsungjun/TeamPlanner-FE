@@ -22,7 +22,7 @@ import Checkbox from '@mui/material/Checkbox';
 import { API } from "../../api/api";
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function     ProduceModal({selectedMember,recruitmentId}){
+export default function ProduceModal({selectedMember,recruitmentId}){
 
 
       
@@ -59,6 +59,8 @@ export default function     ProduceModal({selectedMember,recruitmentId}){
             .then(res => {
                 console.log(res);
                 handleClose();
+                alert("팀이 성공적으로 생성되었습니다!");
+                window.location.reload();
             })
             .catch (err => {
             console.log(err);
