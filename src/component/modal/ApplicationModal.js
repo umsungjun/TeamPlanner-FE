@@ -16,9 +16,10 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
+import { API } from "../../api/api";
 
 
-export default function ApplicationModal(){
+export default function ApplicationModal({recruitmentId}){
 
 
     const theme = createTheme({
@@ -38,8 +39,22 @@ export default function ApplicationModal(){
     const [openModal, setOpenModal] = React.useState(false);
     const handleOpen = () => setOpenModal(true);
     const handleClose = () => setOpenModal(false);
+    const [content, setContent] = useState("")
 
-  
+    const onApply = () => {
+        console.log(`onApply recruitmentId: ${recruitmentId}, content: ${content}`)
+        API.post(`/api/v1/recruitment/${recruitmentId}/apply`, {
+            content: content
+            }
+        )
+        .then(res => {
+            console.log('res', res)
+            alert("참여신청에 성공했습니다")
+        }).catch(err => {
+            console.log('err', err)
+            if (err.response?.data?.message) alert(err.response?.data?.message)
+        }).finally(handleClose())
+    }
 
     return(
         <>
@@ -68,11 +83,14 @@ export default function ApplicationModal(){
                                 <h3>유저 1</h3>
                             </div>
                             <div className="textarea">
-                                <textarea placeholder="내용 입력">열심히 하겠습니다!</textarea>
+                                <textarea 
+                                placeholder="내용을 입력해주세요..." 
+                                value={content} 
+                                onChange={(e)=> setContent(e.target.value)}></textarea>
                             </div>
                             <div className="button-wrap">
                                 <SolidBtn text={"취소"} handle={handleClose}></SolidBtn>
-                                <FilledBtn text={"참여신청"} />
+                                <FilledBtn text={"참여신청"} handle={onApply}/>
                             </div>
                         </DialogContent>
                     </Box>
