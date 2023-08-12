@@ -19,10 +19,8 @@ API.interceptors.request.use(
     if (accessToken) {
       config.headers["Authorization"] = "Bearer " + accessToken;
     } else {
-        config.headers["Authorization"] = "Bearer " + `eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsb2NhbE1lbWJlciIsImV4cCI6MTcyMDYyNzE5MiwidXNlcm5hbWUiOiJsb2NhbE1lbWJlciJ9.xmhoU2wsMRLlkkhziZe_vmJuXkYgZOXrdX1at71_2X_qKrUClCmKKkPbqnGMRWSHBsNUC4Z-nxQ7K8rFzuPzgQ`;
         // if no accessToken? 
         // try refresh with refresh token
-
     }
     return config;
   },
@@ -68,10 +66,13 @@ API.interceptors.response.use(
                     return new Promise(() => {});
                 case -7: // 리프레시토큰 찾을수없음
                 case -4: // 리프레시토큰 만료됨
+                case -101: // unauthorized HTTP status, (unauthenticated.) 
+                    // re-login required.
+                    alert("로그인이 필요합니다.");
                     console.log("refreshToken expired");
                     removeCookie("refreshToken");
                     localStorage.removeItem("userInfo");
-                    window.location.href = "/login"
+                    window.location.href = `/login?redirect=${window.location.pathname}`;
                     return new Promise(() => {});
                 default:
                     console.log('switch default error', error)

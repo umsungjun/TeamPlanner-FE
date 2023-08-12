@@ -207,7 +207,7 @@ export default function Index() {
           <div className="scroll">
           {history.pathname === "/contest" && (
               <KeywordWrap>
-                {contest.map((item, key) => {
+                {contest?.map((item, key) => {
                   return (
                     <KeywordBtn key={key} text={item} translatedPath={ translatedPath} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
                   )
@@ -220,7 +220,7 @@ export default function Index() {
             {history.pathname === "/externalActivity" && (
             
             <KeywordWrap>
-            {externalActivity.map((item, key) => {
+            {externalActivity?.map((item, key) => {
               return (
                 <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
               )
@@ -233,7 +233,7 @@ export default function Index() {
             {history.pathname === "/club" && (
             
             <KeywordWrap>
-            {club.map((item, key) => {
+            {club?.map((item, key) => {
               return (
                 <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
               )
@@ -257,6 +257,7 @@ export default function Index() {
               <div className="competition-list">
               <Grid container spacing={1}>
                 {data.length > 0 ? data.map((item) => {
+
                   let title;
                   if (item.activitiyName.length >= 8) {
                     title = item.activitiyName.slice(0, 8) + "...";
@@ -315,6 +316,7 @@ export default function Index() {
               <div className="competition-list">
               <Grid container spacing={1}>
                 {!loading2 ? data2.map((item) => {
+
                   let title;
                   if (item.activitiyName.length >= 8) {
                     title = item.activitiyName.slice(0, 8) + "...";

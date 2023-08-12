@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import {createTheme,Icon,IconButton,ThemeProvider} from '@mui/material';
+import {Avatar, createTheme,Icon,IconButton,ThemeProvider} from '@mui/material';
 import Nav from "../../component/common/Nav"
 import Footer from "../../component/common/Footer"
 import theme from "../../style/theme";
@@ -9,11 +9,12 @@ import ScrollList from "../../component/list/ScrollList";
 import KeyboardArrowLeftIcon from '@mui/icons-material/KeyboardArrowLeft';
 import IconWrap from "../../component/list/IconWrap";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
-import Comment from "../../component/comment/Comment";
+import Comment from "../../component/recruitmentComment/Comment";
 import Button from "@mui/material/Button";
 import ApplicationModal from "../../component/modal/ApplicationModal";
 import { useParams } from "react-router";
 import { API } from "../../api/api";
+import { now } from "moment/moment";
 
 
 export default function TeamDetail({done}){
@@ -30,6 +31,7 @@ export default function TeamDetail({done}){
     })
     const [commentData, setCommentData] = useState([]);
     const [flag, setChangeFlag] = useState(false);
+    const [commentCount, setCommentCount] = useState(0)
     const [data, setData] = useState({
         commentList: []
     });
@@ -42,6 +44,10 @@ export default function TeamDetail({done}){
         likeCount,
         viewCount,
         commentList = [],
+        boardActivityName,
+        boardEndDate,
+        authorNickname,
+        authorProfileImg,
     } = data;
 
 
@@ -52,13 +58,44 @@ export default function TeamDetail({done}){
     const fetchData = () => {
         API.get(`/api/v1/recruitment/${recruitmentId}`)
         .then(resp => {
-            console.log(resp)
-            setData(resp.data)
-            setCommentData(resp.data.commentList);
+            console.log(resp);
+            console.log(data);
+            // console.log()
+            
+            const tmpList = resp.data.commentList;
+            setCommentCount(tmpList.length);
+            let parents = tmpList.filter(c => c.parentCommentId === null);
+            const childs = tmpList.filter(c => c.parentCommentId !== null);
+
+            // console.log('parents', parents)
+            // console.log('childs', childs)
+
+            parents.map(p => {
+                p.childCommentList = childs.filter(c => c.parentCommentId === p.id);
+            });
+
+            resp.data.commentList = parents;
+            console.log('resp.data.commentList', resp.data.commentList)
+            setData(resp.data);
+            // console.log('tmp', tmp)
+            // console.log(typeof(tmp));
+            // console.log(Object.values(tmp))
         })
     }
 
-
+    function dateDiff(_date1, _date2) {
+        var diffDate_1 = _date1 instanceof Date ? _date1 : new Date(_date1);
+        var diffDate_2 = _date2 instanceof Date ? _date2 : new Date(_date2);
+     
+        diffDate_1 = new Date(diffDate_1.getFullYear(), diffDate_1.getMonth()+1, diffDate_1.getDate());
+        diffDate_2 = new Date(diffDate_2.getFullYear(), diffDate_2.getMonth()+1, diffDate_2.getDate());
+     
+        var diff = Math.abs(diffDate_2.getTime() - diffDate_1.getTime());
+        diff = Math.ceil(diff / (1000 * 3600 * 24));
+     
+        return diff;
+    }
+     
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -70,13 +107,13 @@ export default function TeamDetail({done}){
                                 <div className="title-wrap">
                                     <IconButton className="prev-btn"><KeyboardArrowLeftIcon/></IconButton>
                                     <div className="title">
-                                        <h1>- 공모전</h1>
-                                        <IconWrap viewCount={viewCount} likeCount={likeCount} commentCount={commentList.length}/>
+                                        <h1>{boardActivityName}</h1>
+                                        <IconWrap viewCount={viewCount} likeCount={likeCount} commentCount={commentCount}/>
                                     </div>
                                     <ul className="team-info">
                                         <li className="info-wrap">
                                             <div className="info-box">
-                                                <h2>모집 마감까지 <strong>D-10</strong></h2>
+                                                <h2>모집 마감까지 <strong>D-{dateDiff(now(), boardEndDate)}</strong></h2>
                                             </div>
                                             <div className="info-box">
                                                 <h2>현재인원/최대인원 : <strong>{currentMemberSize}/{maxMemberSize}</strong></h2>
@@ -94,10 +131,8 @@ export default function TeamDetail({done}){
                                 </div>
                                 <div className="content">
                                     <div className="profile dp-flex">
-                                        <IconButton sx={{p : 0}}>
-                                            <AccountCircleIcon/>
-                                        </IconButton>
-                                        <h3>유저 1</h3>
+                                        <Avatar src={authorProfileImg}></Avatar>
+                                        <h3>{authorNickname}</h3>
                                     </div>
                                     <div className="text-wrap">
                                         <h4>{title}</h4>
@@ -105,8 +140,7 @@ export default function TeamDetail({done}){
                                     </div>
                                 </div>
                                 <div className="comment-wrap">
-                                    {/* <Comment /> */}
-                                    <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
+                                    <Comment changeFlag={setChangeFlag} flag={flag} commentData={data.commentList} />
                                 </div>
                             </div>
                         </Content>

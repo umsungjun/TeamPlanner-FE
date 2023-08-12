@@ -13,6 +13,8 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../../AuthContext";
 import moment from "moment";
 import { API_BASE_URL } from "../../common/constant/constant";
+import MySVG from '../../logo.svg';
+
 
 export default function Login() {
 
@@ -92,7 +94,7 @@ const onOauthLogin_K = () => {
         <LoginWrap>
           <div className="login-box">
             <div className="logo">
-              <img src="/logo.svg" alt="로고이미지" />
+              <img src={MySVG} alt="로고이미지" />
             </div>
             <ul className="input-wrap">
               <li>
