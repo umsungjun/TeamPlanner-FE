@@ -145,7 +145,7 @@ export default function TeamDetail({done}){
                             </div>
                         </Content>
                         <SideScroll>
-                            <ScrollList />
+                            <ScrollList category={"공모전"}/>
                         </SideScroll>
                     </PaddingWrap>
                 </Container>
