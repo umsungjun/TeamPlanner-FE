@@ -123,7 +123,7 @@ export default function TeamDetail({done}){
                                             {
                                                 done ? 
                                                 <Button variant="contained" disabled>이미 참여한 공고입니다</Button> :
-                                                <ApplicationModal/>
+                                                <ApplicationModal recruitmentId={recruitmentId}/>
                                             }
                                         </li>
                                     </ul>
