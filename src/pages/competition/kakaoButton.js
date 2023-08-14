@@ -28,19 +28,19 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
     Kakao.Share.sendDefault({
       objectType: "feed",
       content: {
-        title: "오늘의 teamplanner 맛집",
+        title: "오늘의 teamplanner",
         description: `${activityName}에 참여해보세요`,
         imageUrl:
           activityImg,
         link: {
-          mobileWebUrl: realUrl+"/competition/"+boardId,
+          mobileWebUrl: realUrl+"/competition/detail/"+boardId,
         },
       },
       buttons: [
         {
           title: "나도 테스트 하러가기",
           link: {
-            mobileWebUrl: realUrl+"/competition/"+boardId,
+            mobileWebUrl: realUrl+"/competition/detail/"+boardId,
           },
         },
       ],
