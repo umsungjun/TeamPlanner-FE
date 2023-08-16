@@ -163,9 +163,12 @@ export default function Detail() {
                 <li className="detail-list">
                   <div className="dp-flex space-between">
                     <h2>{data.activitiyName}</h2>
+                    <div className="dp-flex scrap-wrap">
                     <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
+
                     {/*3차추가 */}
                     <CheckBtn type={"scrap"}/>
+                    </div>
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">

@@ -19,6 +19,8 @@ import CheckBtn from "../../component/button/CheckBtn";
 
 
 export default function TeamDetail({done}){
+    const userInfo = localStorage.getItem('userInfo'); // Retrieve user token from local storage
+
     const {recruitmentId} = useParams();
     const theme = createTheme({
         typography:{
@@ -137,12 +139,16 @@ export default function TeamDetail({done}){
                                         <h3>{authorNickname}</h3>
                                     </div>
                                         <div className="btn-wrap">
-                                            <SmallBtn variant="outlined" color="secondary">
-                                                <p>수정</p>
-                                            </SmallBtn>
-                                            <SmallBtn variant="outlined" color="secondary">
-                                                <p className="delete">삭제</p>
-                                            </SmallBtn>
+                                        {userInfo && (
+                                                <>
+                                                <SmallBtn variant="outlined" color="secondary">
+                                                    <p>수정</p>
+                                                </SmallBtn>
+                                                <SmallBtn variant="outlined" color="secondary">
+                                                    <p className="delete">삭제</p>
+                                                </SmallBtn>
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                     <div className="text-wrap">
