@@ -134,11 +134,11 @@ export default function Detail() {
     width: 100%;
 
     div {
-      width: 100%;
+      width: 70%;
     }
 
     img {
-      width: 100%;
+      width: 70%;
     }
   `
 
