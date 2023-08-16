@@ -68,6 +68,7 @@ export default function Detail() {
   //comments.length
   let [commentCount, setCommentCount] = useState([]);
   const [flag, setChangeFlag] = useState(false);
+  const [commentFlag, setCommentFlag] = useState(false);
 
 
   useEffect(() => {
@@ -78,7 +79,7 @@ export default function Detail() {
       const filteredComments = res.data[0].comments.filter(commentItem => commentItem.state);
       setCommentCount(filteredComments.length);
     });
-  }, [flag]); 
+  }, [flag, commentFlag]); 
 
   const theme = createTheme({
     typography: {
@@ -327,7 +328,7 @@ export default function Detail() {
                   {/* 팀원 모집글 탭 */}
                   <TeamCardWrap>
                     {
-                      recruitmentList.map(r => 
+                      recruitmentList.map(r =>  
                         <Card>
                           <TaemCard {...r}/>
                         </Card>
@@ -353,7 +354,12 @@ export default function Detail() {
                      {/*3차추가 */}
                      { <>
                     <CommonModal button={
-                    <FilledBtn text={"글쓰기"} handle={() => {console.log("/recruitment/write?boardId=" + boardId); window.location.href=`/recruitment/write?boardId=${boardId}`}}/>
+                    <FilledBtn text={"글쓰기"} handle={() => {
+                      if (localStorage.getItem("userInfo")) {
+                        console.log("/recruitment/write?boardId=" + boardId); 
+                        window.location.href=`/recruitment/write?boardId=${boardId}`
+                      }}}
+                      />
                     } />
                       </>
                      }
@@ -367,7 +373,7 @@ export default function Detail() {
 
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={2}>
-                  <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
+                  <Comment changeFlag={setChangeFlag} flag={flag} commentFlag={commentFlag} changeCommentFlag={setCommentFlag} commentData={commentData} />
                 </StyledTabPanel>
               </TabWrap>
             </Content>

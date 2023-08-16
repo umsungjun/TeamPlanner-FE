@@ -4,7 +4,7 @@ import {createTheme,Link,ThemeProvider} from '@mui/material';
 import Button from "@mui/material/Button";
 import theme from "../../style/theme";
 
-export default function FilledBtn({text, handle,href,color}){
+export default function FilledBtn({text, handle, href, color}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"

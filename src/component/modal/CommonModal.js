@@ -39,10 +39,11 @@ export default function CommonModal({button}){
     const theme2 = useTheme();
     const fullScreen = useMediaQuery(theme2.breakpoints.down('md'));
 
-    const [openModal, setOpenModal] = React.useState(!isLoggedIn);
-    const ModalOpen = () => setOpenModal(true);
+    const [openModal, setOpenModal] = React.useState(false);
+    const ModalOpen = () => {
+        setOpenModal(true)
+    };
     const handleClose = () => setOpenModal(false);
-
   
     useEffect(() => {
         // 로컬스토리지에 "isLoggedIn" 키가 있으면 모달을 닫음
@@ -57,7 +58,7 @@ export default function CommonModal({button}){
             <ThemeProvider theme={theme}>
                     <div className="btn" onClick={ModalOpen}>
                         {
-                            button
+                            button 
                         }
                     </div>
                 <ApplicationModalWrap

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { Button, createTheme, IconButton, ThemeProvider ,Avatar } from "@mui/material";
+import { Button, createTheme, IconButton, ThemeProvider ,Avatar, useForkRef } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import theme from "../../style/theme";
@@ -12,7 +12,8 @@ import MenuItem from '@mui/material/MenuItem';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import SolidBtn from "../button/SolideBtn";
 
-export default function CommentBox({ commentData, changeFlag, flag }) {
+export default function CommentBox({ commentData, changeFlag, flag, commentFlag, changeCommentFlag }) {
+  
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -40,7 +41,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
   const [open, setOpen] = React.useState(false);
   // const [editMode, setEditMode] = React.useState(false); // Add this state
   const { boardId } = useParams();
-  const [contentDelete,setContentDelete]=useState([]);
+  const [contentDelete,setContentDelete] = useState([]);
   
   const handleClick = () => {
     setOpen(!open);
@@ -94,19 +95,19 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
   // }, [currentContent]);
 
   const handleDeleteClick = () => {
-
-    API.delete(`/api/v1/board/${boardId}/comment/${commentData.commentId}`)
-          .then((res) => {  
-            
-            setContentDelete(!contentDelete);
-            alert(res.data);
-          })
-          .catch((error) => {
-            alert(error);
-            // Handle errors (optional)
-            // console.error("Error creating reply:", error);
-          });
-    
+    if (window.confirm("정말로 삭제하시겠어요?")) {
+      API.delete(`/api/v1/board/${boardId}/comment/${commentData.commentId}`)
+      .then((res) => {  
+        setContentDelete(!contentDelete);
+        changeCommentFlag(!commentFlag);
+        alert(res.data);
+      })
+      .catch((error) => {
+        alert(error);
+        // Handle errors (optional)
+        // console.error("Error creating reply:", error);
+      });
+    }
   };
 
 

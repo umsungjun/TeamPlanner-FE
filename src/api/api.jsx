@@ -1,14 +1,14 @@
-import axios from "axios";
 import { getCookie, removeCookie, setCookie } from "../util/cookie";
 import { API_BASE_URL } from "../common/constant/constant";
 import { useNavigate } from "react-router-dom";
 import CommonModal from "../component/modal/CommonModal";
+import axios from "axios";
 
 export const API = axios.create({
-  baseURL: API_BASE_URL,
-  headers: {},
-  timeout: 5000,
-});
+    baseURL: API_BASE_URL,
+    headers: {},
+    timeout: 5000,
+  });
 
 API.interceptors.request.use(
   function (config) {
