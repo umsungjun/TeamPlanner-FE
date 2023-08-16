@@ -13,6 +13,10 @@ import TeamManagement from "./pages/mypage/TeamManagement";
 import Participation from "./pages/mypage/Participation";
 import Writing from "./pages/team/Writing";
 import TokenRedirect from "./TokenRedirect";
+import Search from "./pages/search/Search";
+import RecruitList from "./pages/team/RecruitList";
+import IdPw from "./pages/account/IdPw";
+
 axios.defaults.withCredentials = true;
 
 function App() {
@@ -27,6 +31,7 @@ function App() {
           <Route path="/club" element={ <Index /> }></Route>
           <Route path="/login" element={ <Login /> }></Route>
           <Route path="/join" element={ <Join /> }></Route>
+          <Route path="/idPw" element={ <IdPw /> }></Route>
           <Route path="/competition/detail/:boardId" element={ <Detail /> }></Route>
           <Route path="/recruitment/:recruitmentId" element={ <TeamDetail /> }></Route>
           <Route path="/mypage/acountSetting" element={ <AccountSetting /> }></Route>
@@ -35,6 +40,8 @@ function App() {
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
           <Route path="/recruitment/write" element={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
+          <Route path="/team/recruiteList" element={ <RecruitList /> }></Route>
+          <Route path="/search" element={ <Search /> }></Route>
         </Routes>
       </>
     </AuthProvider>

@@ -7,6 +7,10 @@ import TextField from "@mui/material/TextField";
 import theme from "../../style/theme";
 import { API } from "../../api/api";
 import { useParams } from "react-router-dom";
+import FormControlLabel from '@mui/material/FormControlLabel';
+import Checkbox from '@mui/material/Checkbox';
+import CommonModal from "../../component/modal/CommonModal";
+
 
 export default function TextInput({ changeFlag, flag, parentId }) {
   const { boardId } = useParams();
@@ -31,11 +35,11 @@ export default function TextInput({ changeFlag, flag, parentId }) {
     const userInfoJSON = localStorage.getItem("userInfo");
     const userInfoObject = JSON.parse(userInfoJSON);
 
-    // if(!userInfoObject){
-    //     alert("로그인 후 이용해주세요");
-    //     setIsSubmited(false);
-    //     return;
-    // }
+    if(!userInfoObject){
+        alert("로그인 후 이용해주세요");
+        setIsSubmited(false);
+        return;
+    }
     const username = userInfoObject.username;
     
     
@@ -107,6 +111,8 @@ export default function TextInput({ changeFlag, flag, parentId }) {
           />
           <SolidBtn text={!isSubmmited ? "입력" : "등록 중.."} handle={handleClick} disabled={isSubmmited}/>
         </TextInputWrap>
+         {/*3차추가 */}
+         <StyledFormControlLabel control={<Checkbox defaultChecked />} label="익명 댓글 사용 여부" />
       </ThemeProvider>
     </>
   );
@@ -137,4 +143,11 @@ const StyledTextField = styled(TextField)`
     font-size: 1.6rem;
     color: #3b3b3b;
   }
+`;
+const StyledFormControlLabel = styled(FormControlLabel)`
+    margin-top: .5rem;
+    span{
+        font-size: 1.6rem;
+        color: #808080;
+    }
 `;

@@ -21,6 +21,10 @@ import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
 import KakaoButton from "./kakaoButton";
 import { Opacity } from "@mui/icons-material";
+import CheckBtn from "../../component/button/CheckBtn";
+import CommonModal from "../../component/modal/CommonModal";
+
+
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -160,6 +164,8 @@ export default function Detail() {
                   <div className="dp-flex space-between">
                     <h2>{data.activitiyName}</h2>
                     <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
+                    {/*3차추가 */}
+                    <CheckBtn type={"scrap"}/>
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">
@@ -340,7 +346,13 @@ export default function Detail() {
                     </Card> */}
                   </TeamCardWrap>
                   <div className="dp-end">
+                     {/*3차추가 */}
+                     { <>
+                    <CommonModal button={
                     <FilledBtn text={"글쓰기"} handle={() => {console.log("/recruitment/write?boardId=" + boardId); window.location.href=`/recruitment/write?boardId=${boardId}`}}/>
+                    } />
+                      </>
+                     }
                   </div>
 
                   <BasicPagination
@@ -569,12 +581,15 @@ const StyledTabPanel = styled(CustomTabPanel)`
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  /*수정*/
+  /*3차 수정*/
   button{
-      /* width: 15%; */
+      width: 100%;
+      padding: 1rem 5rem !important;
   }
+  /*3차 수정*/
   a{
-      width: 15%;
+      width: fit-content;
+      padding: .8rem 5rem !important;
   }
 }
 @media ${() => theme.device.mobile} {

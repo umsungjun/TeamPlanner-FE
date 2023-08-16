@@ -2,6 +2,7 @@ import axios from "axios";
 import { getCookie, removeCookie, setCookie } from "../util/cookie";
 import { API_BASE_URL } from "../common/constant/constant";
 import { useNavigate } from "react-router-dom";
+import CommonModal from "../component/modal/CommonModal";
 
 export const API = axios.create({
   baseURL: API_BASE_URL,
@@ -11,6 +12,8 @@ export const API = axios.create({
 
 API.interceptors.request.use(
   function (config) {
+
+    console.log(document.cookie.split(";").map(el=>el.split("=")));
     let accessToken = getCookie("accessToken");
     // console.log("accessToken", accessToken);
     // 1년짜리 토큰
@@ -68,6 +71,11 @@ API.interceptors.response.use(
                 case -4: // 리프레시토큰 만료됨
                 case -101: // unauthorized HTTP status, (unauthenticated.) 
                     // re-login required.
+                    {
+                        <>
+                        <CommonModal/>
+                        </>
+                    }
                     alert("로그인이 필요합니다.");
                     console.log("refreshToken expired");
                     removeCookie("refreshToken");

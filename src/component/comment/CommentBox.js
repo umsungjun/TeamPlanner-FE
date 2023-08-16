@@ -7,6 +7,9 @@ import theme from "../../style/theme";
 import TextInput from "./TextInput";
 import { API } from "../../api/api";
 import { useParams } from "react-router-dom";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import SolidBtn from "../button/SolideBtn";
 
 export default function CommentBox({ commentData, changeFlag, flag }) {
@@ -40,6 +43,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
   
   const handleClick = () => {
     setOpen(!open);
+    setAnchorEl(null);
   };
   // const handleEditClick = () => {
   //   setEditMode(!editMode); // Activate edit mode
@@ -87,6 +91,17 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
   }, [currentContent]);
 
 
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open2 = Boolean(anchorEl);
+  const handleClick2 = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+ 
+
+
   return (
     <>
       <ThemeProvider theme={theme}>
@@ -115,7 +130,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                 <h4>{commentData.updatedAt}</h4>
               </div>
             </li>
-            <div>
+            {/* <div>
             {userInfo && userInfo.username && commentData.username === userInfo.username ? (
               editMode ? (
                 <div>
@@ -127,8 +142,36 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
               )
             ) : null}
             <AddBtn onClick={handleClick}>답글</AddBtn>
-            </div>
-
+            </div> */}
+            {/*3차추가 */}
+            <IconButton
+                            id="basic-button"
+                            aria-controls={open2 ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open2 ? 'true' : undefined}
+                            onClick={handleClick2}
+                        >
+                            <MoreHorizIcon />
+                        </IconButton>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl}
+                            open={open2}
+                            onClose={handleClose}
+                            MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <StyledMenuItem onClick={handleClick}>
+                                답글
+                            </StyledMenuItem>
+                            <StyledMenuItem onClick={handleClose}>
+                                삭제
+                            </StyledMenuItem>
+                            <StyledMenuItem onClick={handleClose}>
+                                수정
+                            </StyledMenuItem>
+                        </Menu>
             
           </ul>
           {open ? (
@@ -253,4 +296,9 @@ const StyledTextField = styled(TextField)`
     font-size: 1.6rem;
     color: #3b3b3b;
   }
+`;
+const StyledMenuItem = styled(MenuItem)`
+    font-size: 1.6rem;
+    color: #3b3b3b;
+    padding: 1rem 3rem;
 `;
