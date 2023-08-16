@@ -69,13 +69,14 @@ export default function Detail() {
   let [commentCount, setCommentCount] = useState([]);
   const [flag, setChangeFlag] = useState(false);
 
+
   useEffect(() => {
     API.get(`/api/v1/board/${boardId}`).then((res) => {
       setData(res.data[0]);
       setCommentData(res.data[0].comments);
-      if (Object.keys(res.data[0].comments).length !== 0) {
-        setCommentCount(res.data[0].comments.length);
-      }
+      console.log(res.data[0].comments)
+      const filteredComments = res.data[0].comments.filter(commentItem => commentItem.state);
+      setCommentCount(filteredComments.length);
     });
   }, [flag]); 
 

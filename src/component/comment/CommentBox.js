@@ -35,11 +35,12 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
     },
   });
   
-  const [editedContent, setEditedContent] = useState(commentData.content);
-  const [currentContent, setContent] = useState(commentData.content);
+  // const [editedContent, setEditedContent] = useState(commentData.content);
+  // const [currentContent, setContent] = useState(commentData.content);
   const [open, setOpen] = React.useState(false);
-  const [editMode, setEditMode] = React.useState(false); // Add this state
+  // const [editMode, setEditMode] = React.useState(false); // Add this state
   const { boardId } = useParams();
+  const [contentDelete,setContentDelete]=useState([]);
   
   const handleClick = () => {
     setOpen(!open);
@@ -48,9 +49,11 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
   // const handleEditClick = () => {
   //   setEditMode(!editMode); // Activate edit mode
   // };
-  const handleEditClick = () => {
-    setEditMode(!editMode); // 토글
-  };
+  // const handleEditClick = () => {
+  //   setEditMode(!editMode); // 토글
+  // };
+
+
 
 
    // 로그인 중인 유저의 아이디를 가져옴
@@ -64,31 +67,48 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
       handleClick();
     }
   };
-  const handleSuccessClick = () => {
-    setEditMode(!editMode); // 토글
+  // const handleSuccessClick = () => {
+  //   setEditMode(!editMode); // 토글
 
-    API.put(`/api/v1/board/${boardId}/comment`, {
-      commentId: commentData.commentId,
-      boardId: boardId,
-      content: editedContent
-      }
-    )
-      .then((res) => {
-        commentData.content = res.data.content;
-        setContent(editedContent);
-        setEditMode(false);
-      })
-      .catch((error) => {
-        alert(error);
-        // Handle errors (optional)
-        // console.error("Error creating reply:", error);
-      });
+  //   API.put(`/api/v1/board/${boardId}/comment`, {
+  //     commentId: commentData.commentId,
+  //     boardId: boardId,
+  //     content: editedContent
+  //     }
+  //   )
+  //     .then((res) => {
+  //       commentData.content = res.data.content;
+  //       setContent(editedContent);
+  //       setEditMode(false);
+  //     })
+  //     .catch((error) => {
+  //       alert(error);
+  //       // Handle errors (optional)
+  //       // console.error("Error creating reply:", error);
+  //     });
 
+  // };
+
+  // useEffect(() => {
+  
+  // }, [currentContent]);
+
+  const handleDeleteClick = () => {
+
+    API.delete(`/api/v1/board/${boardId}/comment/${commentData.commentId}`)
+          .then((res) => {  
+            
+            setContentDelete(!contentDelete);
+            alert(res.data);
+          })
+          .catch((error) => {
+            alert(error);
+            // Handle errors (optional)
+            // console.error("Error creating reply:", error);
+          });
+    
   };
 
-  useEffect(() => {
-  
-  }, [currentContent]);
 
 
   const [anchorEl, setAnchorEl] = React.useState(null);
@@ -114,7 +134,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                 {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">
-                <h3>{commentData.username}</h3>
+                {/* <h3>{commentData.username}</h3>
                 {editMode ?  <ThemeProvider theme={muiTheme}><TextInputWrap>
                <TextField
                 fullWidth
@@ -125,8 +145,8 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                 onKeyPress={handleKeyPress} 
                 onChange={(event) => setEditedContent(event.target.value)}
                 value={editedContent}
-              /> </TextInputWrap></ThemeProvider>: ( <p>{commentData.content}</p>)}
-               
+              /> </TextInputWrap></ThemeProvider>: ( <p>{commentData.content}</p>)} */}
+                <p>{commentData.content}</p>
                 <h4>{commentData.updatedAt}</h4>
               </div>
             </li>
@@ -165,12 +185,16 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                             <StyledMenuItem onClick={handleClick}>
                                 답글
                             </StyledMenuItem>
-                            <StyledMenuItem onClick={handleClose}>
+                            {userInfo && userInfo.username && commentData.username === userInfo.username ? (
+                            <>
+                            <StyledMenuItem onClick={handleDeleteClick}>
                                 삭제
                             </StyledMenuItem>
-                            <StyledMenuItem onClick={handleClose}>
+                            {/* <StyledMenuItem onClick={handleClose}>
                                 수정
-                            </StyledMenuItem>
+                            </StyledMenuItem> */}
+                            </>
+                            ): ""}
                         </Menu>
             
           </ul>

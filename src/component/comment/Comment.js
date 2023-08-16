@@ -64,7 +64,8 @@ export default function Comment({ commentData, changeFlag, flag }) {
           <h2>댓글 입력</h2>
           <TextInput changeFlag={changeFlag} flag={flag} />
           <div className="comment-list">
-            {commentData.map((commentItem) => {
+            {commentData.filter((commentItem) => commentItem.state).map((commentItem) => {
+ 
               return (
                 <CommentBoxWrap>
                   <CommentBox
