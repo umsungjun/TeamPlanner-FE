@@ -84,6 +84,10 @@ export default function Nav(){
    
      useOnHoverOutside(dropdownRef, closeHoverMenu); // Call the hook
      
+     const handleClose = () => {
+        setAnchorEl(null);
+      };
+  
  
 
 
@@ -127,16 +131,21 @@ export default function Nav(){
                                     <SearchIcon />
                                 </IconButton>
                             </div>
-                            <ProfileBtn>
+                            <ProfileBtn
+                             id="basic-button"
+                             aria-controls={open2 ? 'basic-menu' : undefined}
+                             aria-haspopup="true"
+                             aria-expanded={open2 ? 'true' : undefined}
+                             onClick={handleClick2}>
                                 { userInfo ? 
                                 (
                                     <div>
                                         {/* <AccountCircleIcon src={userInfo.username}/> */}
 
-                                        <Link to="/mypage/profileSetting"><img src={userInfo?.profileImg} height={40}/></Link>
+                                       <img src={userInfo?.profileImg} height={40} style={{ borderRadius: '50%' }}/>
                                         {/* <Avatar src={userInfo?.profileImg}/> */}
                                         {/* <div>{userInfo?.username}</div> */}
-                                        <button onClick={handleLogout}>log out</button>
+                                        {/* <button onClick={handleLogout}>log out</button> */}
                                     </div>
                                 )
                                 : 
@@ -148,6 +157,27 @@ export default function Nav(){
                                 
                                 }
                             </ProfileBtn>
+                            
+                            <Menu
+                                id="basic-menu"
+                                anchorEl={anchorEl}
+                                open={open2}
+                                onClose={handleClose}
+                                MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                                }}
+                            >
+                                <StyledMenuItem onClick={handleClose}>
+                                <Link to="/mypage/profileSetting">
+                                        프로필 보기
+                                    </Link>
+                                </StyledMenuItem>
+                                <StyledMenuItem onClick={handleClose}>
+                                    <Link to="/" onClick={handleLogout}>
+                                        로그아웃
+                                    </Link>
+                                </StyledMenuItem>
+                            </Menu>
                            {/*수정 */}
                            <Button onMouseOver={() => setMenuDropDownOpen(true)}>
                                     <NotificationBadge badgeContent={4} color="primary">
@@ -413,67 +443,75 @@ const NotificationBadge = styled(Badge)`
             height: 2.5rem;
         }
     }
+`
+const StyledMenuItem = styled(MenuItem)`
+    a{
+        font-size: 1.6rem;
+        color: #3b3b3b;
+        text-decoration: none;
+    }
 `;
 
-const NotificationMenu = styled(Menu)`
-    &>div{
-        width: 45rem;
-        height: 50rem;
-        max-height: 50rem;
-        overflow-y: scroll;
-    }
-    .close_btn{
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-end;
-        padding: 1rem 2rem 0 2rem;
-        button{
-            padding: 0;
-            svg{
-                width: 2rem;
-                height: 2rem;
-            }
-        }
-    }
-    .notification-list{
-        h3{
-            font-size: 2rem;
-            color: #3b3b3b;
-            font-weight: bold;
-            padding: 0 2rem 2rem 2rem;
-        }
-        li{
-            background-color: #fff;
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            .img-box{
-                width: 24%;
-                img{
-                    width: 100%;
-                    border-radius: 4px;
-                }
-            }
-            .text-box{
-                width: 70%;
-                h4{
-                    font-size: 1.6rem;
-                    color: #3b3b3b;
-                    line-height: 150%;
-                    font-weight: 600;
-                    margin-bottom: 1rem;
-                }
-                p{
-                    font-size: 1.4rem;
-                    color: rgba(0,0,0,.6);
-                    line-height: 150%;
-                }
-            }
-        }
-        li:hover{
-            background-color: #FFF1E5;
-        }
-    }
-`;
+// const NotificationMenu = styled(Menu)`
+//     &>div{
+//         width: 45rem;
+//         height: 50rem;
+//         max-height: 50rem;
+//         overflow-y: scroll;
+//     }
+//     .close_btn{
+//         display: flex;
+//         align-items: flex-end;
+//         justify-content: flex-end;
+//         padding: 1rem 2rem 0 2rem;
+//         button{
+//             padding: 0;
+//             svg{
+//                 width: 2rem;
+//                 height: 2rem;
+//             }
+//         }
+//     }
+//     .notification-list{
+//         h3{
+//             font-size: 2rem;
+//             color: #3b3b3b;
+//             font-weight: bold;
+//             padding: 0 2rem 2rem 2rem;
+//         }
+//         li{
+//             background-color: #fff;
+//             padding: 2rem;
+//             display: flex;
+//             align-items: center;
+//             justify-content: space-between;
+//             cursor: pointer;
+//             .img-box{
+//                 width: 24%;
+//                 img{
+//                     width: 100%;
+//                     border-radius: 4px;
+//                 }
+//             }
+//             .text-box{
+//                 width: 70%;
+//                 h4{
+//                     font-size: 1.6rem;
+//                     color: #3b3b3b;
+//                     line-height: 150%;
+//                     font-weight: 600;
+//                     margin-bottom: 1rem;
+//                 }
+//                 p{
+//                     font-size: 1.4rem;
+//                     color: rgba(0,0,0,.6);
+//                     line-height: 150%;
+//                 }
+//             }
+//         }
+//         li:hover{
+//             background-color: #FFF1E5;
+//         }
+//     }
+// `;
+

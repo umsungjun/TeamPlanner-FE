@@ -1,15 +1,19 @@
 import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
-import { Button, createTheme, IconButton, ThemeProvider ,Avatar } from "@mui/material";
+import { Button, createTheme, IconButton, ThemeProvider ,Avatar, useForkRef } from "@mui/material";
 import Box from "@mui/material/Box";
 import TextField from "@mui/material/TextField";
 import theme from "../../style/theme";
 import TextInput from "./TextInput";
 import { API } from "../../api/api";
 import { useParams } from "react-router-dom";
+import Menu from '@mui/material/Menu';
+import MenuItem from '@mui/material/MenuItem';
+import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import SolidBtn from "../button/SolideBtn";
 
-export default function CommentBox({ commentData, changeFlag, flag }) {
+export default function CommentBox({ commentData, changeFlag, flag, commentFlag, changeCommentFlag }) {
+  
   const theme = createTheme({
     typography: {
       fontFamily: "Pretendard",
@@ -32,21 +36,25 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
     },
   });
   
-  const [editedContent, setEditedContent] = useState(commentData.content);
-  const [currentContent, setContent] = useState(commentData.content);
+  // const [editedContent, setEditedContent] = useState(commentData.content);
+  // const [currentContent, setContent] = useState(commentData.content);
   const [open, setOpen] = React.useState(false);
-  const [editMode, setEditMode] = React.useState(false); // Add this state
+  // const [editMode, setEditMode] = React.useState(false); // Add this state
   const { boardId } = useParams();
+  const [contentDelete,setContentDelete] = useState([]);
   
   const handleClick = () => {
     setOpen(!open);
+    setAnchorEl(null);
   };
   // const handleEditClick = () => {
   //   setEditMode(!editMode); // Activate edit mode
   // };
-  const handleEditClick = () => {
-    setEditMode(!editMode); // 토글
-  };
+  // const handleEditClick = () => {
+  //   setEditMode(!editMode); // 토글
+  // };
+
+
 
 
    // 로그인 중인 유저의 아이디를 가져옴
@@ -60,31 +68,59 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
       handleClick();
     }
   };
-  const handleSuccessClick = () => {
-    setEditMode(!editMode); // 토글
+  // const handleSuccessClick = () => {
+  //   setEditMode(!editMode); // 토글
 
-    API.put(`/api/v1/board/${boardId}/comment`, {
-      commentId: commentData.commentId,
-      boardId: boardId,
-      content: editedContent
-      }
-    )
-      .then((res) => {
-        commentData.content = res.data.content;
-        setContent(editedContent);
-        setEditMode(false);
+  //   API.put(`/api/v1/board/${boardId}/comment`, {
+  //     commentId: commentData.commentId,
+  //     boardId: boardId,
+  //     content: editedContent
+  //     }
+  //   )
+  //     .then((res) => {
+  //       commentData.content = res.data.content;
+  //       setContent(editedContent);
+  //       setEditMode(false);
+  //     })
+  //     .catch((error) => {
+  //       alert(error);
+  //       // Handle errors (optional)
+  //       // console.error("Error creating reply:", error);
+  //     });
+
+  // };
+
+  // useEffect(() => {
+  
+  // }, [currentContent]);
+
+  const handleDeleteClick = () => {
+    if (window.confirm("정말로 삭제하시겠어요?")) {
+      API.delete(`/api/v1/board/${boardId}/comment/${commentData.commentId}`)
+      .then((res) => {  
+        setContentDelete(!contentDelete);
+        changeCommentFlag(!commentFlag);
+        alert(res.data);
       })
       .catch((error) => {
         alert(error);
         // Handle errors (optional)
         // console.error("Error creating reply:", error);
       });
-
+    }
   };
 
-  useEffect(() => {
-  
-  }, [currentContent]);
+
+
+  const [anchorEl, setAnchorEl] = React.useState(null);
+  const open2 = Boolean(anchorEl);
+  const handleClick2 = (event) => {
+    setAnchorEl(event.currentTarget);
+  };
+  const handleClose = () => {
+    setAnchorEl(null);
+  };
+ 
 
 
   return (
@@ -99,7 +135,7 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                 {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">
-                <h3>{commentData.username}</h3>
+                {/* <h3>{commentData.username}</h3>
                 {editMode ?  <ThemeProvider theme={muiTheme}><TextInputWrap>
                <TextField
                 fullWidth
@@ -110,12 +146,12 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
                 onKeyPress={handleKeyPress} 
                 onChange={(event) => setEditedContent(event.target.value)}
                 value={editedContent}
-              /> </TextInputWrap></ThemeProvider>: ( <p>{commentData.content}</p>)}
-               
+              /> </TextInputWrap></ThemeProvider>: ( <p>{commentData.content}</p>)} */}
+                <p>{commentData.content}</p>
                 <h4>{commentData.updatedAt}</h4>
               </div>
             </li>
-            <div>
+            {/* <div>
             {userInfo && userInfo.username && commentData.username === userInfo.username ? (
               editMode ? (
                 <div>
@@ -127,8 +163,40 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
               )
             ) : null}
             <AddBtn onClick={handleClick}>답글</AddBtn>
-            </div>
-
+            </div> */}
+            {/*3차추가 */}
+            <IconButton
+                            id="basic-button"
+                            aria-controls={open2 ? 'basic-menu' : undefined}
+                            aria-haspopup="true"
+                            aria-expanded={open2 ? 'true' : undefined}
+                            onClick={handleClick2}
+                        >
+                            <MoreHorizIcon />
+                        </IconButton>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorEl}
+                            open={open2}
+                            onClose={handleClose}
+                            MenuListProps={{
+                            'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <StyledMenuItem onClick={handleClick}>
+                                답글
+                            </StyledMenuItem>
+                            {userInfo && userInfo.username && commentData.username === userInfo.username ? (
+                            <>
+                            <StyledMenuItem onClick={handleDeleteClick}>
+                                삭제
+                            </StyledMenuItem>
+                            {/* <StyledMenuItem onClick={handleClose}>
+                                수정
+                            </StyledMenuItem> */}
+                            </>
+                            ): ""}
+                        </Menu>
             
           </ul>
           {open ? (
@@ -253,4 +321,9 @@ const StyledTextField = styled(TextField)`
     font-size: 1.6rem;
     color: #3b3b3b;
   }
+`;
+const StyledMenuItem = styled(MenuItem)`
+    font-size: 1.6rem;
+    color: #3b3b3b;
+    padding: 1rem 3rem;
 `;

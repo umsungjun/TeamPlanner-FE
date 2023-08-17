@@ -14,13 +14,13 @@ import TextInput from "./TextInput";
 import BasicPagination from "../pagination/Pagination";
 import { useParams } from "react-router-dom";
 
-export default function Comment({ commentData, changeFlag, flag }) {
+export default function Comment({ commentData, changeFlag, flag, commentFlag, changeCommentFlag }) {
   //대댓글 데이터
+
 
   const [childCommentData, setChildCommentData] = useState([]);
   const [commentId, setCommentId] = useState([]);
   const { boardId } = useParams();
-
 
   const theme = createTheme({
     typography: {
@@ -64,13 +64,15 @@ export default function Comment({ commentData, changeFlag, flag }) {
           <h2>댓글 입력</h2>
           <TextInput changeFlag={changeFlag} flag={flag} />
           <div className="comment-list">
-            {commentData.map((commentItem) => {
+            {commentData.filter((commentItem) => commentItem.state).map((commentItem) => {
               return (
                 <CommentBoxWrap>
                   <CommentBox
                     commentData={commentItem}
                     changeFlag={changeFlag}
                     flag={flag}
+                    commentFlag={commentFlag}
+                    changeCommentFlag={changeCommentFlag}
                   />
                   <AddComment> 
                     <StyledAccordionSummary
