@@ -202,7 +202,7 @@ export default function Search(){
                                                 <h2>단어의 철자가 정확한지 확인하세요.<br/>
                                                 다른 검색어를 사용해보세요.<br/>
                                                 더 일반적인 검색어를 사용해보세요.</h2>
-                                            </NoResult>
+                                        </NoResult>
                                         )}
 
                                             {/* <Card item xs={12} md={6}>
@@ -288,14 +288,14 @@ export default function Search(){
                                             ))
                                         ) : (
                                         <NoResult>
-                                                <div className="no-result-title">
-                                                    <SearchIcon/>
-                                                    <h1>검색 결과가 없습니다.</h1>
-                                                </div>
-                                                <h2>단어의 철자가 정확한지 확인하세요.<br/>
-                                                다른 검색어를 사용해보세요.<br/>
-                                                더 일반적인 검색어를 사용해보세요.</h2>
-                                            </NoResult>
+                                            <div className="no-result-title">
+                                                <SearchIcon/>
+                                                <h1>검색 결과가 없습니다.</h1>
+                                            </div>
+                                            <h2>단어의 철자가 정확한지 확인하세요.<br/>
+                                            다른 검색어를 사용해보세요.<br/>
+                                            더 일반적인 검색어를 사용해보세요.</h2>
+                                        </NoResult>
                                         )}
 
                                             {/* <Card item xs={12} md={6}>
@@ -505,6 +505,7 @@ const NoResult = styled(Box)`
     border-top: 1px solid rgba(0,0,0,.1);
     border-bottom: 1px solid rgba(0,0,0,.1);
     padding: 20rem 0;
+    width: 100%;
     display: flex;
     align-items: center;
     justify-content: center;

@@ -229,9 +229,32 @@ export default function Nav(){
                                     <a href="/"><img src={MySVG} width="80px" height="20%" style={{ marginTop: '20px', display: 'block' }}></img></a>
                                 </div>
                                 <div className="dp-flex">
-                                    <ProfileBtn sx={{ml : 1}}>
-                                        <AccountCircleIcon />
-                                    </ProfileBtn>
+                                <ProfileBtn
+                             id="basic-button"
+                             aria-controls={open2 ? 'basic-menu' : undefined}
+                             aria-haspopup="true"
+                             aria-expanded={open2 ? 'true' : undefined}
+                             onClick={handleClick2}>
+                                { userInfo ? 
+                                (
+                                    <div>
+                                        {/* <AccountCircleIcon src={userInfo.username}/> */}
+
+                                       <img src={userInfo?.profileImg} height={40} style={{ borderRadius: '50%' }}/>
+                                        {/* <Avatar src={userInfo?.profileImg}/> */}
+                                        {/* <div>{userInfo?.username}</div> */}
+                                        {/* <button onClick={handleLogout}>log out</button> */}
+                                    </div>
+                                )
+                                : 
+                                (
+                                    <div>
+                                        <FilledBtn text= {"로그인"} handle={() => window.location.href = `/login?redirect=${window.location.pathname}`}></FilledBtn> 
+                                    </div>
+                                ) 
+                                
+                                }
+                            </ProfileBtn>
                                     <MenuBtn onClick={handleClick}>
                                         <MenuIcon />
                                     </MenuBtn>
