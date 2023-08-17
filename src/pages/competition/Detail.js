@@ -167,10 +167,10 @@ export default function Detail() {
                     <h2>{data.activitiyName}</h2>
                     <div className="dp-flex scrap-wrap">
                     <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
-
                     {/*3차추가 */}
                     <CheckBtn type={"scrap"}/>
                     </div>
+                    
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">
@@ -504,6 +504,18 @@ const Content = styled(Box)`
       }
       .detail-list {
         width: 100%;
+        /*0817 수정 */
+                &>div{
+                    flex-direction: column;
+                    align-items: flex-start;
+                    h2{
+                        margin-bottom: 1rem;
+                    }
+                }
+                .scrap-wrap{
+                    width: 100%;
+                    justify-content: space-between;
+                }
         .detail-info {
           li {
             flex-direction: column;

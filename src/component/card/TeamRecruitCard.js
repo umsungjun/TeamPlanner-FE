@@ -6,7 +6,7 @@ import {createTheme,ThemeProvider} from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
-export default function TeamRecruiteCard({state}){
+export default function TeamRecruiteCard({item}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -21,34 +21,36 @@ export default function TeamRecruiteCard({state}){
          },
     })
 
+    
+
     return(
         <>
         <ThemeProvider theme={theme}>
             <RecruitCardWrap>
                 <div className="recruiteCardWrap">
                     <div className="team-img">
-                        <img src="/img/card/sample4.png" width="100%"/>
+                        <img src={item.activityImg} width="100%"/>
                     </div>
                     <div className="team-info">
                         <div className="dp-wrap">
                             <div className="keyword-wrap">
-                                <Keyword>국내봉사</Keyword>
+                                <Keyword>{item.activityField}</Keyword>
                             </div>
                             <IconButton><ChevronRightIcon/></IconButton>  
                         </div>
-                        <h2>[서울시 지원봉사센터] Project 대학생 멘토 모집</h2>
-                        <p>서울시자원봉사센터</p>
+                        <h2>{item.activitiyName}</h2>
+                        <p>{item.companyType}</p>
                         <div className="dp-wrap">
                             {
-                                state == "done" ?
+                                item.boardStateEnum == "CLOSED" ?
                                 <State><div class="done">마감</div></State>
                                 :  <State><div class="ing">진행중</div></State>
                             }
-                            <div className="view-icon"><RemoveRedEyeIcon/><span>120</span></div>
+                            <div className="view-icon"><RemoveRedEyeIcon/><span>{item.viewCount}</span></div>
                         </div>
                         <div className="dp-wrap btn-wrap">
-                            <Button variant="outlined" color="secondary">팀원모집<strong>0</strong></Button>
-                            <Button variant="outlined" color="secondary">댓글<strong>0</strong></Button>
+                            <Button variant="outlined" color="secondary">팀원모집<strong>{item.recruitmentCount}</strong></Button>
+                            <Button variant="outlined" color="secondary">댓글<strong>{item.commentCount}</strong></Button>
                         </div>
                     </div>
                 </div>

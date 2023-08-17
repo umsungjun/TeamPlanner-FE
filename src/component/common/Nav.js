@@ -30,8 +30,25 @@ import { useRef } from "react";
 import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
 import Notice from "./Notcie";
 import { API } from "../../api/api";
+import { useNavigate } from 'react-router-dom';
 
 export default function Nav(){
+
+    const navigate = useNavigate();
+    const [search, setSearch] = useState('');
+
+    const handleSearch = () => {
+        if(search.trim()===''){
+            alert("검색할 단어를 입력해주세요");
+        }
+        if (search.trim() !== '') {
+            navigate(`/search?s=${encodeURIComponent(search)}`);
+        }
+        
+    };
+
+
+
 
     const theme = createTheme({
         typography:{
@@ -115,7 +132,7 @@ export default function Nav(){
                                     {/* <a href="">동아리</a> */}
                                 </li>
                                 <li>
-                                    <Link to="/">팀원 모집게시판</Link>
+                                    <Link to="/team/recruiteList">팀원 모집게시판</Link>
                                     {/* <a href="">팀원 모집게시판</a> */}
                                 </li>
                             </ul>
@@ -123,11 +140,18 @@ export default function Nav(){
                         <div className="right-box">
                             <div className="search-bar">
                                <StyledInputBase
-                                sx={{ ml: 1, flex: 1 }}
-                                placeholder="검색"
-                                inputProps={{ 'aria-label': 'search google maps' }}
+                               sx={{ ml: 1, flex: 1 }}
+                               placeholder="검색"
+                               inputProps={{ 'aria-label': 'search google maps' }}
+                               value={search}
+                               onChange={(e) => setSearch(e.target.value)}
+                               onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSearch();
+                                }
+                                }}
                                 />
-                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search"  onClick={handleSearch}>
                                     <SearchIcon />
                                 </IconButton>
                             </div>
@@ -230,11 +254,17 @@ export default function Nav(){
                             </div>
                             <div className="search-bar">
                                 <StyledInputBase
-                                    sx={{ ml: 1, flex: 1 }}
-                                    placeholder="검색"
-                                    inputProps={{ 'aria-label': 'search google maps' }}
+                                      sx={{ ml: 1, flex: 1 }}
+                                      placeholder="검색"
+                                      inputProps={{ 'aria-label': 'search google maps' }}
+                                      value={search}
+                                      onChange={(e) => setSearch(e.target.value)}
+                                      onKeyDown={(e) => {
+                                       if (e.key === 'Enter') {
+                                           handleSearch();
+                                       }}}
                                 />
-                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSearch}>
                                     <SearchIcon />
                                 </IconButton>
                             </div>
