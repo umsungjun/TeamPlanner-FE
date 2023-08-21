@@ -125,9 +125,9 @@ const onOauthLogin_K = () => {
             </ul>
             <ul className="a-wrap">
               <li>
-                <a href="">아이디</a>
+                <a href="/Idpw">아이디</a>
                 <span>|</span>
-                <a href="">비밀번호 찾기</a>
+                <a href="/Idpw">비밀번호 찾기</a>
               </li>
               <li>
                 <a href="" className="joinBtn">
