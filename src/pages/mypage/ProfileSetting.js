@@ -112,7 +112,7 @@ export default function ProfileSetting(){
                                     }
                                 </div>
                                 <div className="profile-box">
-                                    <div className="profile-img">
+                                    <div className="profileImage">
                                         <img src="/img/profile/profile.png" alt="프로필 이미지" />
                                         {
                                             edit? <></> :
@@ -474,7 +474,7 @@ const Content = styled(Box)`
         display: flex;
         align-items: center;
         margin-bottom: 5rem;
-        .profile-img{
+        .profileImage{
             width: 25%;
             display: flex;
             align-items: center;
@@ -805,7 +805,7 @@ const Content = styled(Box)`
        }
        .profile-box{
         flex-direction: column;
-        .profile-img{
+        .profileImage{
             width: 70%;
         }
         .introduce-box{

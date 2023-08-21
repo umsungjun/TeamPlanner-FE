@@ -4,7 +4,8 @@ import {createTheme,Link,ThemeProvider} from '@mui/material';
 import Button from "@mui/material/Button";
 import theme from "../../style/theme";
 
-export default function FilledBtn({text, handle, href, color}){
+export default function FilledBtn({text, handle,href,color,disabled}){
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -23,10 +24,14 @@ export default function FilledBtn({text, handle, href, color}){
            <ThemeProvider theme={theme}>
                 {/* 수정 */}
                 {
-                    color ?
-                    <FilledButton variant="contained" color="secondary" fullWidth  href={href}  onClick={handle}>{text}</FilledButton>
-                    :
-                    <FilledButton variant="contained" color="primary" fullWidth  href={href}   onClick={handle}>{text}</FilledButton>
+                    disabled ? (
+                        <FilledButton variant="contained" fullWidth  href={href}  onClick={handle} disabled>{text}</FilledButton>
+                    ) : (
+                        color ?
+                        <FilledButton variant="contained" color="secondary" fullWidth  href={href}  onClick={handle}>{text}</FilledButton>
+                        :
+                        <FilledButton variant="contained" color="primary" fullWidth  href={href}   onClick={handle}>{text}</FilledButton>
+                    )               
                 }
            </ThemeProvider>
         </>
