@@ -62,7 +62,7 @@ export default function CommonModal({button}){
                         }
                     </div>
                 <ApplicationModalWrap
-                    fullScreen={fullScreen}
+                    // fullScreen={fullScreen}
                     open={openModal}
                     onClose={handleClose}
                     aria-labelledby="responsive-dialog-title"
