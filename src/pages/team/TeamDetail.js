@@ -15,9 +15,12 @@ import ApplicationModal from "../../component/modal/ApplicationModal";
 import { useParams } from "react-router";
 import { API } from "../../api/api";
 import { now } from "moment/moment";
+import CheckBtn from "../../component/button/CheckBtn";
 
 
 export default function TeamDetail({done}){
+    const userInfo = localStorage.getItem('userInfo'); // Retrieve user token from local storage
+
     const {recruitmentId} = useParams();
     const theme = createTheme({
         typography:{
@@ -123,7 +126,7 @@ export default function TeamDetail({done}){
                                             {
                                                 done ? 
                                                 <Button variant="contained" disabled>이미 참여한 공고입니다</Button> :
-                                                <ApplicationModal/>
+                                                <ApplicationModal recruitmentId={recruitmentId}/>
                                             }
                                         </li>
                                     </ul>
@@ -131,13 +134,29 @@ export default function TeamDetail({done}){
                                 </div>
                                 <div className="content">
                                     <div className="profile dp-flex">
+                                    <div className="dp-flex">
                                         <Avatar src={authorProfileImg}></Avatar>
                                         <h3>{authorNickname}</h3>
+                                    </div>
+                                        <div className="btn-wrap">
+                                        {userInfo && (
+                                                <>
+                                                <SmallBtn variant="outlined" color="secondary">
+                                                    <p>수정</p>
+                                                </SmallBtn>
+                                                <SmallBtn variant="outlined" color="secondary">
+                                                    <p className="delete">삭제</p>
+                                                </SmallBtn>
+                                                </>
+                                            )}
+                                        </div>
                                     </div>
                                     <div className="text-wrap">
                                         <h4>{title}</h4>
                                         {content?.split('\n').map(l => <p>{l}</p>)}
                                     </div>
+                                    {/*3차추가 */}
+                                    <CheckBtn type={"like"}/>
                                 </div>
                                 <div className="comment-wrap">
                                     <Comment changeFlag={setChangeFlag} flag={flag} commentData={data.commentList} />
@@ -145,7 +164,7 @@ export default function TeamDetail({done}){
                             </div>
                         </Content>
                         <SideScroll>
-                            <ScrollList />
+                            <ScrollList category={"공모전"}/>
                         </SideScroll>
                     </PaddingWrap>
                 </Container>
@@ -265,6 +284,8 @@ const Content = styled(Box)`
             border-bottom: 1px solid rgba(0,0,0,.1);
             .profile{
                 margin-bottom: 2rem;
+                justify-content: space-between;
+                align-items: center;
                 svg{
                     width: 4rem;
                     height: 4rem;
@@ -277,8 +298,14 @@ const Content = styled(Box)`
                     font-weight: 700;
                     margin-left: .5rem;
                 }
+                .btn-wrap{
+                    button:first-of-type{
+                        margin-right: .5rem;
+                    }
+                }
             }
             .text-wrap{
+                margin-bottom: 2rem;
                 h4{
                     font-size: 1.8rem;
                     color: #3b3b3b;
@@ -336,3 +363,13 @@ const Content = styled(Box)`
         }
     }
 `;
+
+const SmallBtn = styled(Button)`
+    p{
+        font-size: 1.4rem;
+        color: #3b3b3b;
+    }
+    .delete{
+        color: #F30C0C;
+    }
+`; 

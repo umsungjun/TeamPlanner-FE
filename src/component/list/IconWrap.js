@@ -10,11 +10,11 @@ export default function IconWrap({type, likeCount, viewCount,commentCount}){
         <>
             <IconList>
                 <ul className="icon-wrap">
-                    <li><RemoveRedEyeIcon/><span>{viewCount}</span></li>
-                    <li><FavoriteIcon/><span>{likeCount}</span></li>
+                    <li><RemoveRedEyeIcon/><span> {viewCount} </span></li>
+                    <li><FavoriteIcon/><span> {likeCount} </span></li>
                     {
                         type == "noComment" ?
-                        <></> : <li><CommentIcon/><span>{commentCount}</span></li> 
+                        <></> : <li><CommentIcon/><span> {commentCount} </span></li> 
                     }
                 </ul>
             </IconList>

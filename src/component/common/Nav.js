@@ -8,6 +8,9 @@ import SearchIcon from '@mui/icons-material/Search';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InputBase from '@mui/material/InputBase';
 
+
+import MySVG from '../../logo.svg';
+
 import MenuIcon from '@mui/icons-material/Menu';
 
 import List from '@mui/material/List';
@@ -27,8 +30,25 @@ import { useRef } from "react";
 import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
 import Notice from "./Notcie";
 import { API } from "../../api/api";
+import { useNavigate } from 'react-router-dom';
 
 export default function Nav(){
+
+    const navigate = useNavigate();
+    const [search, setSearch] = useState('');
+
+    const handleSearch = () => {
+        if(search.trim()===''){
+            alert("검색할 단어를 입력해주세요");
+        }
+        if (search.trim() !== '') {
+            navigate(`/search?s=${encodeURIComponent(search)}`);
+        }
+        
+    };
+
+
+
 
     const theme = createTheme({
         typography:{
@@ -81,6 +101,10 @@ export default function Nav(){
    
      useOnHoverOutside(dropdownRef, closeHoverMenu); // Call the hook
      
+     const handleClose = () => {
+        setAnchorEl(null);
+      };
+  
  
 
 
@@ -92,7 +116,7 @@ export default function Nav(){
                     <div className="nav-wrap">
                         <div className="left-box">
                             <div className="logo">
-                                <a href="/"><img src="/logo.svg"></img></a>
+                                <a href="/"><img src={MySVG} width="140px" height="20%" style={{ marginTop: '20px', display: 'block' }}></img></a>
                             </div>
                             <ul>
                                 <li>
@@ -108,7 +132,7 @@ export default function Nav(){
                                     {/* <a href="">동아리</a> */}
                                 </li>
                                 <li>
-                                    <Link to="/">팀원 모집게시판</Link>
+                                    <Link to="/team/recruiteList">팀원 모집게시판</Link>
                                     {/* <a href="">팀원 모집게시판</a> */}
                                 </li>
                             </ul>
@@ -116,22 +140,36 @@ export default function Nav(){
                         <div className="right-box">
                             <div className="search-bar">
                                <StyledInputBase
-                                sx={{ ml: 1, flex: 1 }}
-                                placeholder="검색"
-                                inputProps={{ 'aria-label': 'search google maps' }}
+                               sx={{ ml: 1, flex: 1 }}
+                               placeholder="검색"
+                               inputProps={{ 'aria-label': 'search google maps' }}
+                               value={search}
+                               onChange={(e) => setSearch(e.target.value)}
+                               onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    handleSearch();
+                                }
+                                }}
                                 />
-                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search"  onClick={handleSearch}>
                                     <SearchIcon />
                                 </IconButton>
                             </div>
-                            <ProfileBtn>
+                            <ProfileBtn
+                             id="basic-button"
+                             aria-controls={open2 ? 'basic-menu' : undefined}
+                             aria-haspopup="true"
+                             aria-expanded={open2 ? 'true' : undefined}
+                             onClick={handleClick2}>
                                 { userInfo ? 
                                 (
                                     <div>
                                         {/* <AccountCircleIcon src={userInfo.username}/> */}
-                                        <Avatar src={userInfo?.profileImg}/>
+
+                                       <img src={userInfo?.profileImg} height={40} style={{ borderRadius: '50%' }}/>
+                                        {/* <Avatar src={userInfo?.profileImg}/> */}
                                         {/* <div>{userInfo?.username}</div> */}
-                                        <button onClick={handleLogout}>log out</button>
+                                        {/* <button onClick={handleLogout}>log out</button> */}
                                     </div>
                                 )
                                 : 
@@ -143,6 +181,27 @@ export default function Nav(){
                                 
                                 }
                             </ProfileBtn>
+                            
+                            <Menu
+                                id="basic-menu"
+                                anchorEl={anchorEl}
+                                open={open2}
+                                onClose={handleClose}
+                                MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                                }}
+                            >
+                                <StyledMenuItem onClick={handleClose}>
+                                <Link to="/mypage/profileSetting">
+                                        프로필 보기
+                                    </Link>
+                                </StyledMenuItem>
+                                <StyledMenuItem onClick={handleClose}>
+                                    <Link to="/" onClick={handleLogout}>
+                                        로그아웃
+                                    </Link>
+                                </StyledMenuItem>
+                            </Menu>
                            {/*수정 */}
                            <Button onMouseOver={() => setMenuDropDownOpen(true)}>
                                     <NotificationBadge badgeContent={4} color="primary">
@@ -167,36 +226,68 @@ export default function Nav(){
                         >
                             <div className="dp-flex mobileNav">
                                 <div className="logo">
-                                    <a href="/"><img src="/logo.svg"></img></a>
+                                    <a href="/"><img src={MySVG} width="80px" height="20%" style={{ marginTop: '20px', display: 'block' }}></img></a>
                                 </div>
                                 <div className="dp-flex">
-                                    <ProfileBtn sx={{ml : 1}}>
-                                        <AccountCircleIcon />
-                                    </ProfileBtn>
+                                <ProfileBtn
+                             id="basic-button"
+                             aria-controls={open2 ? 'basic-menu' : undefined}
+                             aria-haspopup="true"
+                             aria-expanded={open2 ? 'true' : undefined}
+                             onClick={handleClick2}>
+                                { userInfo ? 
+                                (
+                                    <div>
+                                        {/* <AccountCircleIcon src={userInfo.username}/> */}
+
+                                       <img src={userInfo?.profileImg} height={40} style={{ borderRadius: '50%' }}/>
+                                        {/* <Avatar src={userInfo?.profileImg}/> */}
+                                        {/* <div>{userInfo?.username}</div> */}
+                                        {/* <button onClick={handleLogout}>log out</button> */}
+                                    </div>
+                                )
+                                : 
+                                (
+                                    <div>
+                                        <FilledBtn text= {"로그인"} handle={() => window.location.href = `/login?redirect=${window.location.pathname}`}></FilledBtn> 
+                                    </div>
+                                ) 
+                                
+                                }
+                            </ProfileBtn>
                                     <MenuBtn onClick={handleClick}>
                                         <MenuIcon />
                                     </MenuBtn>
                                     {/*수정 */}
-                                    <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                    {/*0809 수정 */}
+                                    <Button onClick={() => setMenuDropDownOpen(!isMenuDropDownOpen)}>
                                         <NotificationBadge badgeContent={4} color="primary">
                                             <NotificationsIcon color="action" />
                                         </NotificationBadge>
                                     </Button>
+                                    {/*0809 수정 */}
                                     {
                                         isMenuDropDownOpen &&
-                                        <div onMouseLeave={() => setMenuDropDownOpen(false)}>
-                                            <Notice/> 
+                                        <div onClick={() => setMenuDropDownOpen(false)}>
+                                            {/*0808 수정 */}
+                                            <Notice handle={setMenuDropDownOpen}/> 
                                         </div>
                                      }
                                 </div>
                             </div>
                             <div className="search-bar">
                                 <StyledInputBase
-                                    sx={{ ml: 1, flex: 1 }}
-                                    placeholder="검색"
-                                    inputProps={{ 'aria-label': 'search google maps' }}
+                                      sx={{ ml: 1, flex: 1 }}
+                                      placeholder="검색"
+                                      inputProps={{ 'aria-label': 'search google maps' }}
+                                      value={search}
+                                      onChange={(e) => setSearch(e.target.value)}
+                                      onKeyDown={(e) => {
+                                       if (e.key === 'Enter') {
+                                           handleSearch();
+                                       }}}
                                 />
-                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search">
+                                <IconButton type="button" sx={{ p: '10px' }} aria-label="search" onClick={handleSearch}>
                                     <SearchIcon />
                                 </IconButton>
                             </div>
@@ -405,67 +496,75 @@ const NotificationBadge = styled(Badge)`
             height: 2.5rem;
         }
     }
+`
+const StyledMenuItem = styled(MenuItem)`
+    a{
+        font-size: 1.6rem;
+        color: #3b3b3b;
+        text-decoration: none;
+    }
 `;
 
-const NotificationMenu = styled(Menu)`
-    &>div{
-        width: 45rem;
-        height: 50rem;
-        max-height: 50rem;
-        overflow-y: scroll;
-    }
-    .close_btn{
-        display: flex;
-        align-items: flex-end;
-        justify-content: flex-end;
-        padding: 1rem 2rem 0 2rem;
-        button{
-            padding: 0;
-            svg{
-                width: 2rem;
-                height: 2rem;
-            }
-        }
-    }
-    .notification-list{
-        h3{
-            font-size: 2rem;
-            color: #3b3b3b;
-            font-weight: bold;
-            padding: 0 2rem 2rem 2rem;
-        }
-        li{
-            background-color: #fff;
-            padding: 2rem;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            cursor: pointer;
-            .img-box{
-                width: 24%;
-                img{
-                    width: 100%;
-                    border-radius: 4px;
-                }
-            }
-            .text-box{
-                width: 70%;
-                h4{
-                    font-size: 1.6rem;
-                    color: #3b3b3b;
-                    line-height: 150%;
-                    font-weight: 600;
-                    margin-bottom: 1rem;
-                }
-                p{
-                    font-size: 1.4rem;
-                    color: rgba(0,0,0,.6);
-                    line-height: 150%;
-                }
-            }
-        }
-        li:hover{
-            background-color: #FFF1E5;
-        }
-    }
-`;
+// const NotificationMenu = styled(Menu)`
+//     &>div{
+//         width: 45rem;
+//         height: 50rem;
+//         max-height: 50rem;
+//         overflow-y: scroll;
+//     }
+//     .close_btn{
+//         display: flex;
+//         align-items: flex-end;
+//         justify-content: flex-end;
+//         padding: 1rem 2rem 0 2rem;
+//         button{
+//             padding: 0;
+//             svg{
+//                 width: 2rem;
+//                 height: 2rem;
+//             }
+//         }
+//     }
+//     .notification-list{
+//         h3{
+//             font-size: 2rem;
+//             color: #3b3b3b;
+//             font-weight: bold;
+//             padding: 0 2rem 2rem 2rem;
+//         }
+//         li{
+//             background-color: #fff;
+//             padding: 2rem;
+//             display: flex;
+//             align-items: center;
+//             justify-content: space-between;
+//             cursor: pointer;
+//             .img-box{
+//                 width: 24%;
+//                 img{
+//                     width: 100%;
+//                     border-radius: 4px;
+//                 }
+//             }
+//             .text-box{
+//                 width: 70%;
+//                 h4{
+//                     font-size: 1.6rem;
+//                     color: #3b3b3b;
+//                     line-height: 150%;
+//                     font-weight: 600;
+//                     margin-bottom: 1rem;
+//                 }
+//                 p{
+//                     font-size: 1.4rem;
+//                     color: rgba(0,0,0,.6);
+//                     line-height: 150%;
+//                 }
+//             }
+//         }
+//         li:hover{
+//             background-color: #FFF1E5;
+//         }
+//     }
+// `;
+

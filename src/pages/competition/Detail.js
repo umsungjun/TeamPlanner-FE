@@ -21,6 +21,10 @@ import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
 import KakaoButton from "./kakaoButton";
 import { Opacity } from "@mui/icons-material";
+import CheckBtn from "../../component/button/CheckBtn";
+import CommonModal from "../../component/modal/CommonModal";
+
+
 
 function CustomTabPanel(props) {
   const { children, value, index, ...other } = props;
@@ -64,16 +68,18 @@ export default function Detail() {
   //comments.length
   let [commentCount, setCommentCount] = useState([]);
   const [flag, setChangeFlag] = useState(false);
+  const [commentFlag, setCommentFlag] = useState(false);
+
 
   useEffect(() => {
     API.get(`/api/v1/board/${boardId}`).then((res) => {
       setData(res.data[0]);
       setCommentData(res.data[0].comments);
-      if (Object.keys(res.data[0].comments).length !== 0) {
-        setCommentCount(res.data[0].comments.length);
-      }
+      console.log(res.data[0].comments)
+      const filteredComments = res.data[0].comments.filter(commentItem => commentItem.state);
+      setCommentCount(filteredComments.length);
     });
-  }, [flag]); 
+  }, [flag, commentFlag]); 
 
   const theme = createTheme({
     typography: {
@@ -129,11 +135,11 @@ export default function Detail() {
     width: 100%;
 
     div {
-      width: 100%;
+      width: 70%;
     }
 
     img {
-      width: 100%;
+      width: 70%;
     }
   `
 
@@ -159,7 +165,12 @@ export default function Detail() {
                 <li className="detail-list">
                   <div className="dp-flex space-between">
                     <h2>{data.activitiyName}</h2>
+                    <div className="dp-flex scrap-wrap">
                     <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
+                    {/*3차추가 */}
+                    <CheckBtn type={"scrap"}/>
+                    </div>
+                    
                   </div>
                   <ol className="detail-info">
                     <li className="dp-flex space-between">
@@ -317,7 +328,7 @@ export default function Detail() {
                   {/* 팀원 모집글 탭 */}
                   <TeamCardWrap>
                     {
-                      recruitmentList.map(r => 
+                      recruitmentList.map(r =>  
                         <Card>
                           <TaemCard {...r}/>
                         </Card>
@@ -340,7 +351,18 @@ export default function Detail() {
                     </Card> */}
                   </TeamCardWrap>
                   <div className="dp-end">
-                    <FilledBtn text={"글쓰기"} handle={() => {console.log("/recruitment/write?boardId=" + boardId); window.location.href=`/recruitment/write?boardId=${boardId}`}}/>
+                     {/*3차추가 */}
+                     { <>
+                    <CommonModal button={
+                    <FilledBtn text={"글쓰기"} handle={() => {
+                      if (localStorage.getItem("userInfo")) {
+                        console.log("/recruitment/write?boardId=" + boardId); 
+                        window.location.href=`/recruitment/write?boardId=${boardId}`
+                      }}}
+                      />
+                    } />
+                      </>
+                     }
                   </div>
 
                   <BasicPagination
@@ -351,7 +373,7 @@ export default function Detail() {
 
                 </StyledTabPanel>
                 <StyledTabPanel value={value} index={2}>
-                  <Comment changeFlag={setChangeFlag} flag={flag} commentData={commentData} />
+                  <Comment changeFlag={setChangeFlag} flag={flag} commentFlag={commentFlag} changeCommentFlag={setCommentFlag} commentData={commentData} />
                 </StyledTabPanel>
               </TabWrap>
             </Content>
@@ -482,6 +504,18 @@ const Content = styled(Box)`
       }
       .detail-list {
         width: 100%;
+        /*0817 수정 */
+                &>div{
+                    flex-direction: column;
+                    align-items: flex-start;
+                    h2{
+                        margin-bottom: 1rem;
+                    }
+                }
+                .scrap-wrap{
+                    width: 100%;
+                    justify-content: space-between;
+                }
         .detail-info {
           li {
             flex-direction: column;
@@ -569,12 +603,15 @@ const StyledTabPanel = styled(CustomTabPanel)`
   display: flex;
   align-items: flex-end;
   justify-content: flex-end;
-  /*수정*/
+  /*3차 수정*/
   button{
-      /* width: 15%; */
+      width: 100%;
+      padding: 1rem 5rem !important;
   }
+  /*3차 수정*/
   a{
-      width: 15%;
+      width: fit-content;
+      padding: .8rem 5rem !important;
   }
 }
 @media ${() => theme.device.mobile} {

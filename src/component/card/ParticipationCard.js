@@ -5,8 +5,20 @@ import theme from "../../style/theme";
 import Box from "@mui/material/Box";
 import SolidBtn from "../button/SolideBtn";
 import FilledBtn from "../button/FilledBtn";
+import { API } from "../../api/api";
 
-export default function ParticipationCard(){
+export default function ParticipationCard({boardId,
+    boardName,
+    recruitmentApplyContent,
+    recruitmentApplyId,
+    recruitmentTitle,
+    recruitmentContent,
+    recruitmentId,
+    fetchData
+
+}){
+
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -18,6 +30,20 @@ export default function ParticipationCard(){
          },
     })
 
+    const onCancel = () => {
+        API.delete(`/api/v1/recruitment/${recruitmentId}/apply`, {
+            }
+        )
+        .then(res => {
+            console.log('res', res)
+            alert("참여신청이 취소되었습니다.")
+            fetchData();
+        }).catch(err => {
+            console.log('err', err)
+            if (err.response?.data?.message) alert(err.response?.data?.message)
+        })
+    }
+
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -25,16 +51,16 @@ export default function ParticipationCard(){
                     <div className="padding">
                         <ul className="participation-list">
                             <li className="img-box">
-                                <img src="/img/card/sample3.png" />
+                                {/* <img src="/img/card/sample3.png" /> */}
                             </li>
                             <li className="text-wrap">
-                                <h2>제목 1</h2>
-                                <p>안녕하세요 저 알고리즘 빡고수입니다. 제 프로필보세요 ㅋㅋ</p>
+                                <a href={`/recruitment/${recruitmentId}`}><h2>{recruitmentTitle}</h2></a>
+                                <p>{recruitmentApplyContent}</p>
                             </li>
                         </ul>
                         <div className="button-wrap">
-                            <SolidBtn text={"취소"}></SolidBtn>
-                            <FilledBtn text={"참여신청"} />
+                            <SolidBtn text={"취소"} handle={onCancel}></SolidBtn>
+                            {/* <FilledBtn text={"참여신청"} /> */}
                         </div>
                     </div>
                 </ParticipationCardWrap>

@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import theme from "../../style/theme";
 import {createTheme,Radio,ThemeProvider} from '@mui/material';
 import Button from '@mui/material/Button';
 import Box from "@mui/material/Box";
 import FormControlLabel from '@mui/material/FormControlLabel';
-export default function KeywordBtn({text, setCurrentChecked, currentChecked}) {
+export default function KeywordBtn({text,translatedPath, setCurrentChecked, currentChecked}) {
 
     const theme = createTheme({
         typography:{
@@ -28,6 +28,13 @@ export default function KeywordBtn({text, setCurrentChecked, currentChecked}) {
             setCurrentChecked((currentChecked.filter(item => item !== text)))
         }
     }
+
+    useEffect(() => {
+    }, [currentChecked])
+
+    useEffect(()=>{
+        setCurrentChecked([]);
+    },[translatedPath])
  
     return(
         <>

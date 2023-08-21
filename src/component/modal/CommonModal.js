@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState,useEffect } from "react";
 import styled from "@emotion/styled";
 import {createTheme,Icon,IconButton,ThemeProvider} from '@mui/material';
 import CloseIcon from '@mui/icons-material/Close';
@@ -9,6 +9,7 @@ import Box from "@mui/material/Box";
 import FilledBtn from "../button/FilledBtn";
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 
+
 import Dialog from '@mui/material/Dialog';
 import DialogActions from '@mui/material/DialogActions';
 import DialogContent from '@mui/material/DialogContent';
@@ -16,10 +17,12 @@ import DialogContentText from '@mui/material/DialogContentText';
 import DialogTitle from '@mui/material/DialogTitle';
 import useMediaQuery from '@mui/material/useMediaQuery';
 import { useTheme } from '@mui/material/styles';
-import { API } from "../../api/api";
 
 
-export default function ApplicationModal({recruitmentId}){
+export default function CommonModal({button}){
+
+
+    const isLoggedIn = localStorage.getItem("userInfo");
 
 
     const theme = createTheme({
@@ -37,33 +40,29 @@ export default function ApplicationModal({recruitmentId}){
     const fullScreen = useMediaQuery(theme2.breakpoints.down('md'));
 
     const [openModal, setOpenModal] = React.useState(false);
-    const handleOpen = () => setOpenModal(true);
+    const ModalOpen = () => {
+        setOpenModal(true)
+    };
     const handleClose = () => setOpenModal(false);
-    const [content, setContent] = useState("")
+  
+    useEffect(() => {
+        // 로컬스토리지에 "isLoggedIn" 키가 있으면 모달을 닫음
+        if (isLoggedIn) {
+            setOpenModal(false);
+        }
+    }, [isLoggedIn]);
 
-    const onApply = () => {
-        console.log(`onApply recruitmentId: ${recruitmentId}, content: ${content}`)
-        API.post(`/api/v1/recruitment/${recruitmentId}/apply`, {
-            content: content
-            }
-        )
-        .then(res => {
-            console.log('res', res)
-            alert("참여신청에 성공했습니다")
-        }).catch(err => {
-            console.log('err', err)
-            if (err.response?.data?.message) alert(err.response?.data?.message)
-        }).finally(handleClose())
-    }
 
     return(
         <>
             <ThemeProvider theme={theme}>
-                <ApplicationBtn>
-                    <FilledBtn text={"참여신청"} handle={handleOpen}></FilledBtn>
-                </ApplicationBtn>
+                    <div className="btn" onClick={ModalOpen}>
+                        {
+                            button 
+                        }
+                    </div>
                 <ApplicationModalWrap
-                    fullScreen={fullScreen}
+                    // fullScreen={fullScreen}
                     open={openModal}
                     onClose={handleClose}
                     aria-labelledby="responsive-dialog-title"
@@ -73,24 +72,12 @@ export default function ApplicationModal({recruitmentId}){
                             <IconButton onClick={handleClose} sx={{p : 0}}><CloseIcon/></IconButton>
                         </div>
                         <DialogTitle id="responsive-dialog-title">
-                            <h1>참여메세지를 남겨주세요!</h1>
+                            <h1>로그인 후 이용가능한 서비스입니다.<br/>
+                                로그인 하시겠습니까?</h1>
                         </DialogTitle>
                         <DialogContent>
-                            <div className="profile">
-                                <IconButton sx={{p : 0}}>
-                                    <AccountCircleIcon/>
-                                </IconButton>
-                                <h3>유저 1</h3>
-                            </div>
-                            <div className="textarea">
-                                <textarea 
-                                placeholder="내용을 입력해주세요..." 
-                                value={content} 
-                                onChange={(e)=> setContent(e.target.value)}></textarea>
-                            </div>
                             <div className="button-wrap">
-                                <SolidBtn text={"취소"} handle={handleClose}></SolidBtn>
-                                <FilledBtn text={"참여신청"} handle={onApply}/>
+                                <FilledBtn text={"확인"}  handle={handleClose}/>
                             </div>
                         </DialogContent>
                     </Box>
@@ -119,35 +106,9 @@ const ApplicationModalWrap = styled(Dialog)`
         color: #3b3b3b;
         line-height: 150%;
         font-weight: bold;
+        text-align: center;
     }
-    .profile{
-        display: flex;
-        align-items: center;
-        margin:1rem 0;
-        svg{
-            width: 4rem;
-            height: 4rem;
-            color: #FFAD6A;
-        }
-        h3{
-            font-size: 1.6rem;
-            color: #3b3b3b;
-            font-weight: 600;
-            line-height: 150%;
-            margin-left: .5rem;
-        }
-    }
-    .textarea{
-        textarea{
-            width: 99%;
-            height: 20rem;
-            font-size: 1.6rem;
-            line-height: 150%;
-            color: #3b3b3b;
-            border: 1px solid rgba(0,0,0,.2);
-            border-radius: 4px;
-        }
-    }
+
     .button-wrap{ 
         display: flex;
         align-items: center;

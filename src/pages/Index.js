@@ -14,8 +14,12 @@ import { useLocation } from "react-router-dom";
 import { contest } from "./category";
 import { externalActivity } from "./category";
 import { club } from "./category";
+import loader from '../loader.gif';
 
 const Item = styled(Box)(({ theme }) => ({
+
+
+
   // backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
   // ...theme.typography.body2,
   padding: theme.spacing(1),
@@ -44,13 +48,13 @@ export default function Index() {
 
   const [currentChecked, setCurrentChecked] = useState([]);
 
-  // console.log("현재페이지", currentPage);
-
   const history = useLocation();
 
-  let translatedPath = "";
+  // 로딩
+  const [loading, setLoading] = useState(true);
+  const [loading2, setLoading2] = useState(true);
 
-  console.log(data);
+  let translatedPath = "";
 
   switch (history.pathname) {
     case "/contest":
@@ -78,6 +82,7 @@ export default function Index() {
   useEffect(() => {
     const result = currentChecked.join('/');
     setActivityField(result);
+    
   }, [currentChecked])
 
   useEffect(() => {
@@ -102,10 +107,8 @@ export default function Index() {
       `/api/v1/board?category=${translatedPath}&activityField=${activityField}&page=0&size=12&sort=${sortParam}`
     ).then((res) => {
       setTotalPages(res.data.totalPages);
-      setCurrentPage(1);
     })
-  }, [translatedPath,activityField]);
-
+  }, [activityField]);
 
   const fetchData = async () => {
     try {
@@ -130,8 +133,8 @@ export default function Index() {
           currentPage - 1
         }&size=12&sort=${sortParam}`
       ).then(response => {
-        console.log(activityField);
         setData(response.data.content || []);
+        setLoading(false);
         setTotalPages(response.data.totalPages);
       })
       // .catch(err => {
@@ -145,7 +148,7 @@ export default function Index() {
   // useEffect hook to fetch initial data on component mount and whenever selectedSort changes
   useEffect(() => {
     fetchData();
-  }, [selectedSort, translatedPath, currentPage,activityField]);
+  }, [selectedSort, translatedPath, currentPage, activityField]);
 
   const theme = createTheme({
     typography: {
@@ -178,8 +181,21 @@ export default function Index() {
       }&size=12&sort=recruitmentPeriod,desc`
     ).then((res) => {
       setData2(res.data.content);
+      setLoading2(false);
     });
   }, [translatedPath, currentPage]);
+
+  useEffect(() => {
+    setActivityField([]);
+    setCurrentPage(1);
+  }, [translatedPath]);
+
+  const Loading = styled.img`
+    position: absolute;
+    left: 50%;
+    transform: translate(0, -50%);
+    width: 5%;
+  `
 
 
   return (
@@ -193,10 +209,10 @@ export default function Index() {
               <KeywordWrap>
                 {contest?.map((item, key) => {
                   return (
-                    <KeywordBtn key={key} text={item} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
+                    <KeywordBtn key={key} text={item} translatedPath={ translatedPath} setCurrentChecked={setCurrentChecked} currentChecked={currentChecked}/>
                   )
                 })}
-              </KeywordWrap>
+              </KeywordWrap>  
             
             )}
             </div>
@@ -240,10 +256,11 @@ export default function Index() {
               </ul>
               <div className="competition-list">
               <Grid container spacing={1}>
-                {data.length > 0 && data?.map((item) => {
+                {data.length > 0 ? data.map((item) => {
+
                   let title;
-                  if (item.activitiyName.length >= 10) {
-                    title = item.activitiyName.slice(0, 10) + "...";
+                  if (item.activitiyName.length >= 8) {
+                    title = item.activitiyName.slice(0, 8) + "...";
                   } else {
                     title = item.activitiyName;
                   }
@@ -266,7 +283,7 @@ export default function Index() {
                     
                     
                   );
-                })}
+                }) : <Loading src={loader}/>}
                   </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
@@ -298,17 +315,15 @@ export default function Index() {
               </ul>
               <div className="competition-list">
               <Grid container spacing={1}>
-                {data2?.map((item) => {
+                {!loading2 ? data2.map((item) => {
+
                   let title;
-                  if (item.activitiyName.length >= 10) {
-                    title = item.activitiyName.slice(0, 10) + "...";
+                  if (item.activitiyName.length >= 8) {
+                    title = item.activitiyName.slice(0, 8) + "...";
                   } else {
                     title = item.activitiyName;
                   }
                   return (
-                    
-                   
-                           
                     <Card item xs={6} md={2}>
                       <Item><CompetitionCard  
                         id={item.boardId}
@@ -323,7 +338,7 @@ export default function Index() {
                     </Card>     
                   
                   );
-                })}
+                }): <Loading src={loader}/>}
                 </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
