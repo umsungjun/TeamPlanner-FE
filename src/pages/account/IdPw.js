@@ -52,11 +52,11 @@ function CustomTabPanel(props) {
 export default function IdPw(){
 
     const navigate = useNavigate();
-    const [verifyButton,setVerifyButton] =useState(false);
+    const [verifyButton,setVerifyButton] = useState(false);
     const [minutes, setMinutes] = useState(2);
     const [seconds, setSeconds] = useState(0);
-    const[userId,setUserId]= useState([]);
-    const[email,setEmail]=useState([]);
+    const[userId,setUserId]= useState();
+    const[email,setEmail]=useState();
 
     const [isVerificationRequested, setIsVerificationRequested] = useState(false);
 
@@ -82,7 +82,7 @@ export default function IdPw(){
     const handleVerificationClick = () => {
 
             // Start the timer and set the flag to prevent multiple requests
-            setMinutes(2);
+            setMinutes(3);
             setSeconds(0);
             setIsVerificationRequested(true);
 
@@ -161,9 +161,6 @@ export default function IdPw(){
         if(email===null || user_id === null){
             alert("이메일 및 닉네임을 입력해주세요");
         }
-        setEmail(email);
-        setUserId(user_id);
-
         
         if(email.match(emailRegEx)===null) { //형식에 맞지 않을 경우 아래 콘솔 출력
             alert('이메일 형식을 확인해주세요');
@@ -178,6 +175,8 @@ export default function IdPw(){
                 "email" :email,
                 "verifyPurpose" : "FORGOT_PASSWORD"
               }).then((res) => {
+                setEmail(email);
+                setUserId(user_id);
                 setVerifyButton(true); //버튼 비활성화 및 readonly로 수정못하게
                 alert("이메일 전송이 완료되었습니다.");
                 handleVerificationClick(); //타이머 돌아가게
@@ -203,6 +202,7 @@ export default function IdPw(){
 
         if(email===null || user_name === null){
             alert("이메일 및 닉네임을 입력해주세요");
+            return;
         }
 
         if(email.match(emailRegEx)===null) { //형식에 맞지 않을 경우 아래 콘솔 출력
