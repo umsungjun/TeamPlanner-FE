@@ -26,16 +26,16 @@ export default function Join(){
         profileImage:'',
         profileIntro:'',
         birth: '',
-        job:'',
-        education:'',
+        job:'UNKNOWN',
+        education:'UNKNOWN',
         admissionDate:'',
         graduationDate:'',
         educationGrade:'',
-        gender:'',
+        gender:'UNKNOWN',
         address:'',
         kakaoId:'',
         contactEmail:'',
-        isPublic:'',
+        isPublic: '0',
     });
 
     const [submitCondition, setSubmitCondition] = useState({
@@ -411,6 +411,7 @@ export default function Join(){
                 console.log(formData);
                 console.log('회원가입이 완료되었습니다.');
                 // 성공적으로 전송되었을 때 할 작업
+                window.location.href = "/";
             })
             .catch(error => {
                 console.error('회원가입에 실패했습니다:', error);
@@ -424,7 +425,7 @@ export default function Join(){
             uploadImageToS3(preSignedUrl,imageFile);
         }
 
-      };
+    };
       
     
 
@@ -768,7 +769,7 @@ export default function Join(){
                             <h3>프로필공개범위</h3>
                             <div className="radio-wrap" flex-direction="column">
                                 <div className="radio-box">
-                                    <input type="radio" name="isPublic" id="isPublic" value={0} onChange={handleInputChange}></input>
+                                    <input type="radio" name="isPublic" id="isPublic" value={0} defaultChecked onChange={handleInputChange}></input>
                                     <label htmlFor={0}>전체공개</label>
                                 </div>
                                 <div className="radio-box">
