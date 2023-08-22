@@ -130,7 +130,7 @@ const onOauthLogin_K = () => {
                 <a href="/Idpw">비밀번호 찾기</a>
               </li>
               <li>
-                <a href="" className="joinBtn">
+                <a href="/join" className="joinBtn">
                   회원가입
                 </a>
               </li>
