@@ -198,9 +198,9 @@ export default function IdPw(){
         
         event.preventDefault(); // Prevent the default form submission behavior
         const email = document.getElementById('nicknameEmail').value.trim();
-        const user_name = document.getElementById('nickname').value.trim();
+        // const user_name = document.getElementById('nickname').value.trim();
 
-        if(email===null || user_name === null){
+        if(email===null){
             alert("이메일 및 닉네임을 입력해주세요");
             return;
         }
@@ -210,27 +210,18 @@ export default function IdPw(){
             return;
         }
 
-        API.post("/api/v1/member/idEmail-verify", {
-            email :email,
-            nickname : user_name
-          }).then((res) => {
-            API.post("/api/v1/member/signup/send-verification", {
-                "email" :email,
-                "verifyPurpose" : "FORGOT_ID"
-              }).then((res) => {
+       
+        API.post("/api/v1/member/forgot-username", {
+            "email" :email
+            }).then((res) => {
                 
-                document.getElementById('nicknameEmail').value="";
-                document.getElementById('nickname').value="";
-                alert("이메일로 아이디가 전송되었습니다.");
+            document.getElementById('nicknameEmail').value="";
+            // document.getElementById('nickname').value="";
+            alert("이메일로 아이디가 전송되었습니다.");
 
             }).catch(err => {
                 alert(err.response.data.message);
             });;
-           
-        }).catch(err => {
-            alert(err.response.data.message);
-            return
-        });;
 
     }
   
@@ -264,12 +255,12 @@ export default function IdPw(){
                             <StyledTabPanel value={value} index={0}>
                                 <p>회원가입시에 사용했던 이름과 이메일로 아이디를 보내드립니다.</p>
                                 <ul>
-                                    <li>
-                                        <h3>이름</h3>
+                                    {/* <li>
+                                        <h3>닉네임 </h3>
                                         <div className="input-wrap">
                                             <TextField id="nickname" type="text" variant="outlined" fullWidth placeholder="이름을 입력하세요." />
                                         </div>
-                                    </li>
+                                    </li> */}
                                     <li>
                                         <h3>이메일</h3>
                                         <div className="input-wrap">
