@@ -20,6 +20,7 @@ import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
 import KakaoButton from "./kakaoButton";
+import NaverButton from "./naverButton";
 import { Opacity } from "@mui/icons-material";
 import CheckBtn from "../../component/button/CheckBtn";
 import CommonModal from "../../component/modal/CommonModal";
@@ -225,7 +226,7 @@ export default function Detail() {
                             <img src="/img/icon/sns/twiter.png"></img>
                           </IconButton>
                           <IconButton>
-                            <img src="/img/icon/sns/naver.png"></img>
+                          <NaverButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
                           <IconButton>
                             <img src="/img/icon/sns/band.png"></img>
