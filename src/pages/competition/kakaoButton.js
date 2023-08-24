@@ -49,13 +49,13 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
 
   return(
     <>
-        <button 
-            className='grey-btn'
+        {/* <button 
             onClick={() => {
                 shareKakao()
             }}
-        > 
-        <img src="/img/icon/sns/kakao.png"></img> </button>
+        >  */}
+        <img src="/img/icon/sns/kakao.png" onclick={shareKakao} alt="카카오"></img>
+        {/* </button> */}
     </>
 )
 };
