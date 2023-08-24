@@ -132,7 +132,7 @@ export default function Nav(){
                                     {/* <a href="">동아리</a> */}
                                 </li>
                                 <li>
-                                    <Link to="/team/recruiteList">팀원 모집게시판</Link>
+                                    <Link to="/recruitment">팀원 모집게시판</Link>
                                     {/* <a href="">팀원 모집게시판</a> */}
                                 </li>
                             </ul>
