@@ -40,7 +40,7 @@ function App() {
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
           <Route path="/recruitment/write" element={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
-          <Route path="/team/recruiteList" element={ <RecruitList /> }></Route>
+          <Route path="/recruitment" element={ <RecruitList /> }></Route>
           <Route path="/search" element={ <Search /> }></Route>
         </Routes>
       </>

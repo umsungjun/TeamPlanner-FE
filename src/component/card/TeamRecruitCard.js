@@ -6,7 +6,27 @@ import {createTheme,ThemeProvider} from '@mui/material';
 import ChevronRightIcon from '@mui/icons-material/ChevronRight';
 import RemoveRedEyeIcon from '@mui/icons-material/RemoveRedEye';
 
-export default function TeamRecruiteCard({item}){
+export default function TeamRecruiteCard({
+    state, // ing, doing
+    id,
+    title,
+    content,
+    viewCount,
+    likeCount,
+    currentMemberSize,
+    maxMemberSize,
+    createdAt,
+    authorNickname,
+    authorProfileImg,
+    commentCount,
+    boardId,
+    recruitmentBoardRecruitmentPeriod,
+    recruitmentBoardActivityName,
+    recruitmentBoardImg,
+    recruitmentBoardActivityField,
+    // recruitmentBoardCategory
+
+}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -25,32 +45,33 @@ export default function TeamRecruiteCard({item}){
 
     return(
         <>
-        <ThemeProvider theme={theme}>
+        <ThemeProvider theme={theme}>  
             <RecruitCardWrap>
                 <div className="recruiteCardWrap">
                     <div className="team-img">
-                        <img src={item.activityImg} width="100%"/>
+                        <img src={recruitmentBoardImg} width="100%"/>
                     </div>
                     <div className="team-info">
                         <div className="dp-wrap">
                             <div className="keyword-wrap">
-                                <Keyword>{item.activityField}</Keyword>
+                                <Keyword>{recruitmentBoardActivityField}</Keyword>
                             </div>
                             <IconButton><ChevronRightIcon/></IconButton>  
                         </div>
-                        <h2>{item.activitiyName}</h2>
-                        <p>{item.companyType}</p>
+                        <h2>{title}</h2>
+                        {/* <p>{recruitmentBoardActivityName}</p> */}
+                        <p>{content}</p>
                         <div className="dp-wrap">
                             {
-                                item.boardStateEnum == "CLOSED" ?
+                                state == "done" ?
                                 <State><div class="done">마감</div></State>
                                 :  <State><div class="ing">진행중</div></State>
                             }
-                            <div className="view-icon"><RemoveRedEyeIcon/><span>{item.viewCount}</span></div>
+                            <div className="view-icon"><RemoveRedEyeIcon/><span>{viewCount}</span></div>
                         </div>
                         <div className="dp-wrap btn-wrap">
-                            <Button variant="outlined" color="secondary">팀원모집<strong>{item.recruitmentCount}</strong></Button>
-                            <Button variant="outlined" color="secondary">댓글<strong>{item.commentCount}</strong></Button>
+                            <Button variant="outlined" color="secondary">팀원모집<strong>{currentMemberSize}/{maxMemberSize}</strong></Button>
+                            <Button variant="outlined" color="secondary">댓글<strong>{commentCount}</strong></Button>
                         </div>
                     </div>
                 </div>
