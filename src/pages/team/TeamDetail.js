@@ -30,6 +30,9 @@ export default function TeamDetail({done}){
             primary: {
               main: "#FF7300",
             },
+            secondary: {
+                main: "#D9D9D9",
+              },
          },
     })
     const [commentData, setCommentData] = useState([]);
@@ -140,8 +143,9 @@ export default function TeamDetail({done}){
                                         <Avatar src={authorProfileImg}></Avatar>
                                         <h3>{authorNickname}</h3>
                                     </div>
+                                    {userInfo && (
                                         <div className="btn-wrap">
-                                        {userInfo && (
+                                        
                                                 <>
                                                 <SmallBtn variant="outlined" color="secondary">
                                                     <p>수정</p>
@@ -150,8 +154,9 @@ export default function TeamDetail({done}){
                                                     <p className="delete">삭제</p>
                                                 </SmallBtn>
                                                 </>
-                                            )}
+                                       
                                         </div>
+                                         )}
                                     </div>
                                     <div className="text-wrap">
                                         <h4>{title}</h4>
