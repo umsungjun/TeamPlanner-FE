@@ -57,6 +57,10 @@ export default function CheckBtn({type,scrapCountFlag,setScrapCountFlag,recruitm
     const [currentRecruitmentLikeId, setCurrentRecruitmentLikeId] = useState(null);
 
 
+    useEffect(() => {
+        scrapState();
+    }, []);
+
     const scrapState=()=>{
             API.get(`/api/v1/board/${boardId}/boardLike/state`,
             )
@@ -161,8 +165,6 @@ export default function CheckBtn({type,scrapCountFlag,setScrapCountFlag,recruitm
             //     console.log(err);
             //     });
             // }
-
-    console.log(scrap);
     return (
         <>
             <ThemeProvider theme={theme}>
