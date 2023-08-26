@@ -13,14 +13,12 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
 
   // 재랜더링시에 실행되게 해준다.
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_KEY);
     // init 해주기 전에 clean up 을 해준다.
     Kakao.cleanup();
     // 자신의 js 키를 넣어준다.
     // 여기에 로그인한 사용자의 앱키를 넣어주면 될 것 같다.
     Kakao.init(process.env.REACT_APP_API_KEY);
     // 잘 적용되면 true 를 뱉는다.
-    console.log(Kakao.isInitialized());
   }, []);
 
   const shareKakao = () => {

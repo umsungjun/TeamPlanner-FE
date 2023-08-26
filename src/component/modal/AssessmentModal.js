@@ -37,7 +37,7 @@ ChartJS.register(
     Legend
   );
 
-  export const data = {
+  export const data = { 
     labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
     datasets: [
       {

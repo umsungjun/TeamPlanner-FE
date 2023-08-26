@@ -38,6 +38,9 @@ export default function TeamDetail({done}){
     const [data, setData] = useState({
         commentList: []
     });
+    //스크랩 수
+  const [likeCountFlag,setLikeCountFlag]=useState(false);
+
     const {
         id,
         title,
@@ -51,18 +54,17 @@ export default function TeamDetail({done}){
         boardEndDate,
         authorNickname,
         authorProfileImg,
+        recruitmentState,
     } = data;
-
 
     useEffect(() => {
         fetchData();
-    },[])
+    },[likeCountFlag])
 
     const fetchData = () => {
         API.get(`/api/v1/recruitment/${recruitmentId}`)
         .then(resp => {
-            console.log(resp);
-            console.log(data);
+            console.log(resp)
             // console.log()
             
             const tmpList = resp.data.commentList;
@@ -156,7 +158,8 @@ export default function TeamDetail({done}){
                                         {content?.split('\n').map(l => <p>{l}</p>)}
                                     </div>
                                     {/*3차추가 */}
-                                    <CheckBtn type={"like"}/>
+                                    {!recruitmentState && <CheckBtn type={"like"} recruitmentState={false} likeCountFlag={likeCountFlag} setLikeCountFlag={setLikeCountFlag} />}
+                                    {recruitmentState && <CheckBtn type={"like"} recruitmentState={true} likeCountFlag={likeCountFlag} setLikeCountFlag={setLikeCountFlag}/>}
                                 </div>
                                 <div className="comment-wrap">
                                     <Comment changeFlag={setChangeFlag} flag={flag} commentData={data.commentList} />

@@ -13,6 +13,8 @@ import Tab from '@mui/material/Tab';
 import { useParams } from "react-router-dom";
 import Typography from '@mui/material/Typography';
 import TeamRecruiteCard from "../../component/card/TeamRecruitCard";
+
+import SearchCard from "../../component/card/SearchCard";
 import BasicPagination from "../../component/pagination/Pagination";
 import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
@@ -97,6 +99,7 @@ export default function Search(){
 
         API.get(`/api/v1/board/search?searchWord=${searchWord}&boardState=ONGOING,CLOSED&page=${currentPage-1}&size=10`)
             .then(res => {
+                console.log(res)
                 setTotalElements(res.data.totalElements);
                 setContent(res.data.content);
                 setTotalPages(res.data.totalPages);
@@ -189,7 +192,7 @@ export default function Search(){
                                             content.map((item) => (
                                                 <Card item xs={12} md={6} key={item.id}>
                                                     <Link to={`/competition/detail/${item.boardId}`}>
-                                                        <Item><TeamRecruiteCard item={item}/></Item>
+                                                        <Item><SearchCard item={item}/></Item>
                                                     </Link>
                                                 </Card>
                                             ))
@@ -236,7 +239,7 @@ export default function Search(){
                                             ongoingContent.map((item) => (
                                                 <Card item xs={12} md={6} key={item.id}>
                                                     <Link to={`/competition/detail/${item.boardId}`}>
-                                                        <Item><TeamRecruiteCard item={item}/></Item>
+                                                        <Item><SearchCard item={item}/></Item>
                                                     </Link>
                                                 </Card>
                                             ))
@@ -282,7 +285,7 @@ export default function Search(){
                                             closedContent.map((item) => (
                                                 <Card item xs={12} md={6} key={item.id}>
                                                     <Link to={`/competition/detail/${item.boardId}`}>
-                                                        <Item><TeamRecruiteCard item={item}/></Item>
+                                                        <Item><SearchCard item={item}/></Item>
                                                     </Link>
                                                 </Card>
                                             ))
