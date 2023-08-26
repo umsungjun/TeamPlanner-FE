@@ -6,6 +6,7 @@ import { useEffect } from "react";
 const { Kakao } = window;
 
 const KakaoButton = ({activityName, activityImg, boardId}) => {
+
   // 배포한 자신의 사이트
   const realUrl = "http://teamplanner-frontend.s3-website.ap-northeast-2.amazonaws.com";
   // 로컬 주소 (localhost 3000 같은거)
@@ -22,6 +23,7 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
   }, []);
 
   const shareKakao = () => {
+
     console.log(activityImg,activityName,boardId)
     Kakao.Share.sendDefault({
       objectType: "feed",
@@ -52,7 +54,7 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
                 shareKakao()
             }}
         >  */}
-        <img src="/img/icon/sns/kakao.png" onclick={shareKakao} alt="카카오"></img>
+        <img src="/img/icon/sns/kakao.png" onClick={shareKakao} alt="카카오"></img>
         {/* </button> */}
     </>
 )
