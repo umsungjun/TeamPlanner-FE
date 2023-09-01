@@ -15,6 +15,8 @@ import { contest } from "./category";
 import { externalActivity } from "./category";
 import { club } from "./category";
 import loader from '../loader.gif';
+import ChatBox from "../component/chat/ChatBox";
+
 
 const Item = styled(Box)(({ theme }) => ({
 
@@ -371,6 +373,8 @@ export default function Index() {
           </PaddingWrap>
         </Container>
         <Footer />
+         {/**채팅버튼 추가 */}
+         <ChatBox />
       </ThemeProvider>
     </>
   );
