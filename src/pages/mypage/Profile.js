@@ -9,6 +9,7 @@ import Box from "@mui/material/Box";
 import Title from "../../component/title/Title";
 import MyPageMenu from "../../component/menu/MypageMenu";
 import FilledBtn from "../../component/button/FilledBtn";
+import SolidBtn from "../../component/button/SolideBtn";
 import AddIcon from '@mui/icons-material/Add';
 import Radio from '@mui/material/Radio';
 import RadioGroup from '@mui/material/RadioGroup';
@@ -98,23 +99,24 @@ export default function ProfileSetting(){
                 <Nav />
                 <Container>
                     <PaddingWrap>
-                        <Title text={"마이페이지"}/>
+                        {/* <Title text={"프로필"}/> */}
                         <ContentWrap>
-                            <SideList>
+                            {/* <SideList>
                                 <MyPageMenu select={"프로필관리"} />
-                            </SideList>
+                            </SideList> */}
                             <Content>
                                 <div className="title dp-flex space-between">
-                                    <h1>프로필 관리</h1>
-                                    {
+                                    <h1>프로필 정보</h1>
+                                    {/* {
                                         edit ?
                                         <FilledBtn text={"프로필 수정하기"} handle={handleChange}></FilledBtn>
                                         :
                                         <></>
-                                    }
+                                    } */}
                                 </div>
                                 <div className="profile-box">
-                                    <div className="profileImage">
+                                    
+                                    <div className="profile-img">
                                         <img src="/img/profile/profile.png" alt="프로필 이미지" />
                                         {
                                             edit? <></> :
@@ -122,10 +124,19 @@ export default function ProfileSetting(){
                                         }
                                     </div>
                                     {
+                                        edit ? 
+                                        <div className="profile-btn-wrap">
+                                            <SolidBtn text={"1:1 대화하기"}/>
+                                            <SolidBtn text={"팀 초대"}/>
+                                        </div>
+                                        : <></>
+                                    }
+                                    {
                                         edit ?
                                         <div className="introduce-box">
                                             <h2>소개글</h2>
                                             <p>
+                                            안녕하세요. 소개글입니다.<br/>
                                             안녕하세요. 소개글입니다.
                                             </p>
                                         </div>
@@ -137,6 +148,55 @@ export default function ProfileSetting(){
                                         </div>
                                         </>
                                     }
+                                </div>
+                                <div className="review-box">
+                                    <h3 className="sub-title">팀원평가</h3>
+                                    <div className="check-box">
+                                        <h4>공개범위설정</h4>
+                                        <FormControl>
+                                            <RadioGroup
+                                                row
+                                                aria-labelledby="demo-row-radio-buttons-group-label"
+                                                name="row-radio-buttons-group"
+                                            >
+                                                {
+                                                    edit ?
+                                                    <>
+                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
+                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
+                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
+                                                    </>
+                                                    :
+                                                    <>
+                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
+                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
+                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" />
+                                                    </>
+                                                }
+                                            </RadioGroup>
+                                        </FormControl>
+                                    </div>
+                                    <div className="review-wrap">
+                                        {
+                                            edit ? 
+                                            <div className="chart-box">
+                                            <Radar
+                                            data={data}
+                                            options={options}
+                                            />
+                                            </div>
+                                            :<></>
+                                        }
+                                        <div className="review-list">
+                                            <h3>성실하고 책임감이 커서 활...</h3>
+                                            <h3>시간을 잘 지켜요</h3>
+                                            <h3>리더십이 뛰어나요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                            <h3>소통이 잘돼요</h3>
+                                        </div>
+                                    </div>
                                 </div>
                                 <div className="skill-box">
                                     <h3 className="sub-title">기술스택</h3>
@@ -343,55 +403,32 @@ export default function ProfileSetting(){
                                         </li>
                                     </ul>
                                 </div>
-                                <div className="review-box">
-                                    <h3 className="sub-title">팀원평가</h3>
-                                    <div className="check-box">
-                                        <h4>공개범위설정</h4>
-                                        <FormControl>
-                                            <RadioGroup
-                                                row
-                                                aria-labelledby="demo-row-radio-buttons-group-label"
-                                                name="row-radio-buttons-group"
-                                            >
-                                                {
-                                                    edit ?
-                                                    <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
-                                                    </>
-                                                    :
-                                                    <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" />
-                                                    </>
-                                                }
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </div>
-                                    <div className="review-wrap">
-                                        {
-                                            edit ? 
-                                            <div className="chart-box">
-                                            <Radar
-                                            data={data}
-                                            options={options}
-                                            />
-                                            </div>
-                                            :<></>
-                                        }
-                                        <div className="review-list">
-                                            <h3>성실하고 책임감이 커서 활...</h3>
-                                            <h3>시간을 잘 지켜요</h3>
-                                            <h3>리더십이 뛰어나요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
+                                {
+                                    edit ?
+                                    <RecomandTeam>
+                                        <h3><strong>사용자</strong> 님과 비슷한 프로필을 추천해드려요</h3>
+                                        <div className="recomand-team-wrap">
+                                            <ul className="scorll-wrap">
+                                                <li>
+                                                    <RecomandTeamCard />
+                                                </li>
+                                                <li>
+                                                    <RecomandTeamCard />
+                                                </li>
+                                                <li>
+                                                    <RecomandTeamCard />
+                                                </li>
+                                                <li>
+                                                    <RecomandTeamCard />
+                                                </li>
+                                                <li>
+                                                    <RecomandTeamCard />
+                                                </li>
+                                            </ul>
                                         </div>
-                                    </div>
-                                </div>
+                                    </RecomandTeam>
+                                    : <></>
+                                }
                             </Content>
                         </ContentWrap>
                             {
@@ -476,14 +513,25 @@ const Content = styled(Box)`
     }
     .profile-box{
         display: flex;
+        flex-direction: column;
         align-items: center;
         margin-bottom: 5rem;
-        .profileImage{
+        .profile-btn-wrap{
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            width: 30%;
+            button{
+                width: 49%;
+            }
+        }
+        .profile-img{
             width: 25%;
             display: flex;
             align-items: center;
             justify-content: center;
             position: relative;
+            margin-bottom: 2rem;
             img{
                 width: 60%;
                 border-radius: 100%;
@@ -511,7 +559,7 @@ const Content = styled(Box)`
             display: flex;
             flex-direction: column;
             align-items: flex-start;
-            width: 75%;
+            width: 100%;
             textarea{
                 width: 98%;
                 height: 9rem;
@@ -525,12 +573,12 @@ const Content = styled(Box)`
             }
         }
         .introduce-box{
-            border: 1px solid rgba(0,0,0,.1);
-            border-radius: 10px;
-            padding: 2rem;
-            width: 75%;
-            min-height: 10rem;
+            width: 100%;
             p{
+                border: 1px solid rgba(0,0,0,.1);
+                min-height: 10rem;
+                border-radius: 10px;
+                padding: 2rem;
                 font-size: 1.6rem;
                 line-height: 150%;
                 color: #3b3b3b;
@@ -729,6 +777,7 @@ const Content = styled(Box)`
         }
     }
     .review-box{
+        margin-bottom: 5rem;
         .check-box{
             display: flex;
             align-items: center;
@@ -804,17 +853,20 @@ const Content = styled(Box)`
     @media ${() => theme.device.mobile2}{
         .title{
         button{
-            width: 30%;
+            width: 40%;
         }
        }
        .profile-box{
         flex-direction: column;
-        .profileImage{
+        .profile-btn-wrap{
+            width: 100%;
+        }
+        .profile-img{
             width: 70%;
         }
         .introduce-box{
             margin-top: 2rem;
-            width: 90%;
+            width: 100%;
         }
         .textarea-box{
             textarea{
@@ -881,6 +933,35 @@ const Content = styled(Box)`
 }
 }
 `;
+
+const RecomandTeam = styled(Box)`
+    h3{
+        font-size: 1.8rem;
+        color: #3b3b3b;
+        line-height: 150%;
+        font-weight: 700;
+        strong{
+            font-weight: bold;
+            color: #FF7300;
+        }
+    }
+    .recomand-team-wrap{
+        width: 100%;
+        overflow-y: scroll;
+        margin-top: 2rem;
+    }
+    .scorll-wrap{
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        li{
+            width: 24%;
+            min-width: 240px;
+            margin-right: 1rem;
+        }
+    }
+`;
+
 
 const StyledTextField = styled(TextField)`
     width: 50%;

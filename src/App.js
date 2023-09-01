@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import TeamDetail from "./pages/team/TeamDetail";
 import AccountSetting from "./pages/mypage/AccountSetting";
 import ProfileSetting from "./pages/mypage/ProfileSetting";
+import Profile from "./pages/mypage/Profile";
 import { AuthProvider } from './AuthContext';
 import axios from "axios";
 import TeamManagement from "./pages/mypage/TeamManagement";
@@ -16,6 +17,7 @@ import TokenRedirect from "./TokenRedirect";
 import Search from "./pages/search/Search";
 import RecruitList from "./pages/team/RecruitList";
 import IdPw from "./pages/account/IdPw";
+import Chat from "./pages/chat/Chat";
 
 axios.defaults.withCredentials = true;
 
@@ -42,6 +44,8 @@ function App() {
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
           <Route path="/recruitment" element={ <RecruitList /> }></Route>
           <Route path="/search" element={ <Search /> }></Route>
+          <Route path="/chat" element={ <Chat /> }></Route>
+          <Route path="/profile/:nickname" element={ <Profile /> }></Route>
         </Routes>
       </>
     </AuthProvider>
