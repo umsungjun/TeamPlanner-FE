@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useContext, useEffect, useRef} from "react";
 import styled from "@emotion/styled";
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Button from "@mui/material/Button";
@@ -8,8 +9,12 @@ import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import MsgListBox from "./MsgListBox";
 import Chating from "./Chating";
 import theme from "../../style/theme";
+import SockJS from 'sockjs-client';
+import {Stomp} from '@stomp/stompjs';
+import { API } from "../../api/api";
+import { AuthContext } from "../../AuthContext";
 
-export default function ChatBox(){
+export default function ChatBox({handleClick, open}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -22,47 +27,182 @@ export default function ChatBox(){
     })
 
     const [activeIndex, setActiveIndex]=useState(0);
-    const tabClickHandler=(index)=>{
+    const tabClickHandler=(index, roomId)=>{
         setActiveIndex(index);
+        setRoomId(roomId);
         setOpen2(!open2);
     };
 
 
-    const [open, setOpen] = React.useState(false);
-
-    const handleClick = () => {
-        setOpen(!open);
-    };
+    
 
     const [open2, setOpen2] = React.useState(false);
 
     const handleClick2 = () => {
         setOpen2(!open2);
     };
-    
-    const tabContArr=[
-        {
-            tabTitle:(
-                <div className={activeIndex===0 ? "is-active" : ""} onClick={()=>tabClickHandler(0)}>
-                    <MsgListBox id={"msgBox1"} none={true} user={"운영자"}/>
-                </div>
-            ),
-            tabCont:(
-                <Chating handle={handleClick} handle2={handleClick2} user={"운영자"}/>
-            )
-        },
-        {
-            tabTitle:(
-            <div className={activeIndex===1 ? "is-active" : ""} onClick={()=>tabClickHandler(1)}>
-                <MsgListBox id={"msgBox2"} user={"운영자2"} />
-            </div>
-            ),
-            tabCont:(
-                <Chating handle={handleClick} handle2={handleClick2} user={"운영자2"}/>
-            )
-        },
+ 
+    /*채팅에 관련된 변수 셋팅*/
 
-    ];
+    const [chatList, setChatList] = useState([]);
+    const [targetNickname, setTargetNickname] = useState(null);
+    const [roomId, setRoomId] = useState(null);
+    const [message, setMessage] = useState("asdf")
+    const [chatRoomList, setChatRoomList] = useState([]);
+    const { userInfo, setUserInfo } = useContext(AuthContext);
+    const info = JSON.parse(localStorage.getItem("userInfo"));
+    const [initialChatList, setInitialChatList] = useState([]);
+    const [subscribeState,setSubscribeState]=useState(false);
+    const client = useRef(null); // Use a ref to hold the client instance
+    const [tmp, setTmp] = useState([]);
+
+
+    function onConnected() {
+        console.log("onConnected")
+      }
+    
+      function onError() {
+        console.log("onError")
+    }
+    // 소켓 연결 설정 및 정리
+    useEffect(() => {
+        // Clean up existing subscriptions
+        if (client.current) {
+            client.current.disconnect();
+        }
+    
+        // Set up a new socket connection
+        let socket = new SockJS('http://localhost:8080/ws/chat');
+        client.current = Stomp.over(socket);
+        client.current.connect({}, onConnected, onError);
+    
+        return () => {
+            // Clean up subscriptions when the component unmounts
+            console.log("testedsa");
+            if (client.current) {
+                client.current.disconnect();
+            }
+        };
+    }, []); // Make sure to include roomId as a dependency
+    /*
+    * 채팅방을 가져오는 api 
+    */
+    const fetchChatRoomList = () => {
+        if(roomId){
+        API.get(`/api/v1/chat/room/${roomId}`)
+        .then(res => {
+            console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와",res.data)
+            setChatList(res.data.chattings);
+        })
+        }
+    }
+    //* 현재 생성되어 있는 채팅방 번호를 가져오는 코드*/
+
+    const fetchChatRoomNumberList = () => {
+    
+        API.get(`/api/v1/chat/room`)
+        .then(res => {
+            console.log("채팅방 리스트",res.data)
+            setChatRoomList(res.data);
+        }).catch(err => {
+            alert(err.response.data.message);
+        })
+    }
+
+    // 구독한 토픽에 대한 message를 response하고 chatList에 담는다.
+    const onMessageReceived = (message) => {
+        // console.log('message', message)
+        // console.log('message', message.body)
+        const newChat = JSON.parse(message.body);
+        setChatList((prevChatList) => [...prevChatList, newChat]);
+    };
+
+    const tabContArr=[];
+
+
+    chatRoomList.map((item, key) => {
+        tabContArr.push(
+            {
+                tabTitle:(
+                    <div className={activeIndex===key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
+                        <MsgListBox 
+                        id={item.roomId} 
+                        none={true} 
+                        user={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                        lastMessageText={item.lastMessageText}
+                        lastMessageTime={item.lastMessageTime}
+                        profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
+                        />
+                    </div>
+                ),
+                tabCont:(
+                    <Chating
+                    handle={handleClick} 
+                    handle2={handleClick2} 
+                    chatList={chatList}
+                    user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                    memberId={userInfo.memberId}
+                    chattingRoomId={roomId}
+                    setRoomId={setRoomId}
+                    />
+                )
+            }
+        )
+    })
+
+
+    useEffect(() => {
+        fetchChatRoomNumberList();
+    }, [chatList])  
+
+
+    // 이전 채팅방 ID를 기억하는 변수를 추가합니다.
+    let previousRoomId = null;
+
+
+    
+
+    useEffect(() => {
+        // 현재 채팅방이 있는 경우에만 구독을 시도합니다.
+        let sameCheck = false;
+        if (roomId !== null) {
+            if (previousRoomId !== null) {
+                client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
+            }
+            // 현재 채팅방에 대한 구독을 설정합니다.
+            if (tmp) {
+                tmp.map((item) => {
+                    if (item.roomId === roomId) {
+                        sameCheck = true;
+                        console.log(tmp);
+                        return false;
+                    }
+                })
+            }
+
+            if (!sameCheck) {
+                let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
+
+                if (socket) {
+                    setTmp((tmp) => [...tmp, {roomId: roomId, socket: socket.id}])
+                }
+                // 이전 채팅방 ID를 업데이트합니다.
+                previousRoomId = roomId;
+            }
+        }
+
+        // 여기에서 채팅 목록을 가져오는 코드를 실행합니다.
+        fetchChatRoomList();
+
+        // 컴포넌트가 언마운트될 때 이전 채팅방의 구독을 해제합니다.
+        // return () => {
+        //     if (previousRoomId !== null) {
+        //         client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
+        //     }
+
+        // };
+    }, [roomId]);
+    console.log(chatList)
 
     return(
         <>
@@ -80,7 +220,7 @@ export default function ChatBox(){
                                         <IconButton><MapsUgcIcon/></IconButton>
                                     </div>
                                     <MsgList>
-                                        {tabContArr.map((section, index)=>{
+                                        {tabContArr.length > 0 && tabContArr.map((section, index)=>{
                                             return section.tabTitle
                                         })}
                                     </MsgList>
@@ -89,7 +229,7 @@ export default function ChatBox(){
                                     {
                                     open2 ? 
                                     <MsgList>
-                                        {tabContArr.map((section, index)=>{
+                                        {tabContArr.length > 0 && tabContArr.map((section, index)=>{
                                             return section.tabTitle
                                         })}
                                     </MsgList>
@@ -98,7 +238,7 @@ export default function ChatBox(){
                                 </Mobile>
                             </div>
                             <ChatingBox>
-                                {tabContArr[activeIndex].tabCont}
+                                {tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
                             </ChatingBox>
                         </Chat>
                         : <></>
@@ -128,6 +268,7 @@ const ChatBoxWrap = styled(Box)`
     position: fixed;
     bottom: 2%;
     right: 2%;
+    z-index: 999;
     .chat-wrap{
         position: relative;
         display: flex;
@@ -262,3 +403,4 @@ const ChatingBox = styled(Box)`
         width: 100%;
     }
 `;
+

@@ -373,8 +373,7 @@ export default function Index() {
           </PaddingWrap>
         </Container>
         <Footer />
-         {/**채팅버튼 추가 */}
-         <ChatBox />
+        {localStorage.getItem("userInfo") && <ChatBox/>}
       </ThemeProvider>
     </>
   );

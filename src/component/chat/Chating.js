@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { useContext, useEffect, useRef} from "react";
 import styled from "@emotion/styled";
 import {Button, createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
@@ -11,12 +12,15 @@ import NotificationsIcon from '@mui/icons-material/Notifications';
 import NotificationsOffIcon from '@mui/icons-material/NotificationsOff';
 import MenuIcon from '@mui/icons-material/Menu';
 import SendIcon from '@mui/icons-material/Send';
-
+import { API } from "../../api/api";
 import List from '@mui/material/List';
 import ListItem from '@mui/material/ListItem';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemIcon from '@mui/material/ListItemIcon';
 import ListItemText from '@mui/material/ListItemText';
+import SockJS from 'sockjs-client';
+import {Stomp} from '@stomp/stompjs';
+import { AuthContext } from "../../AuthContext";
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -24,7 +28,9 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function Chating({handle, user, handle2}){
+export default function Chating({chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
+
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -41,6 +47,138 @@ export default function Chating({handle, user, handle2}){
     const handleAddList = () => {
         setAdd(!add);
     };
+
+
+
+    //  //소켓연결
+    //  useEffect(() => {
+    //     // Initialize the STOMP client and connect when component mounts
+    //     const socket = new SockJS('http://localhost:8080/ws/chat');
+    //     client.current = Stomp.over(socket);
+    //     client.current.connect({}, onConnected, onError);
+    //     return () => {
+    //     // Disconnect and clean up when component unmounts
+    //     if (client.current) {
+    //         client.current.disconnect();
+    //     }
+    //     };
+    // }, []);
+
+    // 소켓 연결 설정 및 정리
+    useEffect(() => {
+        let socket;
+        let stompClient;
+
+        // 함수 내부에서 소켓 연결을 설정
+        const setupSocket = () => {
+            socket = new SockJS('http://localhost:8080/ws/chat');
+            client.current = Stomp.over(socket);
+            client.current.connect({}, onConnected, onError);
+        };
+
+        // 컴포넌트 마운트 시 소켓 연결 설정
+        setupSocket();
+
+        return () => {
+            // 컴포넌트 언마운트 시 소켓 연결 해제
+            if (client.current) {
+                client.current.disconnect();
+            }
+        };
+    }, []);
+
+    function onConnected() {
+        console.log("onConnected")
+      }
+    
+      function onError() {
+        console.log("onError")
+    }
+
+    const [targetNickname, setTargetNickname] = useState(user);
+    const [message, setMessage] = useState("")
+    const client = useRef(null); // Use a ref to hold the client instance
+    const { userInfo, setUserInfo } = useContext(AuthContext);
+    const info = JSON.parse(localStorage.getItem("userInfo"));
+    const scrollRef = useRef();
+
+    useEffect(() => {
+        scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }, [chatList])
+    
+    // 채팅을 보낸다. 보낼 유저를 클릭해야 보내짐
+    // -> 기존의 채팅방이 없으면 -> 채팅방 생성 
+    const sendMessageBtnHandler = () => {
+        if(message===""){
+            window.alert("채팅을 입력해주세요");
+            return;
+        }
+        if (targetNickname == null) {
+            window.alert("채팅 할 유저를 선택해주세요");
+            return;
+        }
+        if (chattingRoomId === null) {
+        API.post("/api/v1/chat/room", {
+            targetNickname: targetNickname
+        }).then(res => {
+            console.log('방 생성 응답값 : ', res);
+            setRoomId(res.data);
+            createChatRoomthenSend(res.data);
+        })
+        } else {
+            isPresentChatRoomthenSend();
+        }
+    }
+
+
+
+        /*
+    * 채팅방이 처음 만들어 졋을 때 채팅 realsend
+    */
+
+        const createChatRoomthenSend = (roomId) => {
+            console.log("처음 채팅방을 생성 후 메세지를 전송");
+            client.current.publish({
+            // destination: `/queue/${roomId}`,
+            destination: `/pub/chattings/rooms/${roomId}`,
+            body: `${JSON.stringify({
+                content: message,
+                // sender: localStorage.getItem("userInfo").nickname,
+                senderId: userInfo.memberId,
+                chattingRoomId: roomId
+            })}`,
+            headers: { priority: '9' },
+            });
+          setMessage("");
+        }
+    
+        /*
+       * 기존의 채팅방이 있었을 때 채팅 realsend
+       */
+    
+        const isPresentChatRoomthenSend = () => {
+          console.log("기존의 있던 채팅방에 메세지를 전송");
+          client.current.publish({
+            // destination: `/queue/${roomId}`,
+            destination: `/pub/chattings/rooms/${chattingRoomId}`,
+            body: `${JSON.stringify({
+              content: message,
+              // sender: localStorage.getItem("userInfo").nickname,
+              senderId: userInfo.memberId,
+              chattingRoomId: chattingRoomId
+            })}`,
+            headers: { priority: '9' },
+          });
+          setMessage("");
+        }
+
+
+
+     const handleInputChange = (event) => {
+        const inputValue = event.target.value;
+        setMessage(inputValue); // 입력값을 message 상태에 업데이트
+     };
+     let prevMessageTime = null;
 
 
     return(
@@ -66,9 +204,63 @@ export default function Chating({handle, user, handle2}){
                         <IconButton onClick={handle}><CloseIcon/></IconButton>
                     </li>
                 </ul>
-                <ChatingList>
-                    <Date><small>2023년 8월 28일</small></Date>
-                    <ReceiveMsg>
+                <ChatingList ref={scrollRef}>
+                  
+                    
+
+                    {chatList.map((message, index) => {
+
+                        // 메시지의 발신자 ID와 사용자 ID 비교
+                        const isUserMessage = message.senderId === memberId;
+                        const currentMessageTime = message.createdTime;
+
+                        // 이전 메시지의 createdTime과 현재 메시지의 createdTime 비교
+                        const shouldDisplayTime =
+                            prevMessageTime === null || currentMessageTime !==prevMessageTime; // 예: 1분 이상 차이가 나면 표시
+
+                        // 이전 메시지의 createdTime을 업데이트
+                        prevMessageTime = currentMessageTime;
+                        
+                            return (
+                            <React.Fragment key={index}>
+                                 {shouldDisplayTime && (
+                                <Date>
+                                    <small>{message.createdTime}</small>
+                                </Date>
+                                 )}
+                                {isUserMessage ? (
+                                    <SendMsg>
+                                        <div className="msg-wrap">
+                                            <div className="msg-box-wrap">
+                                                <p className="msg-box">
+                                                    {message.content}
+                                                </p>
+                                                <span>{message.createdTime}{message.createdDate}</span>
+                                                
+                                            </div>
+                                        </div>
+                                    </SendMsg>
+                                ) : (
+                                    <ReceiveMsg>
+                                        <UserImg>
+                                            <PersonOutlineIcon />
+                                        </UserImg>
+                                        <div className="msg-wrap">
+                                            <h3>{user}</h3>
+                                            <div className="msg-box-wrap">
+                                                <p className="msg-box">
+                                                    {message.content}
+                                                </p>
+                                                <span>{message.createdTime}</span>
+                                                <span>{message.createdDate}</span>
+                                            </div>
+                                        </div>
+                                    </ReceiveMsg>
+                                )}
+                            </React.Fragment>
+                        );
+                    })}
+                    {/* <ReceiveMsg>
                         <UserImg>
                             <PersonOutlineIcon />
                         </UserImg>
@@ -91,8 +283,11 @@ export default function Chating({handle, user, handle2}){
                                 <span>7:30 PM</span>
                             </div>
                         </div>
-                    </SendMsg>
-                    <ReceiveMsg>
+                    </SendMsg> */}
+
+      
+
+                    {/* <ReceiveMsg>
                         <UserImg>
                             <PersonOutlineIcon />
                         </UserImg>
@@ -139,7 +334,7 @@ export default function Chating({handle, user, handle2}){
                                 <span>7:30 PM</span>
                             </div>
                         </div>
-                    </SendMsg>
+                    </SendMsg> */}
                     
                     
                     
@@ -178,8 +373,13 @@ export default function Chating({handle, user, handle2}){
                         <div className="padding">
                             <IconButton onClick={handleAddList}><AddCircleOutlineIcon/></IconButton>
                             <div className="chat-input">
-                                <textarea id="chat-input" placeholder="내용을 입력하세요." cols={1} rows={1}></textarea>
-                                <SendBtn variant="contained"><SendIcon/></SendBtn>
+                                <textarea id="chat-input" 
+                                placeholder="내용을 입력하세요."
+                                 cols={1} 
+                                 rows={1}
+                                 value={message} 
+                                 onChange={handleInputChange}></textarea>
+                                <SendBtn variant="contained" onClick={sendMessageBtnHandler}><SendIcon/></SendBtn>
                             </div>
                         </div>
                     </div>

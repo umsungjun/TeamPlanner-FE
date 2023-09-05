@@ -19,7 +19,8 @@ export default function Chat(){
     "KAKAO-cf69c235-b6cf-4c2c-a39f-14670a3187a2",
     "GOOGLE-cb337f90-4749-45ae-b3ec-b6458519318b",
     "NAVER-0d9cf439-4d7b-4427-9a7e-694adda9660d",
-    "GOOGLE-0e202579-60f2-46c4-9006-fc17c27c86cc"
+    "GOOGLE-0e202579-60f2-46c4-9006-fc17c27c86cc",
+    "KAKAO-d6c89bde-336b-4908-b662-375382f3a3f8"
 
   ]
 
@@ -28,7 +29,6 @@ export default function Chat(){
   const [roomId, setRoomId] = useState(null);
   const [message, setMessage] = useState("asdf")
   const [chatRoomList, setChatRoomList] = useState([]);
-  const [chatRoomNumberList, setChatRoomNumberList] = useState([]);
   const { userInfo, setUserInfo } = useContext(AuthContext);
   const info = JSON.parse(localStorage.getItem("userInfo"));
 
@@ -77,9 +77,12 @@ export default function Chat(){
       .then(res => {
         console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와",res.data)
         setChatList(res.data.chattings);
-      })
+      }).catch(err => {
+        alert(err.response.data.message);
+    })
     }
   }
+  
   //* 현재 생성되어 있는 채팅방 번호를 가져오는 코드*/
 
   const fetchChatRoomNumberList = () => {
@@ -92,14 +95,6 @@ export default function Chat(){
         alert(err.response.data.message);
       })
   }
-
-  // const send = (roomId, message) => {
-  //   client.current.publish({
-  //     destination: `/sub/${roomId}`,
-  //     body: `${message}`,
-  //     headers: { priority: '9' },
-  //   });
-  // }
 
   // 구독한 토픽에 대한 message를 response하고 chatList에 담는다.
   const onMessageReceived = (message) => {
@@ -132,6 +127,8 @@ export default function Chat(){
         console.log('방 생성 응답값 : ', res);
         setRoomId(res.data);
         createChatRoomthenSend(res.data);
+      }).catch(err => {
+        alert(err.response.data.message);
       })
     } else {
       isPresentChatRoomthenSend();
@@ -189,6 +186,8 @@ export default function Chat(){
     }
     fetchChatRoomList();
   },[roomId]);
+
+
 
 
   return (

@@ -14,6 +14,7 @@ export default function ParticipationCard({boardId,
     recruitmentTitle,
     recruitmentContent,
     recruitmentId,
+    applyUsernickname,
     fetchData,
     boardImage
 
@@ -45,9 +46,9 @@ export default function ParticipationCard({boardId,
         })
     }
 
-    const recuritmentPage = () => {
-        window.location.href = `/recruitment/${recruitmentId}`;
-    }
+    const profilePage = () => {
+        window.location.href = `/profile/${applyUsernickname}`;
+    };
 
     return(
         <>
@@ -65,7 +66,7 @@ export default function ParticipationCard({boardId,
                         </ul>
                         <div className="button-wrap">
                             <SolidBtn text={"취소"} handle={onCancel}></SolidBtn>
-                            <FilledBtn text={"모집 글 확인 "} handle={recuritmentPage}/>
+                            <FilledBtn text={"프로필 확인"} handle={profilePage}/>
                         </div>
                     </div>
                 </ParticipationCardWrap>
