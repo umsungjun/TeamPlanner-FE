@@ -6,6 +6,7 @@ import AccountCircleIcon from "@mui/icons-material/AccountCircle";
 import TextInput from "./TextInput";
 import theme from "../../style/theme";
 import moment from "moment";
+import { Link } from 'react-router-dom';
 
 export default function CommentBox({ commentData, changeFlag, flag }) {
   const theme = createTheme({
@@ -31,7 +32,9 @@ export default function CommentBox({ commentData, changeFlag, flag }) {
           <ul className="comment">
             <li>
               <IconButton sx={{ p: 0 }}>
-                <Avatar src={commentData.memberProfileImg} alt="Profile" />
+              <Link to={`/profile/${commentData.memberNickname}`}>
+                <Avatar src={commentData.memberProfileImg} alt="Profile"/>
+              </Link>
                 {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">

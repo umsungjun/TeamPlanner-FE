@@ -11,6 +11,8 @@ import AssessmentModal from "../modal/AssessmentModal";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import moment from "moment"; // Moment.js 라이브러리
+import { useHistory } from 'react-router-dom';
+
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -22,7 +24,7 @@ import "swiper/css/scrollbar";
 
 SwiperCore.use([Pagination, Navigation, Autoplay]);
 
-export default function TeamCard2Less({type}){
+export default function     TeamCard2Less({type}){
 
 
 
@@ -43,6 +45,7 @@ export default function TeamCard2Less({type}){
     const [endDate,setEndDate]=useState('');
     const [teamId,setTeamId]=useState('');
     const [memberId,setMemberId]=useState('');
+
     const handleClick = (event,nickname,endDate,teamId,mebmerId) => {
       setEndDate(endDate);
       setCurrentNickname(nickname);
@@ -53,6 +56,12 @@ export default function TeamCard2Less({type}){
     const handleClose = () => {
       setAnchorEl(null);
     };
+
+    const handleProfileClick = () => {
+        const url = `/profile/${currentNickname}`;
+        window.location.href = url;
+    };
+
     return(
         <>
           <ThemeProvider theme={theme}>
@@ -261,7 +270,7 @@ export default function TeamCard2Less({type}){
                 horizontal: 'right',
                 }}
             >
-                <StyledMenuItem onClick={handleClose}>프로필 보기</StyledMenuItem>
+                <StyledMenuItem onClick={handleProfileClick}>프로필 보기</StyledMenuItem>
                 <MenuItem><AssessmentModal nickname={currentNickname} endDate={endDate} teamId={teamId} memberId={memberId}/></MenuItem>
             </StyledMenu>
           </ThemeProvider>

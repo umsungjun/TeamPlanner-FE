@@ -403,8 +403,8 @@ export default function ProfileSetting(){
                     </PaddingWrap>
                 </Container>
                 <Footer />
-                {/**채팅버튼 추가 */}
-                <ChatBox />
+                {/* *채팅버튼 추가
+                <ChatBox /> */}
             </ThemeProvider>
         </>
     )

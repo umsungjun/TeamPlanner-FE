@@ -18,6 +18,8 @@ import FormControl from '@mui/material/FormControl';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import TextField from '@mui/material/TextField';
+import { useParams } from 'react-router-dom';
+
 
 import {
     Chart as ChartJS,
@@ -72,7 +74,10 @@ export const options = {
    },
 }
 
-export default function ProfileSetting(){
+
+
+export default function Profile({handleClick}){
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -84,14 +89,21 @@ export default function ProfileSetting(){
          },
     })
 
+    const img="/img/profile/profile.png";
+    const { nickname } = useParams();
+
+
     const [edit, setEdit] = React.useState(true);
+    const [chatBoxOpen,setChatboxOpen]=useState(false);
 
     const handleChange = () => {
         setEdit(!edit);
     };
 
-    
-
+    const toggleChatbox = () => {
+        handleClick(img,nickname);
+        // ChatBox.handleClick(); // ChatBox의 handleClick 함수 호출
+    };
 
     return(
         <>
@@ -126,7 +138,7 @@ export default function ProfileSetting(){
                                     {
                                         edit ? 
                                         <div className="profile-btn-wrap">
-                                            <SolidBtn text={"1:1 대화하기"}/>
+                                            <SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>
                                             <SolidBtn text={"팀 초대"}/>
                                         </div>
                                         : <></>
@@ -440,8 +452,6 @@ export default function ProfileSetting(){
                     </PaddingWrap>
                 </Container>
                 <Footer />
-                {/**채팅버튼 추가 */}
-                <ChatBox />
             </ThemeProvider>
         </>
     )

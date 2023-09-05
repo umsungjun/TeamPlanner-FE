@@ -4,7 +4,28 @@ import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import PersonOutlineIcon from '@mui/icons-material/PersonOutline';
 import Box from "@mui/material/Box";
 
-export default function MsgListBox({none, id, user}){
+export default function MsgListBox({none, id, user, lastMessageText, lastMessageTime, profileImage}){
+    
+
+    const calculateDaysAgo = (lastMessageTime) => {
+        // 날짜 문자열을 JavaScript Date 객체로 변환
+        const messageDate = new Date(lastMessageTime.replace(/년|월/g, '/').replace(/일/, ''));
+
+        // 현재 날짜 생성
+        const currentDate = new Date();
+
+        // 날짜 차이 계산 (밀리초 단위)
+        const timeDifference = currentDate - messageDate;
+
+        // 밀리초를 일로 변환
+        const daysAgo = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+
+        return daysAgo;
+    }
+    
+      
+    
+    
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -27,16 +48,16 @@ export default function MsgListBox({none, id, user}){
         <>
             <ThemeProvider theme={theme}>
                 <MsgListBoxWrap onClick={handleClick} id={id}>
-                    <div className="profile-img-box">
-                        <PersonOutlineIcon />
+                    <div className="profile-img-box" style={{backgroundImage: `url(${profileImage})`, backgroundSize: "cover"}}>
+                        {/* <PersonOutlineIcon /> */}
                     </div>
                     <ul className="user-name">
                         <li>
-                            <h3 className="name">{user}</h3>
-                            <span className="date">3일전</span>
+                        <h3 className="name">{user.length > 10 ? user.slice(0, 10) + '...' : user}</h3>
+                            {calculateDaysAgo(lastMessageTime) === 0 ? '오늘' : calculateDaysAgo(lastMessageTime) + '일 전'}
                         </li>
                         <li>
-                            <p className="msg">내용내용내용내용내용내용내용내용내용내용내용내용
+                            <p className="msg">{lastMessageText}
                             </p>
                             {
                                 none ? <></> :
