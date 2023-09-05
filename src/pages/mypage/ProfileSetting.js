@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
-import {createTheme,IconButton,ThemeProvider} from '@mui/material';
+import {createTheme,IconButton,ThemeProvider,Paper,Modal} from '@mui/material';
 import Nav from "../../component/common/Nav";
 import Footer from "../../component/common/Footer";
 import theme from "../../style/theme";
@@ -15,8 +15,14 @@ import RadioGroup from '@mui/material/RadioGroup';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import FormControl from '@mui/material/FormControl';
 import AddCircleIcon from '@mui/icons-material/AddCircle';
+import CloseIcon from '@mui/icons-material/Close';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import TextField from '@mui/material/TextField';
+import Calendar from 'react-calendar';
+import 'react-calendar/dist/Calendar.css';
+import Select from 'react-select';
+import axios from "axios";
+import { API } from "../../api/api";
 
 import {
     Chart as ChartJS,
@@ -81,12 +87,535 @@ export default function ProfileSetting(){
          },
     })
 
-    const [edit, setEdit] = React.useState(true);
+    ////
+    ////
+    ////
+    ////
 
-    const handleChange = () => {
+    const [edit, setEdit] = useState(true);
+
+    const handleEdit = () => {
+        const { evaluations, ...remains } = profileData;
         setEdit(!edit);
+        setFormData(remains);
     };
 
+    const [profileData, setProfileData] = useState({
+        basicProfile:[],
+        techStacks:[],
+        activities:[],
+        certifications:[],
+        evaluations:[]
+    });
+
+    const [formData, setFormData] = useState({
+        basicProfile:[],
+        techStacks:[],
+        activities:[],
+        certifications:[],
+        evaluations:[]
+    });
+
+    const [jobs, setJobs] = useState([]);
+
+    const [educations, setEducations] = useState([]);
+
+    const [birthData, setBirthData] = useState({
+        year:'',
+        month:'',
+        day:''
+    });
+
+    const [admissionDateData, setAdmissionDateData] = useState({
+        year:'',
+        month:''
+    });
+
+    const [graduationDateData, setGraduationDateData] = useState({
+        year:'',
+        month:''
+    });
+
+    const handleFileOpen = () => {
+        setFileOpen(true);
+    };
+
+    const handleFileClose = () => {
+        setFileOpen(false);
+    };
+
+    const [fileOpen, setFileOpen] = useState(false);
+
+    const [imageFile, setImageFile] = useState([]);
+
+    const [newImageFile, setNewImageFile] = useState([]);
+
+    const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
+
+    const [preSignedUrl, setPreSignedUrl] = useState([]);
+
+    //이미지
+    const handleImageUpload = async (event) => {
+        // presignedurl 발급
+        const selectedFile = event.target.files[0];
+        if(selectedFile){
+            const fileType = selectedFile.type;
+            if(fileType.startsWith('image/')){
+                const extension = selectedFile.name.split('.').pop();
+                setImageFile(selectedFile);
+
+                setFormData((prevData) => ({
+                    ...prevData,
+                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
+                  }));
+                try{
+                    const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
+                    setPreSignedUrl(response.data.preSignedUrl);
+                    console.log(preSignedUrl);
+                    handleFileClose();
+                } catch (error){
+                    console.log(error.response);
+                    alert(error.response.data.message);
+                }
+            } else{
+                alert('이미지 파일이 아닙니다.');
+            }
+        }
+    };
+
+    const uploadImageToS3 = async (preSignedUrl, file) => {
+        try{
+            const response = await axios.put(preSignedUrl, file, {
+                headers: {
+                    'Content-Type': file.type
+                }
+            });
+        } catch (error) {
+            console.log(error.response); 
+            alert(error.response);   
+        }
+    }
+
+    const updateBirth = () => {
+        if (birthData.year == '' || birthData.month == '' || birthData.day == '') return;
+        const birthString = `${birthData.year}-${birthData.month}-${birthData.day}`;
+        setFormData((prevData) => ({
+            ...prevData,
+            birth: birthString,
+        }));
+    };
+    
+    const handleBirthChange = (field, value) => {
+        setBirthData((prevData) => ({
+          ...prevData,
+          [field]: value,
+        }));
+    };    
+
+
+    //입학년도
+    const updateAdimssionDate = () => {
+        if (admissionDateData.year == '' || admissionDateData.month == '') return;
+        const admissionDateString = `${admissionDateData.year}-${admissionDateData.month}-01`;
+        
+        setFormData((prevData) => ({
+            ...prevData,
+            "basicProfile": {
+                ...prevData["basicProfile"],
+                admissionDate: admissionDateString
+            },
+        }));
+        console.log(formData);
+    };
+    
+    const handleAdmissionDateChange = (field, value) => {
+        setAdmissionDateData((prevData) => ({
+          ...prevData,
+          [field]: value,
+        }));
+    }; 
+    
+    //졸업년도
+    const graduationYears = Array.from({ length: 100 }, (_, i) => ({
+        value: (new Date().getFullYear()+10 - i).toString(),
+        label: (new Date().getFullYear()+10 - i).toString(),  
+    }));
+    const updateGraduationDate = () => {
+        if (graduationDateData.year == '' || graduationDateData.month == '') return;
+        const graduationDateString = `${graduationDateData.year}-${graduationDateData.month}-01`;
+        setFormData((prevData) => ({
+            ...prevData,
+            "basicProfile": {
+                ...prevData["basicProfile"],
+                graduationDate: graduationDateString
+            },
+        }));
+    };
+    
+    const handleGraduationDateChange = (field, value) => {
+        setGraduationDateData((prevData) => ({
+          ...prevData,
+          [field]: value,
+        }));
+        
+    }; 
+
+
+    //전화번호
+    const [phoneData, setPhoneData] = useState({
+        phone1:'',
+        phone2:'',
+        phone3:''
+    })
+
+    const handlePhoneChange = (event) => {
+        const { id, value } = event.target;
+        setPhoneData((prevData) => ({
+          ...prevData,
+          [id]: value,
+        }));
+    }; 
+
+    const updatePhone = () =>{
+        if (phoneData.phone1 == '' || phoneData.phone2 == '' || phoneData.phone3 == '') return;
+        const phoneString = `${phoneData.phone1}-${phoneData.phone2}-${phoneData.phone3}`;
+        setFormData((prevData) => ({
+            ...prevData,
+            phone: phoneString,
+        }));
+    }
+
+    //활동
+    const [selectedActivityIndex, setSelectedActivityIndex] = useState(null); // 클릭한 활동의 인덱스
+
+    const handleAddActivity = () => {
+        const newActivity = {
+            startDate: new Date().toISOString().split('T')[0],
+            endDate: new Date().toISOString().split('T')[0],
+            subject: "제목",
+            detail: "내용을 입력해주세요.",
+            tags: []
+        };
+    
+        setFormData((prevData) => ({
+            ...prevData,
+            "activities": [...prevData.activities, newActivity],
+        }));
+    };
+
+    const handleEditActivity = (index) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            activities: prevData.activities.map((activity, i) => {
+                if (i === index) {
+                    return {
+                        ...activity,
+                        isEditing: true, // 클릭 시 수정 모드로 변경
+                    };
+                }
+                return activity;
+            }),
+        }));
+    };
+
+    const handleRemoveActivity = (index) => {
+        console.log("formData",formData);
+
+        const updatedActivities = [...formData.activities];
+        console.log(index,updatedActivities);
+        updatedActivities.splice(index, 1);
+        console.log(updatedActivities);
+        setFormData((prevData) =>({
+            ...prevData,
+            "activities": updatedActivities
+        }));
+        console.log(formData);
+    };
+
+    const handleActivityInputChange = (event, index) => {
+        const { id, value } = event.target;
+        const keys = id.split('.');
+        console.log(index,keys);
+        setFormData((prevData) => ({
+            ...prevData,
+            activities: prevData.activities.map((activity, i) => {
+                if(i===index){
+                    return{
+                        ...activity,
+                        [keys[1]]: value
+                    }
+                }
+                return activity;
+            }),
+        }));
+        console.log(formData);
+    };
+
+    //자격증,수상이력
+    const [selectedCertificationIndex, setSelectedCertificationIndex] = useState(null); // 클릭한 활동의 인덱스
+
+    const handleAddCertification = () => {
+        const newCertification = {
+            gainDate: new Date().toISOString().split('T')[0],
+            name: "제목",
+            score:"100",
+            tags: []
+        };
+    
+        setFormData((prevData) => ({
+            ...prevData,
+            "certifications": [...prevData.certifications, newCertification],
+        }));
+    };
+
+    const handleEditCertification = (index) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            certifications: prevData.certifications.map((certification, i) => {
+                if (i === index) {
+                    return {
+                        ...certification,
+                        isEditing: true, // 클릭 시 수정 모드로 변경
+                    };
+                }
+                return certification;
+            }),
+        }));
+    };
+
+    const handleRemoveCertification = (index) => {
+        console.log("formData",formData);
+
+        const updatedCertifications = [...formData.certifications];
+        console.log(index,updatedCertifications);
+        updatedCertifications.splice(index, 1);
+        console.log(updatedCertifications);
+        setFormData((prevData) =>({
+            ...prevData,
+            "certifications": updatedCertifications
+        }));
+        console.log(formData);
+    };
+
+    const handleCertificationInputChange = (event, index) => {
+        const { id, value } = event.target;
+        const keys = id.split('.');
+        console.log(index,keys);
+        setFormData((prevData) => ({
+            ...prevData,
+            certifications: prevData.certifications.map((certification, i) => {
+                if(i===index){
+                    return{
+                        ...certification,
+                        [keys[1]]: value
+                    }
+                }
+                return certification;
+            }),
+        }));
+        console.log(formData);
+    };
+
+    //캘린더
+    const [calendarDate, setCalendarDate] = useState(new Date());
+  
+    const [showCalendar, setShowCalendar] = useState(false); // 달력을 표시할지 여부
+
+    const [showMonthCalendar, setShowMonthCalendar] = useState(false);
+
+    const [calendarUsage, setCalendarUsage] = useState();
+    
+    function formatDateToString(date) {
+        const year = date.getFullYear();
+        const month = String(date.getMonth() + 1).padStart(2, '0'); // 월은 0부터 시작하므로 +1 해줍니다.
+        const day = String(date.getDate()).padStart(2, '0');
+      
+        return `${year}-${month}-${day}`;
+    }
+
+    const handleCalendarChange = (date) => {
+        const formattedDate = formatDateToString(date);
+        const keys = calendarUsage.split('.');
+        if (selectedActivityIndex !== null) {
+            const updatedActivities = [...formData.activities];
+
+            console.log(calendarUsage);
+          
+            updatedActivities[selectedActivityIndex] = {
+                ...updatedActivities[selectedActivityIndex],
+                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+            };
+            setFormData((prevData) => ({
+                ...prevData,
+                activities: updatedActivities,
+            }));
+            setSelectedActivityIndex(null);
+        }
+        if (selectedCertificationIndex !== null) {
+            const updatedCertifications = [...formData.certifications];
+
+            console.log(calendarUsage);
+          
+            updatedCertifications[selectedCertificationIndex] = {
+                ...updatedCertifications[selectedCertificationIndex],
+                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+            };
+            setFormData((prevData) => ({
+                ...prevData,
+                certifications: updatedCertifications,
+            }));
+            setSelectedCertificationIndex(null);
+        }
+        else{
+            setFormData((prevData) => ({
+                ...prevData,
+                [keys[0]]: {
+                    ...prevData[keys[0]],
+                    [keys[1]]: formattedDate
+                },
+            }));
+        }
+        // 달력 모달 닫기.
+        setShowCalendar(false);
+        setShowMonthCalendar(false);
+    };
+      
+
+    //범용
+    const handleInputChange = (event) => {
+        const { id, value } = event.target;
+        console.log("event.target",event.target);
+        console.log("id",id);
+        console.log("value",value);
+        const keys = id.split('.');
+        console.log(id,value);
+        console.log("keys0",keys[0],"keys1",keys[1]);
+        setFormData((prevData) => ({
+            ...prevData,
+            [keys[0]]: {
+                ...prevData[keys[0]],
+                [keys[1]]: value
+            },
+        }));
+        console.log(formData);
+    }; 
+    
+    const handleRadioInputChange = (key, value) => {
+        const keys = key.split('.');
+        console.log(keys,value);
+        //true, false string으로 받아지는 문제
+        if(value==="true" || value==="false"){
+
+        }
+        setFormData((prevData) => ({
+            ...prevData,
+            [keys[0]]: {
+                ...prevData[keys[0]],
+                [keys[1]]: value
+            },
+        }));
+        console.log(formData[keys[0]][keys[1]])
+        console.log(formData);
+      };
+
+    const years = Array.from({ length: 100 }, (_, i) => ({
+        value: (new Date().getFullYear() - i).toString(),
+        label: (new Date().getFullYear() - i).toString(),  
+    }));
+          
+    const months = Array.from({ length: 12 }, (_, i) => ({
+        value: (i + 1).toString().padStart(2, '0'),
+        label: (i + 1).toString().padStart(2, '0'),
+    }));
+          
+    const days = Array.from({ length: 31 }, (_, i) => ({
+        value: (i + 1).toString().padStart(2, '0'),
+        label: (i + 1).toString().padStart(2, '0'),
+    }));
+
+    const fetchEnum = async () => {
+        try {
+            const response = await API.get('/api/v1/member/signup/enums');
+            setJobs(response.data.job.map(option => ({ value: option.name, label: option.label })));
+            setEducations(response.data.education.map(option => ({ value: option.name, label: option.label })));
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+    
+    const fetchProfile = async () => {
+        try {
+            const response = await API.get('/api/v1/profile');
+            console.log(response);
+            setProfileData(prevData => ({
+                ...prevData,
+                ...response.data
+            }));
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+
+    const fetchImage = async () =>{
+        if(profileData.basicProfile.profileImage!=''){
+            setImageFileURL(profileData.basicProfile.profileImage);
+        }
+    }
+
+    const handleSubmit = () => {
+        setEdit(!edit);
+        console.log(formData);
+        //const isAllTrue = Object.values(submitCondition).every(value => value === true);
+        // if(isAllTrue){
+        // API.put("/api/v1/profile", formData)
+        // .then(response => {
+        //     console.log(formData);
+        //     console.log('회원가입이 완료되었습니다.');
+        //     // 성공적으로 전송되었을 때 할 작업
+        //     window.location.href = "/";
+        // })
+        // .catch(error => {
+        //     console.error('회원가입에 실패했습니다:', error);
+        //     // 전송 실패 시 에러 처리
+        // });
+        // // }
+        // // else{
+        // //     alert("필수 입력란을 채워주세요.")
+        // // }
+        // if(preSignedUrl!=''){
+        //     uploadImageToS3(preSignedUrl,imageFile);
+        // }
+
+    };
+
+    useEffect(()=>{
+        if(newImageFile!=''){
+            setImageFileURL(URL.createObjectURL(newImageFile));
+        }
+    },[newImageFile]);
+    
+    // useEffect
+    useEffect(() => {
+        fetchEnum();
+        fetchProfile();
+        console.log(profileData);
+    }, []);
+
+    useEffect(() =>{
+        fetchImage();
+    },[profileData.basicProfile.profileImage]);
+
+    useEffect(()=>{
+        updateBirth();
+    },[birthData]);
+
+    useEffect(()=>{
+        updateAdimssionDate();
+    },[admissionDateData]);
+
+    useEffect(()=>{
+        updateGraduationDate();
+    },[graduationDateData]);
     
 
 
@@ -106,34 +635,47 @@ export default function ProfileSetting(){
                                     <h1>프로필 관리</h1>
                                     {
                                         edit ?
-                                        <FilledBtn text={"프로필 수정하기"} handle={handleChange}></FilledBtn>
+                                        <FilledBtn text={"프로필 수정"} handle={handleEdit}></FilledBtn>
                                         :
                                         <></>
                                     }
                                 </div>
                                 <div className="profile-box">
                                     <div className="profileImage">
-                                        <img src="/img/profile/profile.png" alt="프로필 이미지" />
+                                        <img src={imageFileURL} alt="프로필 이미지" />
                                         {
                                             edit? <></> :
-                                            <IconButton><AddCircleIcon/></IconButton>
+                                            <div>
+                                            <IconButton onClick={handleFileOpen}><AddCircleIcon /></IconButton>
+                                            <Modal open={fileOpen} onClose={handleFileClose} aria-labelledby="image-upload-modal" aria-describedby="image-upload-description">
+                                                <Paper>
+                                                    <div className="modal-header">
+                                                        <h2>이미지 업로드</h2>
+                                                        <IconButton onClick={handleFileClose}>
+                                                            <CloseIcon />
+                                                        </IconButton>
+                                                    </div>
+                                                    <div className="image-upload-content">
+                                                        <input type="file" accept="image/*" onChange={handleImageUpload} />
+                                                    </div>
+                                                </Paper>
+                                            </Modal>
+                                            </div>
                                         }
                                     </div>
                                     {
                                         edit ?
-                                        <div className="introduce-box">
-                                            <h2>소개글</h2>
+                                        <div className="profileIntro">
+                                            <h2>자기소개</h2>
                                             <p>
-                                            안녕하세요. 소개글입니다.
+                                                {profileData.basicProfile.profileIntro}
                                             </p>
                                         </div>
                                         : 
-                                        <>
                                         <div className="textarea-box">
-                                             <h2>소개글</h2>
-                                             <textarea cols={5} value="안녕하세요. 소개글입니다."></textarea>
+                                             <h2>자기소개</h2>
+                                             <textarea cols={5} id="basicProfile.profileIntro" value={formData.basicProfile.profileIntro} onChange={handleInputChange}></textarea>
                                         </div>
-                                        </>
                                     }
                                 </div>
                                 <div className="skill-box">
@@ -164,7 +706,9 @@ export default function ProfileSetting(){
                                             <img src="/img/profile/icon/An.svg"/>
                                             {
                                                 edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
+                                                <IconButton>
+                                                    <RemoveCircleOutlineIcon/>
+                                                </IconButton>
                                             }
                                         </li>
                                         {
@@ -188,82 +732,181 @@ export default function ProfileSetting(){
                                                         row
                                                         aria-labelledby="demo-row-radio-buttons-group-label"
                                                         name="row-radio-buttons-group"
-                                                        
+                                                        id="basicProfile.isPublic"
+                                                        value={formData.basicProfile.isPublic}
+                                                        onChange={(e) => handleRadioInputChange("basicProfile.isPublic", e.target.value)}
                                                     >
                                                         {
                                                             edit ?
                                                             <>
-                                                                <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                                <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
-                                                                <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
+                                                                <FormControlLabel value={0} control={<Radio  />} label="전체공개" checked={profileData.basicProfile.isPublic===0} disabled={profileData.basicProfile.isPublic!=0}/>
+                                                                <FormControlLabel value={1} control={<Radio  />} label="팀원공개" checked={profileData.basicProfile.isPublic===1} disabled={profileData.basicProfile.isPublic!=1}/>
+                                                                <FormControlLabel value={2} control={<Radio />} label="비공개" checked={profileData.basicProfile.isPublic===2} disabled={profileData.basicProfile.isPublic!=2}/>
                                                             </>
                                                             :
-                                                            <>
-                                                                <FormControlLabel value="female" control={<Radio  />} label="전체공개" defaultChecked/>
-                                                                <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
-                                                                <FormControlLabel value="other" control={<Radio />} label="비공개" />
-                                                            </>
+                                                            <div id="basicProfile.isPublic">
+                                                                <FormControlLabel id="basicProfile.isPublic" value={0} control={<Radio  />} label="전체공개" checked={formData.basicProfile.isPublic==0}/>
+                                                                <FormControlLabel id="basicProfile.isPublic" value={1} control={<Radio  />} label="팀원공개" checked={formData.basicProfile.isPublic==1}/>
+                                                                <FormControlLabel id="basicProfile.isPublic" value={2} control={<Radio />} label="비공개" checked={formData.basicProfile.isPublic==2}/>
+                                                            </div>
                                                         }
                                                     </RadioGroup>
                                                 </FormControl>
                                             </div>
                                         </li>
                                         <li className="dp-flex">
+                                            <h4>성별</h4>
+                                            {
+                                                edit ?
+                                                <p>{profileData.basicProfile.gender}</p>
+                                                :
+                                                <div className="radio-wrap">
+                                                    <FormControl>
+                                                        <RadioGroup
+                                                            row
+                                                            aria-labelledby="demo-row-radio-buttons-group-label"
+                                                            name="gender"
+                                                            id="basicProfile.gender"
+                                                            value={formData.basicProfile.gender}
+                                                            onChange={(e) => handleRadioInputChange("basicProfile.gender", e.target.value)}
+                                                        >
+                                                        <div id="basicProfile.gender">
+                                                            <FormControlLabel id="basicProfile.gender" value="남성" control={<Radio  />} label="남성" checked={formData.basicProfile.gender==="남성"}/>
+                                                            <FormControlLabel id="basicProfile.gender" value="여성" control={<Radio  />} label="여성" checked={formData.basicProfile.gender==="여성"}/>
+                                                        </div>
+                                                        </RadioGroup>
+                                                    </FormControl>
+                                                </div>
+                                            }
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>생년월일</h4>
+                                            {
+                                                edit ?
+                                                <p>{profileData.basicProfile.birth}</p>:
+                                                <h4
+                                                    id="basicProfile.birth"
+                                                    value={formData.basicProfile.birth} 
+                                                    onClick={() => {
+                                                        setShowCalendar(true);
+                                                        setCalendarUsage("basicProfile.birth");
+                                                        setCalendarDate(formData.basicProfile.birth)
+                                                    }}
+                                                    onChange={handleInputChange}
+                                                >
+                                                {formData.basicProfile.birth}
+                                                </h4>
+                                            }
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>직업</h4>
+                                                {
+                                                    edit ?
+                                                    <p>{profileData.basicProfile.job}</p>:
+                                                    <div className="input-wrap">
+                                                        <Select
+                                                            options={jobs}
+                                                            value={jobs.find(option => option.value === jobs.jobs)}
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.label } })}
+                                                            placeholder="선택"
+                                                        />
+                                                    </div>
+                                                }
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>최종학력</h4>
+                                                {
+                                                    edit ?
+                                                    <p>{profileData.basicProfile.education}</p>:
+                                                    <div className="birth-wrap">
+                                                        <Select
+                                                            options={educations}
+                                                            value={educations.find(option => option.value === educations.educations)}
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.label } })}
+                                                            placeholder="선택"
+                                                        />
+                                                    </div>
+                                                }
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>입학날짜</h4>
+                                            {
+                                                edit ?
+                                                <p>{profileData.basicProfile.admissionDate}</p>:
+                                                <h4
+                                                    id="basicProfile.admissionDate" 
+                                                    value={formData.basicProfile.admissionDate} 
+                                                    onClick={() => {
+                                                        setShowCalendar(true);
+                                                        setCalendarUsage("basicProfile.admissionDate");
+                                                        setCalendarDate(formData.basicProfile.admissionDate)
+                                                    }}
+                                                    onChange={handleInputChange}
+                                                >
+                                                {formData.basicProfile.admissionDate}
+                                                </h4>
+                                            } 
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>졸업날짜</h4>
+                                            {
+                                                edit ?
+                                                <p>{profileData.basicProfile.graduationDate}</p>:
+                                                <h4
+                                                    id="basicProfile.graduationDate"
+                                                    value={formData.basicProfile.graduationDate} 
+                                                    onClick={() => {
+                                                        setShowCalendar(true);
+                                                        setCalendarUsage("basicProfile.graduationDate");
+                                                        setCalendarDate(formData.basicProfile.graduationDate)
+                                                    }}
+                                                    onChange={handleInputChange}
+                                                >
+                                                {formData.basicProfile.graduationDate}
+                                                </h4>
+                                            }  
+                                        </li>
+                                        {showCalendar && (
+                                            <div className="calendar-modal">
+                                                <Calendar
+                                                    onChange={(date) => handleCalendarChange(date)}
+                                                    value={calendarDate} // 캘린더의 초기 날짜
+                                                />
+                                            </div>
+                                        )}
+                                        <li className="dp-flex">
+                                            <h4>카카오아이디</h4>
+                                                {
+                                                    edit ?
+                                                    <p>{profileData.basicProfile.kakaoId}</p>:
+                                                    <div className="input-wrap">
+                                                        <TextField id="basicProfile.kakaoId" value={formData.basicProfile.kakaoId} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                    </div>
+                                                }
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>연락처(이메일)</h4>
+                                                {
+                                                    edit ?
+                                                    <p>{profileData.basicProfile.contactEmail}</p>:
+                                                    <div className="input-wrap">
+                                                        <TextField id="basicProfile.contactEmail" value={formData.basicProfile.contactEmail} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                    </div>
+                                                }
+                                        </li>
+                                        <li className="dp-flex">
                                             <h4>거주지</h4>
-                                            {
-                                                edit ?
-                                                <p>거주지</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="거주지"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>대학</h4>
-                                            {
-                                                edit ?
-                                                <p>대학</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="대학"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>이메일</h4>
-                                            {
-                                                edit ?
-                                                <p>이메일</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="이메일"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>나이</h4>
-                                            {
-                                                edit ?
-                                                <p>나이</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="나이"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>학년</h4>
-                                            {
-                                                edit ?
-                                                <p>학년</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="학년"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>전화번호</h4>
-                                            {
-                                                edit ?
-                                                <p>전화번호</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="전화번호"/>
-                                            }
+                                                {
+                                                    edit ?
+                                                    <p>{profileData.basicProfile.address}</p>:
+                                                    <div className="input-wrap">
+                                                        <TextField id="basicProfile.address" value={formData.basicProfile.address} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                    </div>
+                                                }
                                         </li>
                                     </ul>
                                 </div>
+
                                 <div className="history-box">
                                     <h3 className="sub-title">수상이력 및 활동내역</h3>
                                     <div className="dp-flex space-between add-title">
@@ -271,74 +914,147 @@ export default function ProfileSetting(){
                                         {
                                             edit ? <></>
                                             :
-                                            <Button>
+                                            <Button onClick={handleAddActivity}>
                                                 추가하기<AddIcon />
                                             </Button>
                                         }
                                     </div>
+
                                     <ul className="activity-box">
-                                        <li>
-                                            <span>2023.05</span>
-                                            <h4>게시판 프로젝트</h4>
-                                            <p>
-                                            스프링 게시판<br/>
-                                            Spring JPA , MVC 학습 및 활용
-                                            </p>
-                                            <div className="tag-wrap">
-                                                <h5>Spring Boot</h5>
-                                                <h5>Spring Data JPA</h5>
-                                                <h5>MVC</h5>
-                                            </div>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li>
-                                            <span>2023.05</span>
-                                            <h4>게시판 프로젝트</h4>
-                                            <p>
-                                            스프링 게시판<br/>
-                                            Spring JPA , MVC 학습 및 활용
-                                            </p>
-                                            <div className="tag-wrap">
-                                                <h5>Spring Boot</h5>
-                                                <h5>Spring Data JPA</h5>
-                                                <h5>MVC</h5>
-                                            </div>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
+                                        {edit ? (
+                                            <>
+                                                {profileData.activities.map((activity, index) => (
+                                                    <li key={index}>
+                                                        <span>{activity.startDate} ~ {activity.endDate}</span>
+                                                        <h4>{activity.subject}</h4>
+                                                        <p>{activity.detail}</p>
+                                                        <div className="tag-wrap">
+                                                            {/* {activity.tags.map((tag, tagIndex) => (
+                                                                <h5 key={tagIndex}>{tag}</h5>
+                                                            ))} */}
+                                                            <h5>Spring Boot</h5>
+                                                            <h5>Spring Data JPA</h5>
+                                                            <h5>MVC</h5>
+                                                        </div>
+                                                    </li>
+                                                ))}
+                                            </>
+                                        ) : (
+                                            <>
+                                                {formData.activities.map((activity, index) => (
+                                                    <li key={index}>
+                                                        <span 
+                                                            id={`activities[${index}].startDate`} 
+                                                            value={activity.startDate} 
+                                                            onClick={() => {
+                                                                setShowCalendar(true);
+                                                                setSelectedActivityIndex(index);
+                                                                setCalendarUsage(`activities[${index}].startDate`);
+                                                                setCalendarDate(formData.activities[index].startDate)
+                                                            }}
+                                                            onChange={(e) => handleActivityInputChange(e, index)}
+                                                        >
+                                                        {activity.startDate}
+                                                        </span>
+                                                        {" ~ "}
+                                                        <span 
+                                                            id={`activities[${index}].endDate`} 
+                                                            value={activity.endDate} 
+                                                            onClick={() => {
+                                                                setShowCalendar(true);
+                                                                setSelectedActivityIndex(index);
+                                                                setCalendarUsage(`activities[${index}].endDate`);
+                                                                setCalendarDate(formData.activities[index].endDate)
+                                                            }}
+                                                            onChange={(e) => handleActivityInputChange(e, index)}
+                                                        >
+                                                        {activity.endDate}
+                                                        </span>
+                                                        <h4 onClick={() => handleEditActivity(index)}>
+                                                            {activity.isEditing ? (
+                                                                <input id={`activities[${index}].subject`} value={activity.subject} onChange={(e) => handleActivityInputChange(e, index)}></input>
+                                                            ) : (
+                                                                activity.subject
+                                                            )}
+                                                        </h4>
+                                                        <p onClick={() => handleEditActivity(index)}>
+                                                            {activity.isEditing ? (
+                                                                <input id={`activities[${index}].detail`} value={activity.detail} onChange={(e) => handleActivityInputChange(e, index)}></input>
+                                                            ) : (
+                                                                activity.detail
+                                                            )}
+                                                        </p>
+                                                        <div className="tag-wrap">
+                                                            {/* {activity.tags.map((tag, tagIndex) => (
+                                                                <h5 key={tagIndex}>{tag}</h5>
+                                                            ))} */}
+                                                            <h5>Spring Boot</h5>
+                                                            <h5>Spring Data JPA</h5>
+                                                            <h5>MVC</h5>
+                                                        </div>
+                                                        <IconButton onClick={() => handleRemoveActivity(index)}>
+                                                            <RemoveCircleOutlineIcon />
+                                                        </IconButton>
+                                                    </li>
+                                                ))}
+                                                </>
+                                        )}
                                     </ul>
+
+
                                     <div className="dp-flex space-between add-title">
-                                        <h4>자격증</h4>
+                                        <h4>자격증/수상이력</h4>
                                         {
                                             edit ? <></>
                                             :
-                                            <Button>
+                                            <Button onClick={handleAddCertification}>
                                                 추가하기<AddIcon />
                                             </Button>
                                         }
                                     </div>
                                     <ul className="certificate-box">
-                                        <li>
-                                            <span>2023. 05</span>
-                                            <h4>정보처리기사 (Engineer Information Processing)</h4>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li>
-                                            <span>2023. 05</span>
-                                            <h4>제 9회 한양대학교 프로그래밍 경시대회 HCPC (Advanced division) 우수상 3등</h4>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
+                                        {edit ? (
+                                            <>
+                                            {profileData.certifications.map((certification, index) => (
+                                                <li key={index}>
+                                                    <span>{certification.gainDate}</span>
+                                                    <h4>{certification.name}</h4>
+                                                </li>
+                                            ))}
+                                        </>                                            
+                                        ) : (
+                                            <>
+                                                {formData.certifications.map((certification, index) => (
+                                                    <li key={index}>
+                                                        <li key={index}>
+                                                            <span
+                                                                id={`certifications[${index}].gainDate`} 
+                                                                value={certification.gainDate} 
+                                                                onClick={() => {
+                                                                    setShowCalendar(true);
+                                                                    setSelectedCertificationIndex(index);
+                                                                    setCalendarUsage(`certifications[${index}].gainDate`);
+                                                                    setCalendarDate(formData.certifications[index].gainDate)
+                                                                }}
+                                                                onChange={(e) => handleCertificationInputChange(e, index)}
+                                                            >
+                                                            {certification.gainDate}
+                                                            </span>
+                                                            <h4 onClick={() => handleEditCertification(index)}>
+                                                                {certification.isEditing ? (
+                                                                    <input id={`certifications[${index}].name`} value={certification.name} onChange={(e) => handleCertificationInputChange(e, index)}></input>
+                                                                ) : (
+                                                                    certification.name
+                                                                )}
+                                                            </h4>
+                                                        </li>
+                                                        <IconButton onClick={() => handleRemoveCertification(index)}>
+                                                            <RemoveCircleOutlineIcon />
+                                                        </IconButton>
+                                                    </li>
+                                                ))}
+                                            </>
+                                        )}
                                     </ul>
                                 </div>
                                 <div className="review-box">
@@ -350,19 +1066,20 @@ export default function ProfileSetting(){
                                                 row
                                                 aria-labelledby="demo-row-radio-buttons-group-label"
                                                 name="row-radio-buttons-group"
+                                                id="basicProfile.evaluationPublic"
+                                                value={formData.basicProfile.evaluationPublic}
+                                                onChange={(e) => handleRadioInputChange("basicProfile.evaluationPublic", e.target.value)}
                                             >
                                                 {
                                                     edit ?
                                                     <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
+                                                    <FormControlLabel value={true} control={<Radio  />} label="공개" checked={profileData.basicProfile.evaluationPublic==true} disabled={profileData.basicProfile.evaluationPublic!=true}/>
+                                                    <FormControlLabel value={false} control={<Radio  />} label="비공개" checked={profileData.basicProfile.evaluationPublic==false} disabled={profileData.basicProfile.evaluationPublic!=false}/>
                                                     </>
                                                     :
                                                     <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" />
+                                                    <FormControlLabel value={true} control={<Radio  />} label="공개" checked={formData.basicProfile.evaluationPublic===true || formData.basicProfile.evaluationPublic==='true'}/>
+                                                    <FormControlLabel value={false} control={<Radio  />} label="비공개" checked={formData.basicProfile.evaluationPublic===false || formData.basicProfile.evaluationPublic=='false'}/>
                                                     </>
                                                 }
                                             </RadioGroup>
@@ -379,15 +1096,19 @@ export default function ProfileSetting(){
                                             </div>
                                             :<></>
                                         }
-                                        <div className="review-list">
-                                            <h3>성실하고 책임감이 커서 활...</h3>
-                                            <h3>시간을 잘 지켜요</h3>
-                                            <h3>리더십이 뛰어나요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                        </div>
+                                        {
+                                            edit ?
+                                            <div className="review-list">
+                                                <h3>성실하고 책임감이 커서 활...</h3>
+                                                <h3>시간을 잘 지켜요</h3>
+                                                <h3>리더십이 뛰어나요</h3>
+                                                <h3>소통이 잘돼요</h3>
+                                                <h3>소통이 잘돼요</h3>
+                                                <h3>소통이 잘돼요</h3>
+                                                <h3>소통이 잘돼요</h3>
+                                            </div>:
+                                            <></>
+                                        }
                                     </div>
                                 </div>
                             </Content>
@@ -395,7 +1116,7 @@ export default function ProfileSetting(){
                             {
                                 edit ? <></> :
                                 <SaveBtn>
-                                    <FilledBtn text={"저장하기"}></FilledBtn>
+                                    <FilledBtn text={"저장하기"} handle={handleSubmit}></FilledBtn>
                                 </SaveBtn>
                             }
                     </PaddingWrap>
@@ -520,7 +1241,7 @@ const Content = styled(Box)`
                 line-height: 150%;
             }
         }
-        .introduce-box{
+        .profileIntro{
             border: 1px solid rgba(0,0,0,.1);
             border-radius: 10px;
             padding: 2rem;
@@ -605,6 +1326,27 @@ const Content = styled(Box)`
                 input{
                 }
             }
+            .input-wrap{
+                width: 65%;
+                display: flex;
+                align-items: center;
+                .sBtn{
+                    width: 65%;
+                    margin-left: 1rem;
+                }.
+            }
+            .birth-wrap{
+                width: 65%;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
+            .phone-wrap{
+                width: 65%;
+                display: flex;
+                align-items: center;
+                gap: 1rem;
+            }
         }
     }
     .history-box{
@@ -625,6 +1367,18 @@ const Content = styled(Box)`
                 }
             }
         }
+        .calendar-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            border: 1px solid #ccc;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+            padding: 20px;
+            max-width: 400px;
+          }
         .activity-box{
             display: flex;
             align-items: center;
@@ -808,7 +1562,7 @@ const Content = styled(Box)`
         .profileImage{
             width: 70%;
         }
-        .introduce-box{
+        .profileIntro{
             margin-top: 2rem;
             width: 90%;
         }
