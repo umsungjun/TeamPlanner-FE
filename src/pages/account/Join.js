@@ -112,7 +112,7 @@ export default function Join(){
 
                 setFormData((prevData) => ({
                     ...prevData,
-                    profileImage: formData.username+"."+extension,
+                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
                   }));
                 try{
                     const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
