@@ -7,6 +7,7 @@ import Index from "./pages/Index";
 import TeamDetail from "./pages/team/TeamDetail";
 import AccountSetting from "./pages/mypage/AccountSetting";
 import ProfileSetting from "./pages/mypage/ProfileSetting";
+import Profile from "./pages/mypage/Profile";
 import { AuthProvider } from './AuthContext';
 import axios from "axios";
 import TeamManagement from "./pages/mypage/TeamManagement";
@@ -16,14 +17,23 @@ import TokenRedirect from "./TokenRedirect";
 import Search from "./pages/search/Search";
 import RecruitList from "./pages/team/RecruitList";
 import IdPw from "./pages/account/IdPw";
+import Chat from "./pages/chat/Chat";
+import ChatBox from "./component/chat/ChatBox";
+import { useState } from "react";
 
 axios.defaults.withCredentials = true;
 
 function App() {
+
+  const [open, setOpen] = useState(false);
+
+  const handleClick = () => {
+      setOpen(!open);
+  };
   return (
     <AuthProvider>
       <>
-        <GlobalStyle/>
+        
         <Routes>
           <Route path="/" element={ <Index /> }></Route>
           <Route path="/contest" element={ <Index /> }></Route>
@@ -40,9 +50,13 @@ function App() {
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
           <Route path="/recruitment/write" element={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
-          <Route path="/team/recruiteList" element={ <RecruitList /> }></Route>
+          <Route path="/recruitment" element={ <RecruitList /> }></Route>
           <Route path="/search" element={ <Search /> }></Route>
+          <Route path="/chat" element={ <Chat /> }></Route>
+          <Route path="/profile/:nickname" element={ <Profile handleClick={handleClick}/> }></Route>
         </Routes>
+        <GlobalStyle/>
+        {localStorage.getItem("userInfo") && <ChatBox handleClick={handleClick} open={open}/>}
       </>
     </AuthProvider>
   );

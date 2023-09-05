@@ -6,6 +6,7 @@ import { useEffect } from "react";
 const { Kakao } = window;
 
 const KakaoButton = ({activityName, activityImg, boardId}) => {
+
   // 배포한 자신의 사이트
   const realUrl = "http://teamplanner-frontend.s3-website.ap-northeast-2.amazonaws.com";
   // 로컬 주소 (localhost 3000 같은거)
@@ -13,17 +14,16 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
 
   // 재랜더링시에 실행되게 해준다.
   useEffect(() => {
-    console.log(process.env.REACT_APP_API_KEY);
     // init 해주기 전에 clean up 을 해준다.
     Kakao.cleanup();
     // 자신의 js 키를 넣어준다.
     // 여기에 로그인한 사용자의 앱키를 넣어주면 될 것 같다.
     Kakao.init(process.env.REACT_APP_API_KEY);
     // 잘 적용되면 true 를 뱉는다.
-    console.log(Kakao.isInitialized());
   }, []);
 
   const shareKakao = () => {
+
     console.log(activityImg,activityName,boardId)
     Kakao.Share.sendDefault({
       objectType: "feed",
@@ -49,13 +49,13 @@ const KakaoButton = ({activityName, activityImg, boardId}) => {
 
   return(
     <>
-        <button 
-            className='grey-btn'
+        {/* <button 
             onClick={() => {
                 shareKakao()
             }}
-        > 
-        <img src="/img/icon/sns/kakao.png"></img> </button>
+        >  */}
+        <img src="/img/icon/sns/kakao.png" onClick={shareKakao} alt="카카오"></img>
+        {/* </button> */}
     </>
 )
 };

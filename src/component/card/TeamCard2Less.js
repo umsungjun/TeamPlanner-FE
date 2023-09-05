@@ -11,6 +11,8 @@ import AssessmentModal from "../modal/AssessmentModal";
 import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import moment from "moment"; // Moment.js 라이브러리
+import { useHistory } from 'react-router-dom';
+
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -22,9 +24,8 @@ import "swiper/css/scrollbar";
 
 SwiperCore.use([Pagination, Navigation, Autoplay]);
 
-export default function TeamCard2Less({type}){
+export default function     TeamCard2Less({type}){
 
-    console.log(type);
 
 
     const theme = createTheme({
@@ -40,16 +41,27 @@ export default function TeamCard2Less({type}){
 
     const [anchorEl, setAnchorEl] = React.useState(null);
     const open = Boolean(anchorEl);
-    const handleClick = (event) => {
+    const [currentNickname,setCurrentNickname]=useState('');
+    const [endDate,setEndDate]=useState('');
+    const [teamId,setTeamId]=useState('');
+    const [memberId,setMemberId]=useState('');
+
+    const handleClick = (event,nickname,endDate,teamId,mebmerId) => {
+      setEndDate(endDate);
+      setCurrentNickname(nickname);
       setAnchorEl(event.currentTarget);
+      setMemberId(mebmerId);
+      setTeamId(teamId);
     };
     const handleClose = () => {
       setAnchorEl(null);
     };
 
-    // {type ? (asasd) : (asdasdsa)}
-    // { type ? }
-   
+    const handleProfileClick = () => {
+        const url = `/profile/${currentNickname}`;
+        window.location.href = url;
+    };
+
     return(
         <>
           <ThemeProvider theme={theme}>
@@ -63,7 +75,7 @@ export default function TeamCard2Less({type}){
                                     
                                     {/* <AccountCircleIcon color="black"/> */}
                                     <img src={type.leaderProfileImage} width="30rem" height="30rem" style={{borderRadius:"50px", marginRight : "0.5rem"}}></img>
-                                    <h3>팀장 : {type.teamLeader}</h3>
+                                    <h3>팀장 : {type.teamLeader.length > 10 ? `${type.teamLeader.slice(0,12)}...` : type.teamLeader}</h3>
                                 </li>
                                 <li>
                                     {
@@ -90,11 +102,11 @@ export default function TeamCard2Less({type}){
                                     aria-controls={open ? 'basic-menu' : undefined}
                                     aria-haspopup="true"
                                     aria-expanded={open ? 'true' : undefined}
-                                    onClick={handleClick}
+                                    onClick={(event) => handleClick(event, member.nickname,type.endDate,type.id,member.memberId)}
                                 >
                                     <img src={member.profileImage} alt={`Profile ${member.memberId + 1}`} />
-                                    
-                                </div>
+                          
+                                </div>  
                                 
                             ))}
                             {/* <div className="img-box"
@@ -258,8 +270,8 @@ export default function TeamCard2Less({type}){
                 horizontal: 'right',
                 }}
             >
-                <StyledMenuItem onClick={handleClose}>프로필 보기</StyledMenuItem>
-                <MenuItem><AssessmentModal /></MenuItem>
+                <StyledMenuItem onClick={handleProfileClick}>프로필 보기</StyledMenuItem>
+                <MenuItem><AssessmentModal nickname={currentNickname} endDate={endDate} teamId={teamId} memberId={memberId}/></MenuItem>
             </StyledMenu>
           </ThemeProvider>
         </>

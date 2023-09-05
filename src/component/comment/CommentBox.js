@@ -11,6 +11,7 @@ import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import MoreHorizIcon from '@mui/icons-material/MoreHoriz';
 import SolidBtn from "../button/SolideBtn";
+import { Link } from 'react-router-dom';
 
 export default function CommentBox({ commentData, changeFlag, flag, commentFlag, changeCommentFlag }) {
   
@@ -131,7 +132,9 @@ export default function CommentBox({ commentData, changeFlag, flag, commentFlag,
           <ul className="comment">
             <li>
               <IconButton sx={{ p: 0 }}>
+              <Link to={`/profile/${commentData.nickName}`}>
                 <Avatar src={commentData.profileImage} alt="Profile" />
+                </Link>
                 {/* <AccountCircleIcon/> */}
               </IconButton>
               <div className="comment-text">

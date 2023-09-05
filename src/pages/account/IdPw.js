@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import styled from "@emotion/styled";
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
@@ -9,9 +9,11 @@ import theme from "../../style/theme";
 import PropTypes from 'prop-types';
 import Tabs from '@mui/material/Tabs';
 import Tab from '@mui/material/Tab';
+import { API } from "../../api/api";
 import Typography from '@mui/material/Typography';
 import TextField from "@mui/material/TextField";
 import FilledBtn from "../../component/button/FilledBtn";
+import { useNavigate } from "react-router-dom";
 
 function CustomTabPanel(props) {
     const { children, value, index, ...other } = props;
@@ -49,6 +51,44 @@ function CustomTabPanel(props) {
 
 export default function IdPw(){
 
+    const navigate = useNavigate();
+    const [verifyButton,setVerifyButton] = useState(false);
+    const [minutes, setMinutes] = useState(2);
+    const [seconds, setSeconds] = useState(0);
+    const[userId,setUserId]= useState();
+    const[email,setEmail]=useState();
+
+    const [isVerificationRequested, setIsVerificationRequested] = useState(false);
+
+    useEffect(() => {
+        const countdown = setInterval(() => {
+            setSeconds(prevSeconds => {
+                if (prevSeconds > 0) {
+                    return prevSeconds - 1;
+                } else {
+                    if (minutes > 0) {
+                        setMinutes(prevMinutes => prevMinutes - 1);
+                        return 59;
+                    } else {
+                        clearInterval(countdown);
+                        return 0;
+                    }
+                }
+            });
+        }, 1000);
+        return () => clearInterval(countdown);
+    }, [isVerificationRequested, minutes]);
+
+    const handleVerificationClick = () => {
+
+            // Start the timer and set the flag to prevent multiple requests
+            setMinutes(3);
+            setSeconds(0);
+            setIsVerificationRequested(true);
+
+        // Here you can also add the logic to send the verification request to the server
+    };
+
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -74,6 +114,116 @@ export default function IdPw(){
     const handleChange2 = () => {
         setChange(!change);
     };
+
+    const emailRegEx = /^[A-Za-z0-9]([-_.]?[A-Za-z0-9])*@[A-Za-z0-9]([-_.]?[A-Za-z0-9])*\.[A-Za-z]{2,3}$/i;
+
+    const handleFormSubmit = (event) => {
+        event.preventDefault(); // Prevent the default form submission behavior
+        
+        const user_id = document.getElementById('id').value.trim();
+        const email_id = document.getElementById('email').value.trim();
+        const verifyNum = document.getElementById('verifyNum').value.trim();
+        if(email_id.match(emailRegEx)===null) { //형식에 맞지 않을 경우 아래 콘솔 출력
+            alert('이메일 형식을 확인해주세요');
+            return;
+        }
+
+        API.post("/api/v1/member/signup/verify", {
+            email : email_id,
+            code : verifyNum,
+            verifyPurpose : "FORGOT_PASSWORD"
+          }).then((res) => {
+        
+            console.log(res)
+        }).catch(err => {
+            return
+        });;
+
+        API.post("/api/v1/member/forgot-password", {
+            username: user_id,
+            email: email_id,
+            code : verifyNum
+          }).then((res) => {
+            alert("임시번호 전송완료")
+            navigate("/login");
+        }).catch(err => {
+            // console.log(err.response)
+            alert("인증번호가 만료되었거나 일치하지 않습니다!");
+        });;
+    };
+
+    const EmailFormSubmit= (event)=>{
+        
+        event.preventDefault(); // Prevent the default form submission behavior
+        const email = document.getElementById('email').value.trim();
+        const user_id = document.getElementById('id').value.trim();
+
+        if(email===null || user_id === null){
+            alert("이메일 및 닉네임을 입력해주세요");
+        }
+        
+        if(email.match(emailRegEx)===null) { //형식에 맞지 않을 경우 아래 콘솔 출력
+            alert('이메일 형식을 확인해주세요');
+            return;
+        }
+
+        API.post("/api/v1/member/email-verify", {
+            email :email,
+            username : user_id
+          }).then((res) => {
+            API.post("/api/v1/member/signup/send-verification", {
+                "email" :email,
+                "verifyPurpose" : "FORGOT_PASSWORD"
+              }).then((res) => {
+                setEmail(email);
+                setUserId(user_id);
+                setVerifyButton(true); //버튼 비활성화 및 readonly로 수정못하게
+                alert("이메일 전송이 완료되었습니다.");
+                handleVerificationClick(); //타이머 돌아가게
+            }).catch(err => {
+                setVerifyButton(false);
+                alert(err.response.data.message);
+            });;
+           
+        }).catch(err => {
+            alert(err.response.data.message);
+            return
+        });;
+
+    }
+
+
+
+    const EmailFormSubmitForId= (event)=>{
+        
+        event.preventDefault(); // Prevent the default form submission behavior
+        const email = document.getElementById('nicknameEmail').value.trim();
+        // const user_name = document.getElementById('nickname').value.trim();
+
+        if(email===null){
+            alert("이메일 및 닉네임을 입력해주세요");
+            return;
+        }
+
+        if(email.match(emailRegEx)===null) { //형식에 맞지 않을 경우 아래 콘솔 출력
+            alert('이메일 형식을 확인해주세요');
+            return;
+        }
+
+       
+        API.post("/api/v1/member/forgot-username", {
+            "email" :email
+            }).then((res) => {
+                
+            document.getElementById('nicknameEmail').value="";
+            // document.getElementById('nickname').value="";
+            alert("이메일로 아이디가 전송되었습니다.");
+
+            }).catch(err => {
+                alert(err.response.data.message);
+            });;
+
+    }
   
 
     return(
@@ -103,22 +253,22 @@ export default function IdPw(){
                                 </Box>
                             </TabWrap>
                             <StyledTabPanel value={value} index={0}>
-                                <p>본인인증시에 사용했던 휴대폰으로 아이디를 보내드립니다.</p>
+                                <p>회원가입시에 사용했던 이름과 이메일로 아이디를 보내드립니다.</p>
                                 <ul>
-                                    <li>
-                                        <h3>이름</h3>
+                                    {/* <li>
+                                        <h3>닉네임 </h3>
                                         <div className="input-wrap">
-                                            <TextField id="name" type="text" variant="outlined" fullWidth placeholder="이름을 입력하세요." />
+                                            <TextField id="nickname" type="text" variant="outlined" fullWidth placeholder="이름을 입력하세요." />
+                                        </div>
+                                    </li> */}
+                                    <li>
+                                        <h3>이메일</h3>
+                                        <div className="input-wrap">
+                                            <TextField id="nicknameEmail" type="text" variant="outlined" fullWidth placeholder="이메일을 입력하세요."/>
                                         </div>
                                     </li>
                                     <li>
-                                        <h3>휴대폰번호</h3>
-                                        <div className="input-wrap">
-                                            <TextField id="num" type="number" variant="outlined" fullWidth placeholder="‘-’없이 입력하세요."/>
-                                        </div>
-                                    </li>
-                                    <li>
-                                        <FilledBtn text={"SMS로 아이디 전송"}/>
+                                        <FilledBtn text={"이메일로 아이디 전송"} handle={EmailFormSubmitForId}/>
                                     </li>
                                 </ul>
                                 <div className="login-join-wrap">
@@ -128,16 +278,58 @@ export default function IdPw(){
                             </StyledTabPanel>
                             <StyledTabPanel value={value} index={1}>
                                 <p>회원가입 시 사용한 이메일을 입력하시면<br/>
-                                새로운 비밀번호 생성이 가능한 링크를 입력하신 이메일로 보내 드립니다.</p>
+                                새로운 임시비밀번호를 입력하신 이메일로 보내 드립니다.</p>
                                 <ul>
                                     <li>
                                         <h3>아이디</h3>
                                         <div className="input-wrap">
-                                            <TextField id="id" type="text" variant="outlined" fullWidth placeholder="아이디를 입력하세요." />
+                                            <TextField id="id" type="text" value={userId} inputProps={{ readOnly: verifyButton }} variant="outlined" fullWidth placeholder="아이디를 입력하세요." />
                                         </div>
                                     </li>
                                     <li>
-                                        <FilledBtn text={"비밀번호 재설정 링크 전송"}/>
+                                        <h3>이메일</h3>
+                                        <div className="input-wrap">
+                                            <TextField id="email" type="text" value={email} inputProps={{ readOnly: verifyButton }} variant="outlined" fullWidth placeholder="이메일을 입력하세요." />
+                                            {isVerificationRequested ? (
+                                            <div className="sBtn"><FilledBtn disabled={verifyButton} text="발송완료" handle={EmailFormSubmit}/></div>):
+                                            (
+                                                <div className="sBtn"><FilledBtn text="전송하기" handle={EmailFormSubmit}/></div>
+                                            )}
+                                        </div>
+                                    </li>
+                                    <li>
+
+                                        {isVerificationRequested ? (
+                                            <>
+                                            <h3>인증번호</h3>
+                                        
+                                            <div className="input-wrap">
+                                                <TextField id="verifyNum" variant="outlined" fullWidth/>
+                                            
+                                            </div>
+                                            </>
+                                            ):
+                                            (
+                                                ""
+                                            )
+                                           
+                                        }
+                                            
+                                    </li> 
+                                    <li>
+                                    {isVerificationRequested ? (
+                                                <span>인증번호가 발송되었습니다 <span>{minutes}:{seconds < 10 ? `0${seconds}` : seconds}</span></span>
+                                            ) : (
+                                                ""
+                                            )}
+                                            {isVerificationRequested && (
+                                                <a href="#" onClick={EmailFormSubmit}>재전송</a>
+                                            )}
+                                    </li>
+
+                                        
+                                    <li>
+                                        <FilledBtn handle={handleFormSubmit} text={"비밀번호 재설정 링크 전송"}/>
                                     </li>
                                 </ul>
                                 <div className="login-join-wrap">
@@ -155,7 +347,7 @@ export default function IdPw(){
 
 const Container = styled(Box)`
     width: 100%;
-    margin-top: 13rem;
+    margin-top: 20rem;
     height: 80vh;
     display: flex;
     align-items: center;

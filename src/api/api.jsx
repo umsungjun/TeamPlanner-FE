@@ -13,8 +13,7 @@ export const API = axios.create({
 API.interceptors.request.use(
   function (config) {
 
-    console.log(document.cookie.split(";").map(el=>el.split("=")));
-    let accessToken = getCookie("accessToken");
+    const accessToken=document.cookie.split(";").map(el=>el.split("="))[0][1];
     // console.log("accessToken", accessToken);
     // 1년짜리 토큰
     // const accessToken = `eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJsb2NhbE1lbWJlciIsImV4cCI6MTcyMDYyNzE5MiwidXNlcm5hbWUiOiJsb2NhbE1lbWJlciJ9.xmhoU2wsMRLlkkhziZe_vmJuXkYgZOXrdX1at71_2X_qKrUClCmKKkPbqnGMRWSHBsNUC4Z-nxQ7K8rFzuPzgQ`;
@@ -47,7 +46,8 @@ API.interceptors.response.use(
                     // try to renew access token
                         // get refresh token
 
-                    const refreshToken = getCookie("refreshToken");
+                    // const refreshToken = getCookie("refreshToken");
+                    const refreshToken=document.cookie.split(";").map(el=>el.split("="))[1][1];
                     console.log('refreshToken', refreshToken)
 
                     if (!refreshToken) {
@@ -60,7 +60,7 @@ API.interceptors.response.use(
                         // console.log('resp.data.accessToken', resp.data.accessToken);
                         console.log("refresh access token with refreshToken");
                         console.log("new accessToken =", resp.data.accessToken);
-                        setCookie("accessToken", resp.data.accessToken);
+                        // setCookie("accessToken", resp.data.accessToken);
                         return new Promise(() => {});
                     }).catch(err => {
                         console.log('err', err);
@@ -71,14 +71,11 @@ API.interceptors.response.use(
                 case -4: // 리프레시토큰 만료됨
                 case -101: // unauthorized HTTP status, (unauthenticated.) 
                     // re-login required.
-                    {
-                        <>
-                        <CommonModal/>
-                        </>
-                    }
+     
                     alert("로그인이 필요합니다.");
                     console.log("refreshToken expired");
                     removeCookie("refreshToken");
+                    removeCookie("accessToken");
                     localStorage.removeItem("userInfo");
                     window.location.href = `/login?redirect=${window.location.pathname}`;
                     return new Promise(() => {});

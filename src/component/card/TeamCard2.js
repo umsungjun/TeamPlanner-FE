@@ -57,9 +57,10 @@ export default function TeamCard2({type}){
                         <li>
                                     {/* <AccountCircleIcon color="black"/> */}
                                     <img src={type.leaderProfileImage} width="30rem" height="30rem" style={{borderRadius:"50px", marginRight : "0.5rem"}}></img>
-                                    <h3>팀장 : {type.teamLeader}</h3>
+                                    <h3>팀장 : {type.teamLeader.length > 10 ? `${type.teamLeader.slice(0,12)}...` : type.teamLeader}</h3>
                                 </li>
                                 <li>
+                                    
                                     {
                                         new Date(type.endDate) > new Date() ?
                                         <h4 className="ing">진행 중</h4>
@@ -203,7 +204,7 @@ export default function TeamCard2({type}){
                         </div>
                         </SwiperSlide> */}
                         </Swiper>
-                    </div>
+                    </div>ƒ
                 </div>
             </TeamCard2Wrap>
             <StyledMenu
