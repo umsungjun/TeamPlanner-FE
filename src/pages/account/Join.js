@@ -104,7 +104,6 @@ export default function Join(){
     //이미지
     const handleImageUpload = async (event) => {
         const selectedFile = event.target.files[0];
-        console.log(selectedFile);
         // presignedurl 발급
         if(selectedFile){
             const fileType = selectedFile.type;
@@ -167,22 +166,15 @@ export default function Join(){
             profileImage: newProfileImageURL,
           }));
 
-          console.log("getPresignedUrl : I got Presigned Url! ",returnedPreSignedUrl);
           setPreSignedUrl(returnedPreSignedUrl);
-          console.log("getPresignedUrl : profileImage, presignedUrl is...",formData.profileImage,preSignedUrl);
-      
-          console.log("getPresignedUrl : response is...", response);
 
           setSubmitPermit(true);
         } catch (error) {
-          console.log(error.response);
-          alert("getPresignedUrl error :",error.response.data.message);
+            alert("getPresignedUrl error :",error.response.data.message);
         }
     };
 
     const uploadImageToS3 = () => {
-        console.log("uploadImageToS3 : presigned url and imagefile in uploadImageToS3 method...",preSignedUrl,imageFile);
-        
         axios.put(preSignedUrl, imageFile, {
             headers: {
                 'Content-Type': imageFile.type
@@ -190,13 +182,8 @@ export default function Join(){
             withCredentials : false
         })
         .then(response =>{
-            console.log("uploadImageToS3 : uploadImage response is...",response);
         })
         .catch(error =>{
-            console.log("uploadImageToS3 error : preSignedUrl is...", preSignedUrl);
-            console.log("uploadImageToS3 error : profileImage is...",formData.profileImage);
-            console.log("uploadImageToS3 error : error is...", error);
-            console.log("uploadImageToS3 error: error.response is...", error.response);
             alert(error.response);  
         })
     }
@@ -401,8 +388,7 @@ export default function Join(){
             .then(response => {
                 setIsCodeSent(true);
                 setRemainingTime(180);
-                console.log('데이터가 성공적으로 전송되었습니다.');
-                // 성공적으로 전송되었을 때 할 작업
+                console.log('인증번호가 성공적으로 전송되었습니다.');
             })
             .catch(error => {
                 alert(error.response.data.message);
@@ -457,8 +443,7 @@ export default function Join(){
             try{
                 await getPresignedUrl();
             } catch(error) {
-                console.error('handleSubmit error :', error);
-                // 전송 실패 시 에러 처리
+                alert("사진 저장에 실패했습니다. 다시 시도해주세요.")
             }
         }
         else{
@@ -467,7 +452,6 @@ export default function Join(){
     };
 
     const submitFormData = () => {
-        console.log("Im in submitFormData");
         API.post("/api/v1/member/signup", formData)
         .then(response =>{
             console.log(response);
@@ -482,9 +466,10 @@ export default function Join(){
     }
 
     useEffect(()=>{
-        console.log("submitPermit",submitPermit);
-        uploadImageToS3();
-        submitFormData();
+        if (submitPermit){
+            uploadImageToS3();
+            submitFormData();
+        }
     },[submitPermit]);
       
     
@@ -546,7 +531,6 @@ export default function Join(){
     const fetchEnum = ()=>{
         API.get('/api/v1/member/signup/enums')
         .then(response => {
-            console.log('API 응답 데이터:', response.data);
             setJobs(response.data.job.map(option => ({ value: option.name, label: option.label})));
             setEducations(response.data.education.map(option => ({ value: option.name, label:option.label})));
         })
