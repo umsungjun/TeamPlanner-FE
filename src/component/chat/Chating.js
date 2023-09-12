@@ -21,6 +21,7 @@ import ListItemText from '@mui/material/ListItemText';
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
 import { AuthContext } from "../../AuthContext";
+import { API_BASE_URL } from "../../common/constant/constant";
 
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CollectionsIcon from '@mui/icons-material/Collections';
@@ -29,6 +30,7 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function Chating({chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
+
 
 
     const theme = createTheme({
@@ -47,6 +49,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
     const handleAddList = () => {
         setAdd(!add);
     };
+
 
 
 
@@ -71,7 +74,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
 
         // 함수 내부에서 소켓 연결을 설정
         const setupSocket = () => {
-            socket = new SockJS('http://localhost:8080/ws/chat');
+            socket = new SockJS(API_BASE_URL+'/ws/chat');
             client.current = Stomp.over(socket);
             client.current.connect({}, onConnected, onError);
         };
@@ -95,7 +98,6 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
         console.log("onError")
     }
 
-    const [targetNickname, setTargetNickname] = useState(user);
     const [message, setMessage] = useState("")
     const client = useRef(null); // Use a ref to hold the client instance
     const { userInfo, setUserInfo } = useContext(AuthContext);
@@ -113,13 +115,14 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
             window.alert("채팅을 입력해주세요");
             return;
         }
-        if (targetNickname == null) {
+        if (user == null) {
             window.alert("채팅 할 유저를 선택해주세요");
             return;
         }
-        if (chattingRoomId === null) {
+        console.log(user,chattingRoomId)
+        if (!chattingRoomId) {
         API.post("/api/v1/chat/room", {
-            targetNickname: targetNickname
+            targetNickname: user
         }).then(res => {
             console.log('방 생성 응답값 : ', res);
             setRoomId(res.data);
@@ -145,6 +148,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                 content: message,
                 // sender: localStorage.getItem("userInfo").nickname,
                 senderId: userInfo.memberId,
+                readCount: 2,
                 chattingRoomId: roomId
             })}`,
             headers: { priority: '9' },
@@ -165,6 +169,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
               content: message,
               // sender: localStorage.getItem("userInfo").nickname,
               senderId: userInfo.memberId,
+              readCount: 2,
               chattingRoomId: chattingRoomId
             })}`,
             headers: { priority: '9' },
@@ -180,7 +185,6 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
      };
      let prevMessageTime = null;
 
-
     return(
         <>
         <ThemeProvider theme={theme}>
@@ -193,7 +197,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                         <UserImg>
                             <PersonOutlineIcon />
                         </UserImg>
-                        <h2>{user}</h2>
+                        <h2>{chatList.length>0 ? (user) : ("") }</h2>
                     </li>
                     <li>
                         <Checkbox
@@ -208,7 +212,10 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                   
                     
 
-                    {chatList.map((message, index) => {
+                
+
+                {chatList && chatList.length > 0 ? (
+                        chatList.map((message, index) => {
 
                         // 메시지의 발신자 ID와 사용자 ID 비교
                         const isUserMessage = message.senderId === memberId;
@@ -235,8 +242,11 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                                                 <p className="msg-box">
                                                     {message.content}
                                                 </p>
-                                                <span>{message.createdTime}{message.createdDate}</span>
-                                                
+                                                <span>{message.createdTime} {message.createdDate}{' '}
+                                                    <span style={{ color: message.readCount === 0 ? 'initial' : 'red' }}>
+                                                        {message.readCount === 0 ? '' : '읽지 않음'}
+                                                    </span>
+                                                </span>
                                             </div>
                                         </div>
                                     </SendMsg>
@@ -253,13 +263,21 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                                                 </p>
                                                 <span>{message.createdTime}</span>
                                                 <span>{message.createdDate}</span>
+                                                <span style={{ color: message.readCount === 0 ? 'initial' : 'red' }}>
+                                                        {message.readCount === 0 ? '' : '읽지 않음'}
+                                                </span>
                                             </div>
                                         </div>
                                     </ReceiveMsg>
                                 )}
                             </React.Fragment>
                         );
-                    })}
+                    })): (
+                    <div>
+                        대화를 나누고 싶은 상대와 메시지를 주고받을 수 있어요.
+                        지금 바로 시작해 보세요!
+                    </div>
+                    )}
                     {/* <ReceiveMsg>
                         <UserImg>
                             <PersonOutlineIcon />

@@ -19,6 +19,8 @@ import AddCircleIcon from '@mui/icons-material/AddCircle';
 import RemoveCircleOutlineIcon from '@mui/icons-material/RemoveCircleOutline';
 import TextField from '@mui/material/TextField';
 import { useParams } from 'react-router-dom';
+import { API } from "../../api/api";
+
 
 
 import {
@@ -89,8 +91,7 @@ export default function Profile({handleClick}){
          },
     })
 
-    const img="/img/profile/profile.png";
-    const { nickname } = useParams();
+
 
 
     const [edit, setEdit] = React.useState(true);
@@ -100,10 +101,26 @@ export default function Profile({handleClick}){
         setEdit(!edit);
     };
 
+    const img="/img/profile/profile.png";
+    const { nickname } = useParams();
     const toggleChatbox = () => {
-        handleClick(img,nickname);
-        // ChatBox.handleClick(); // ChatBox의 handleClick 함수 호출
+
+
+        API.get(`/api/v1/chat/room-check/${nickname}`)
+        .then(res => {
+            if(res.data.roomCheck===false){
+                window.alert("이미 채팅방이 존재합니다");
+            }else{
+                handleClick(img,nickname);
+                localStorage.setItem("img",img);
+                localStorage.setItem("targetNickname",nickname);
+                setEdit(!edit)
+            }
+        }).catch(err => {
+            console.log('err', err)
+        }).finally()
     };
+
 
     return(
         <>
@@ -139,7 +156,6 @@ export default function Profile({handleClick}){
                                         edit ? 
                                         <div className="profile-btn-wrap">
                                             <SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>
-                                            <SolidBtn text={"팀 초대"}/>
                                         </div>
                                         : <></>
                                     }

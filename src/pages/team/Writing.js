@@ -55,6 +55,8 @@ export default function Writing(){
         });
     };
 
+    console.log("hello")
+
     const handleWriteButton = (event) => {
         console.log("handle write button")
         console.log(`input = ${inputs}`)
