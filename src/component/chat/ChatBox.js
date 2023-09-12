@@ -8,13 +8,19 @@ import SmsIcon from '@mui/icons-material/Sms';
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import MsgListBox from "./MsgListBox";
 import Chating from "./Chating";
+import CloseIcon from '@mui/icons-material/Close';
 import theme from "../../style/theme";
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
 import { API } from "../../api/api";
 import { AuthContext } from "../../AuthContext";
+import { API_BASE_URL } from "../../common/constant/constant";
 
 export default function ChatBox({handleClick, open}){
+
+   
+ 
+    
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -72,13 +78,29 @@ export default function ChatBox({handleClick, open}){
         }
     
         // Set up a new socket connection
-        let socket = new SockJS('http://localhost:8080/ws/chat');
+        let socket = new SockJS(API_BASE_URL+'/ws/chat');
+
+        const cookies = document.cookie.split(";");
+
+                    let accessToken = null;
+
+                    for (const cookie of cookies) {
+                        const [name, value] = cookie.trim().split("=");
+                        if (name === "accessToken") {
+                            accessToken = value;
+                        break;
+                        }
+                    }
+
+        const headers = {
+            Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+        };
+
         client.current = Stomp.over(socket);
-        client.current.connect({}, onConnected, onError);
+        client.current.connect(headers, onConnected, onError);
     
         return () => {
             // Clean up subscriptions when the component unmounts
-            console.log("testedsa");
             if (client.current) {
                 client.current.disconnect();
             }
@@ -113,41 +135,104 @@ export default function ChatBox({handleClick, open}){
     const onMessageReceived = (message) => {
         // console.log('message', message)
         // console.log('message', message.body)
-        const newChat = JSON.parse(message.body);
-        setChatList((prevChatList) => [...prevChatList, newChat]);
+        let newChat = JSON.parse(message.body);
+
+        //해당 메세지를 제대로 받았으면 count 값 -=1
+        
+        API.get(`/api/v1/chat/${newChat.id}`)
+        .then(res => {
+            console.log("구독 성공 readcount 한개취소",newChat.readCount);
+            newChat.readCount = newChat.readCount - 1;
+
+            setChatList((prevChatList) => [...prevChatList, newChat]);
+            
+        }).catch(err => {
+            alert(err.response.data.message);
+        })
     };
 
     const tabContArr=[];
 
+    let img="";
+    let nickname="";
+    if(localStorage.getItem("img") && localStorage.getItem("targetNickname")){
+        img=localStorage.getItem("img");
+        nickname=localStorage.getItem("targetNickname");
+
+        
+        if(img && nickname){
+
+            const memberList = [
+                {
+                  nickname: userInfo.nickname,
+                  profileImage: userInfo.profileImg,
+                }
+              ];
+              
+              const newMemberList = {
+                nickname: nickname,
+                profileImage: img,
+              };
+              
+            memberList.push(newMemberList);
+
+            // 현재 날짜를 가져옵니다.
+            const currentDate = new Date();
+
+            // 년, 월, 일을 추출합니다.
+            const year = currentDate.getFullYear();
+            const month = currentDate.getMonth() + 1; // 월은 0부터 시작하므로 1을 더합니다.
+            const day = currentDate.getDate();
+
+            // 결과를 원하는 형식으로 표시합니다.
+            const result = `${year}.${month}.${day}.`;
+              
+
+            const newItem = {
+                lastMessageText: "",
+                lastMessageTime: result,
+                memberList: memberList,
+                roomId: "",
+            };
+    
+            chatRoomList.push(newItem);
+            localStorage.removeItem("img");
+            localStorage.removeItem("targetNickname");
+        }
+    }
+
+    
 
     chatRoomList.map((item, key) => {
-        tabContArr.push(
-            {
-                tabTitle:(
-                    <div className={activeIndex===key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
-                        <MsgListBox 
-                        id={item.roomId} 
-                        none={true} 
-                        user={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
-                        lastMessageText={item.lastMessageText}
-                        lastMessageTime={item.lastMessageTime}
-                        profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
+        if(userInfo){
+            tabContArr.push(
+                {
+                    tabTitle:(
+                        <div className={activeIndex===key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
+                            <MsgListBox 
+                            id={item.roomId} 
+                            none={true} 
+                            user={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                            lastMessageText={item.lastMessageText}
+                            lastMessageTime={item.lastMessageTime}
+                            profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
+                            />
+                        </div>
+                    ),
+                    tabCont:(
+                        <Chating
+                        handle={handleClick} 
+                        handle2={handleClick2} 
+                        chatList={chatList}
+                        user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                        memberId={userInfo.memberId}
+                        chattingRoomId={roomId}
+                        setRoomId={setRoomId}
                         />
-                    </div>
-                ),
-                tabCont:(
-                    <Chating
-                    handle={handleClick} 
-                    handle2={handleClick2} 
-                    chatList={chatList}
-                    user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
-                    memberId={userInfo.memberId}
-                    chattingRoomId={roomId}
-                    setRoomId={setRoomId}
-                    />
-                )
-            }
-        )
+                    )
+                }
+            )
+        }
     })
 
 
@@ -182,6 +267,13 @@ export default function ChatBox({handleClick, open}){
 
             if (!sameCheck) {
                 let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
+                // API.get(`/api/v1/chat/{}`)
+                // .then(res => {
+                //     console.log("채팅방 리스트",res.data)
+                //     setChatRoomList(res.data);
+                // }).catch(err => {
+                //     alert(err.response.data.message);
+                // })
 
                 if (socket) {
                     setTmp((tmp) => [...tmp, {roomId: roomId, socket: socket.id}])
@@ -202,7 +294,6 @@ export default function ChatBox({handleClick, open}){
 
         // };
     }, [roomId]);
-    console.log(chatList)
 
     return(
         <>
@@ -240,6 +331,7 @@ export default function ChatBox({handleClick, open}){
                             <ChatingBox>
                                 {tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
                             </ChatingBox>
+                            {!tabContArr.length >0 &&  <IconButton onClick={handleClick} style={{ width: '5%' , height: '10%' }}><CloseIcon/></IconButton>}
                         </Chat>
                         : <></>
                     }

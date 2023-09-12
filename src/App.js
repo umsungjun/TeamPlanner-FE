@@ -19,21 +19,26 @@ import RecruitList from "./pages/team/RecruitList";
 import IdPw from "./pages/account/IdPw";
 import Chat from "./pages/chat/Chat";
 import ChatBox from "./component/chat/ChatBox";
-import { useState } from "react";
+import { useState ,useEffect} from "react";
 
 axios.defaults.withCredentials = true;
 
 function App() {
 
   const [open, setOpen] = useState(false);
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("userInfo"));
 
   const handleClick = () => {
       setOpen(!open);
   };
+  useEffect(() => {
+    // Check for login status whenever the component mounts or updates
+    setIsLoggedIn(!!localStorage.getItem("userInfo"));
+  }, []);
   return (
     <AuthProvider>
       <>
-        
+      <GlobalStyle/>
         <Routes>
           <Route path="/" element={ <Index /> }></Route>
           <Route path="/contest" element={ <Index /> }></Route>
@@ -48,17 +53,18 @@ function App() {
           <Route path="/mypage/profileSetting" element={ <ProfileSetting /> }></Route>
           <Route path="/mypage/teamManagement" element={ <TeamManagement /> }></Route>
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
-          <Route path="/recruitment/write" element={ <Writing /> }></Route>
+          <Route path="/recruitment/write" elemen t={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
           <Route path="/recruitment" element={ <RecruitList /> }></Route>
           <Route path="/search" element={ <Search /> }></Route>
           <Route path="/chat" element={ <Chat /> }></Route>
           <Route path="/profile/:nickname" element={ <Profile handleClick={handleClick}/> }></Route>
         </Routes>
-        <GlobalStyle/>
-        {localStorage.getItem("userInfo") && <ChatBox handleClick={handleClick} open={open}/>}
       </>
+
+      {isLoggedIn && <ChatBox handleClick={handleClick} open={open}/>}
     </AuthProvider>
+    
   );
 }
 
