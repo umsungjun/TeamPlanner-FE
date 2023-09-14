@@ -86,12 +86,12 @@ const onOauthLogin_K = () => {
     target += "/kakao"
     window.location.href = target;
 }
-const onOauthLogin_N = () => {
-  // TODO:
-  let target = API_BASE_URL + "/oauth2/authorization"
-  target += "/naver"
-  window.location.href = target;
-}
+// const onOauthLogin_N = () => {
+//   // TODO:
+//   let target = API_BASE_URL + "/oauth2/authorization"
+//   target += "/naver"
+//   window.location.href = target;
+// }
 
   return (
     <>
@@ -162,7 +162,7 @@ const onOauthLogin_N = () => {
                 카카오로 로그인
               </Button>
 
-              <Button
+              {/* <Button
                 variant="outlined"
                 color="secondary"
                 fullWidth
@@ -170,7 +170,7 @@ const onOauthLogin_N = () => {
               >
                 <img src="/img/icon/naver.svg" alt="네이버" />
                 네이버로 로그인
-              </Button>
+              </Button> */}
             </div>
           </div>
         </LoginWrap>

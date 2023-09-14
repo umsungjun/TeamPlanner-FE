@@ -22,7 +22,6 @@ export default function Join(){
         nickname: '',
         email: '',
         verificationCode: '',
-        phone: '',
         profileImage:'',
         profileIntro:'',
         birth: '',
@@ -30,7 +29,7 @@ export default function Join(){
         education:'UNKNOWN',
         admissionDate:'',
         graduationDate:'',
-        educationGrade:'',
+        educationGrade:'0',
         gender:'UNKNOWN',
         address:'',
         kakaoId:'',
@@ -86,9 +85,11 @@ export default function Join(){
 
     const [imageFile, setImageFile] = useState([]);
 
-    const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
+    const [imageFileURL, setImageFileURL] = useState(['/img/profile/profile.png']);
 
-    const [preSignedUrl, setPreSignedUrl] = useState([]);
+    const [preSignedUrl, setPreSignedUrl] = useState(['']);
+
+    const [submitPermit, setSubmitPermit] = useState(false);
     
 
 
@@ -102,44 +103,89 @@ export default function Join(){
 
     //이미지
     const handleImageUpload = async (event) => {
-        // presignedurl 발급
         const selectedFile = event.target.files[0];
+        // presignedurl 발급
         if(selectedFile){
             const fileType = selectedFile.type;
             if(fileType.startsWith('image/')){
                 const extension = selectedFile.name.split('.').pop();
                 setImageFile(selectedFile);
 
-                setFormData((prevData) => ({
-                    ...prevData,
-                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
-                  }));
-                try{
-                    const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
-                    setPreSignedUrl(response.data.preSignedUrl);
-                    console.log(preSignedUrl);
-                    handleFileClose();
-                } catch (error){
-                    console.log(error.response);
-                    alert(error.response.data.message);
-                }
+                // setFormData((prevData) => ({
+                //     ...prevData,
+                //     profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
+                // }));
+                // try{
+                //     // const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
+                //     // setPreSignedUrl(response.data.preSignedUrl);
+                //     // console.log(preSignedUrl);
+                //     handleFileClose();
+                // } catch (error){
+                //     console.log(error.response);
+                // }
+                handleFileClose();
             } else{
                 alert('이미지 파일이 아닙니다.');
             }
         }
     };
 
-    const uploadImageToS3 = async (preSignedUrl, file) => {
-        try{
-            const response = await axios.put(preSignedUrl, file, {
-                headers: {
-                    'Content-Type': file.type
-                }
+    const setDefaultImageAsFile = () => {
+        const imageFileName = "profile.png"; // 이미지 파일 이름 (확장자 포함)
+      
+        // 이미지 URL을 Blob 객체로 변환합니다.
+        fetch(imageFileURL)
+          .then((response) => response.blob())
+          .then((blob) => {
+            // Blob 객체를 File 객체로 변환합니다.
+            const imageFile = new File([blob], imageFileName, {
+              type: blob.type,
+              lastModified: new Date().getTime(),
             });
+      
+            // imageFile을 상태에 설정합니다.
+            setImageFile(imageFile);
+          })
+          .catch((error) => {
+            console.error("기본 이미지를 가져오는 동안 오류 발생:", error);
+          });
+    };
+
+
+    const getPresignedUrl = async () => {
+        const extension = imageFile.name.split('.').pop();
+        const newProfileImageURL = "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + formData.username + "." + extension;
+      
+        try {
+          const response = await API.get("/api/v1/image/new-pre-signed-url?name=" + formData.username + "&extension=" + extension + "&purpose=PUT");
+          const returnedPreSignedUrl = response.data.preSignedUrl;
+      
+          // setFormData와 setPreSignedUrl 호출
+          setFormData(prevData => ({
+            ...prevData,
+            profileImage: newProfileImageURL,
+          }));
+
+          setPreSignedUrl(returnedPreSignedUrl);
+
+          setSubmitPermit(true);
         } catch (error) {
-            console.log(error.response); 
-            alert(error.response);   
+            alert("getPresignedUrl error :",error.response.data.message);
         }
+    };
+
+    const uploadImageToS3 = () => {
+        axios.put(preSignedUrl, imageFile, {
+            headers: {
+                'Content-Type': imageFile.type
+            },
+            withCredentials : false
+        })
+        .then(response =>{
+        })
+        .catch(error =>{
+            alert(error.response);  
+        })
     }
 
 
@@ -214,35 +260,16 @@ export default function Join(){
         }));
     }; 
 
+    //아이디 중복확인
+    const [usernameInput, setUsernameInput] = useState([]);
 
-    //전화번호
-    const [phoneData, setPhoneData] = useState({
-        phone1:'',
-        phone2:'',
-        phone3:''
-    })
-
-    const handlePhoneChange = (event) => {
-        const { id, value } = event.target;
-        setPhoneData((prevData) => ({
-          ...prevData,
-          [id]: value,
-        }));
-    }; 
-
-    const updatePhone = () =>{
-        if (phoneData.phone1 == '' || phoneData.phone2 == '' || phoneData.phone3 == '') return;
-        const phoneString = `${phoneData.phone1}-${phoneData.phone2}-${phoneData.phone3}`;
-        setFormData((prevData) => ({
-            ...prevData,
-            phone: phoneString,
-        }));
+    const handleUsernameInputChange = (event) =>{
+        const {id, value} = event.target;
+        setUsernameInput(value);
     }
 
-
-    //아이디 중복확인
     const handleCheckDuplicateUsername = () => {
-        const requestData = {username:formData.username};
+        const requestData = {username: usernameInput};
 
         if(requestData.username!=''){
             API.post("/api/v1/member/signup/check-duplicate/username", requestData)
@@ -251,7 +278,11 @@ export default function Join(){
                     setSubmitCondition((prevData) => ({
                         ...prevData,
                         usernameValid: true,
-                      }));
+                    }));
+                    setFormData((prevData) => ({
+                        ...prevData,
+                        username: usernameInput
+                    }));
                 }
             // 성공적으로 전송되었을 때 할 작업
             })
@@ -267,8 +298,15 @@ export default function Join(){
 
 
     //닉네임 중복확인
+    const [nicknameInput, setNicknameInput] = useState([]);
+
+    const handleNicknameInputChange = (event) =>{
+        const {id, value} = event.target;
+        setNicknameInput(value);
+    }
+
     const handleCheckDuplicateNickname = () => {
-        const requestData = {nickname:formData.nickname};
+        const requestData = {nickname: nicknameInput};
 
         if(requestData.nickname!=''){
             API.post("/api/v1/member/signup/check-duplicate/nickname", requestData)
@@ -278,12 +316,10 @@ export default function Join(){
                         ...prevData,
                         nicknameValid: true,
                       }));
-                }
-                else{
-                    setSubmitCondition((prevData) => ({
+                      setFormData((prevData) => ({
                         ...prevData,
-                        nicknameValid: false,
-                      }));
+                        nickname: nicknameInput
+                    }))
                 }
             // 성공적으로 전송되었을 때 할 작업
             })
@@ -352,8 +388,7 @@ export default function Join(){
             .then(response => {
                 setIsCodeSent(true);
                 setRemainingTime(180);
-                console.log('데이터가 성공적으로 전송되었습니다.');
-                // 성공적으로 전송되었을 때 할 작업
+                console.log('인증번호가 성공적으로 전송되었습니다.');
             })
             .catch(error => {
                 alert(error.response.data.message);
@@ -402,30 +437,40 @@ export default function Join(){
 
 
     //제출
-    const handleSubmit = () => {
-        console.log(formData);
+    const handleSubmit = async () => {
         const isAllTrue = Object.values(submitCondition).every(value => value === true);
         if(isAllTrue){
-            API.post("/api/v1/member/signup", formData)
-            .then(response => {
-                console.log(formData);
-                console.log('회원가입이 완료되었습니다.');
-                // 성공적으로 전송되었을 때 할 작업
-                window.location.href = "/";
-            })
-            .catch(error => {
-                console.error('회원가입에 실패했습니다:', error);
-                // 전송 실패 시 에러 처리
-            });
+            try{
+                await getPresignedUrl();
+            } catch(error) {
+                alert("사진 저장에 실패했습니다. 다시 시도해주세요.")
+            }
         }
         else{
-            alert("필수 입력란을 채워주세요.")
+            alert("필수 입력란을 모두 채워주세요.")
         }
-        if(preSignedUrl!=''){
-            uploadImageToS3(preSignedUrl,imageFile);
-        }
-
     };
+
+    const submitFormData = () => {
+        API.post("/api/v1/member/signup", formData)
+        .then(response =>{
+            console.log(response);
+            if(response.status==201){
+                alert("회원가입이 완료되었습니다.");
+                window.location.href = "/";
+            }
+        })
+        .catch(error =>{
+            console.error('회원가입에 실패했습니다:', error);
+        })
+    }
+
+    useEffect(()=>{
+        if (submitPermit){
+            uploadImageToS3();
+            submitFormData();
+        }
+    },[submitPermit]);
       
     
 
@@ -443,6 +488,7 @@ export default function Join(){
     //useEffect
     useEffect(()=>{
         fetchEnum();
+        setDefaultImageAsFile();
     },[]);
 
     useEffect(()=>{
@@ -455,11 +501,7 @@ export default function Join(){
 
     useEffect(()=>{
         updateGraduationDate();
-    },[graduationDateData]);
-
-    useEffect(()=>{
-        updatePhone();
-    },[phoneData]);    
+    },[graduationDateData]);   
 
     useEffect(()=>{
     },[buttonTimeout]);
@@ -485,10 +527,10 @@ export default function Join(){
         }
     },[imageFile]);
 
+
     const fetchEnum = ()=>{
         API.get('/api/v1/member/signup/enums')
         .then(response => {
-            console.log('API 응답 데이터:', response.data);
             setJobs(response.data.job.map(option => ({ value: option.name, label: option.label})));
             setEducations(response.data.education.map(option => ({ value: option.name, label:option.label})));
         })
@@ -509,7 +551,7 @@ export default function Join(){
                         <li>
                             <h3>아이디</h3>
                             <div className="input-wrap">
-                                <TextField id="username" pattern="[a-zA-Z0-9]" value={formData.username} onChange={handleInputChange} variant="outlined" fullWidth />
+                                <TextField id="username" pattern="[a-zA-Z0-9]" value={usernameInput} onChange={handleUsernameInputChange} variant="outlined" fullWidth />
                                 <div className="sBtn">
                                     <FilledBtn text="중복확인" handle = {handleCheckDuplicateUsername}/>
                                 </div>
@@ -549,7 +591,7 @@ export default function Join(){
                         <li>
                             <h3>닉네임</h3>
                             <div className="input-wrap">
-                                <TextField id="nickname" value={formData.nickname} onChange={handleInputChange} variant="outlined" fullWidth />
+                                <TextField id="nickname" value={nicknameInput} onChange={handleNicknameInputChange} variant="outlined" fullWidth />
                                 <div className="sBtn"><FilledBtn text="중복확인" handle = {handleCheckDuplicateNickname}/></div>
                             </div>
                         </li>
@@ -590,16 +632,6 @@ export default function Join(){
                                 </div>
                             )}
                         </div>
-                        <li>
-                            <h3>전화번호</h3>
-                            <div className="phone-wrap">
-                            <TextField id="phone1" value={phoneData.phone1} onChange={handlePhoneChange} variant="outlined" fullWidth placeholder="010" inputProps={{ maxLength: 3 }}/>
-                            <span className="phone-separator">-</span>
-                            <TextField id="phone2" value={phoneData.phone2} onChange={handlePhoneChange} variant="outlined" fullWidth placeholder="xxxx" inputProps={{ maxLength: 4 }}/>
-                            <span className="phone-separator">-</span>
-                            <TextField id="phone3" value={phoneData.phone3} onChange={handlePhoneChange} variant="outlined" fullWidth placeholder="xxxx" inputProps={{ maxLength: 4 }}/>
-                            </div>
-                        </li>
                     </ul>
                     <div className="title">
                         <h3>선택사항</h3>
@@ -892,13 +924,6 @@ const JoinWrap = styled(Box)`
                     align-items: center;
                     gap: 1rem;
                 }
-                .phone-wrap{
-                    width: 65%;
-                    display: flex;
-                    align-items: center;
-                    gap: 1rem;
-                }
-
             }
             .profileImage{
                 width: 35%;
