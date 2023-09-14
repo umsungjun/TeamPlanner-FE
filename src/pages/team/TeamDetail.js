@@ -13,6 +13,7 @@ import Comment from "../../component/recruitmentComment/Comment";
 import Button from "@mui/material/Button";
 import ApplicationModal from "../../component/modal/ApplicationModal";
 import { useParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { API } from "../../api/api";
 import { now } from "moment/moment";
 import CheckBtn from "../../component/button/CheckBtn";
@@ -41,6 +42,7 @@ export default function TeamDetail({done}){
     const [data, setData] = useState({
         commentList: []
     });
+    const navigate = useNavigate();
     //스크랩 수
   const [likeCountFlag,setLikeCountFlag]=useState(false);
 
@@ -104,6 +106,18 @@ export default function TeamDetail({done}){
         return diff;
     }
      
+    const handleUpdate = () => {
+        navigate(`/recruitment/${recruitmentId}/update`);
+    }
+    const handleDelete = () => {
+        API.delete(`/api/v1/recruitment/${recruitmentId}`)
+        .then(resp => {
+            console.log(`resp ${resp}`);
+            navigate('/');
+        }).catch(err => {
+            console.log(`err = ${err}`);
+        })
+    }
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -147,10 +161,10 @@ export default function TeamDetail({done}){
                                         <div className="btn-wrap">
                                         
                                                 <>
-                                                <SmallBtn variant="outlined" color="secondary">
+                                                <SmallBtn variant="outlined" color="secondary" onClick={handleUpdate}>
                                                     <p>수정</p>
                                                 </SmallBtn>
-                                                <SmallBtn variant="outlined" color="secondary">
+                                                <SmallBtn variant="outlined" color="secondary" onClick={handleDelete}>
                                                     <p className="delete">삭제</p>
                                                 </SmallBtn>
                                                 </>

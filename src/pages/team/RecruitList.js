@@ -273,7 +273,7 @@ const Content = styled(Box)`
             justify-content: space-between;
             width: 100%;
             padding-bottom: 1.5rem;
-            border-bottom: 2px solid #FF7300;
+            // border-bottom: 2px solid #FF7300;
             margin-bottom: 2rem;
             h1{
                 font-size: 2.5rem;

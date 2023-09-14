@@ -20,6 +20,7 @@ import IdPw from "./pages/account/IdPw";
 import Chat from "./pages/chat/Chat";
 import ChatBox from "./component/chat/ChatBox";
 import { useState } from "react";
+import Update from "./pages/team/Update";
 
 axios.defaults.withCredentials = true;
 
@@ -48,6 +49,7 @@ function App() {
           <Route path="/mypage/profileSetting" element={ <ProfileSetting /> }></Route>
           <Route path="/mypage/teamManagement" element={ <TeamManagement /> }></Route>
           <Route path="/mypage/participation" element={ <Participation /> }></Route>
+          <Route path="/recruitment/:recruitmentId/update" element={ <Update /> }></Route>
           <Route path="/recruitment/write" element={ <Writing /> }></Route>
           <Route path="/oauth2/redirect" element={ <TokenRedirect /> }></Route>
           <Route path="/recruitment" element={ <RecruitList /> }></Route>
