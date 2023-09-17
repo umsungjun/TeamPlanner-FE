@@ -115,7 +115,7 @@ export default function Join(){
                     profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
                   }));
                 try{
-                    const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
+                    const response = await API.get("/api/v1/image/new-pre-signed-url?extension="+extension+"&purpose=PUT");
                     setPreSignedUrl(response.data.preSignedUrl);
                     console.log(preSignedUrl);
                     handleFileClose();
@@ -612,7 +612,7 @@ export default function Join(){
                             <h3>프로필이미지</h3>
                             <div className="profileImage">
                                 <img src={imageFileURL} alt="프로필 이미지"/>
-                                <IconButton onClick={handleFileOpen}><AddCircleIcon/></IconButton>
+                                <IconButton disabled={!submitCondition.usernameValid} onClick={handleFileOpen}><AddCircleIcon/></IconButton>
                                 <Modal open={fileOpen} onClose={handleFileClose} aria-labelledby="image-upload-modal" aria-describedby="image-upload-description">
                                     <Paper>
                                         <div className="modal-header">

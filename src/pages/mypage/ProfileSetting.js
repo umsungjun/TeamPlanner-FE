@@ -23,6 +23,7 @@ import 'react-calendar/dist/Calendar.css';
 import Select from 'react-select';
 import axios from "axios";
 import { API } from "../../api/api";
+import TechStackModal from '../../component/modal/TechStackModal';
 
 import {
     Chart as ChartJS,
@@ -42,20 +43,7 @@ ChartJS.register(
     Filler,
     Tooltip,
     Legend
-  );
-
-  export const data = {
-    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
-    datasets: [
-      {
-        label: '',
-        data: [4, 5, 7, 6, 5],
-        backgroundColor: 'rgba(255, 115, 0, 0.2)',
-        borderColor: 'rgba(255, 115, 0, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+);
 
 export const options = {
     responsive: true,
@@ -100,6 +88,7 @@ export default function ProfileSetting(){
         setFormData(remains);
     };
 
+     //fetched data
     const [profileData, setProfileData] = useState({
         basicProfile:[],
         techStacks:[],
@@ -116,10 +105,17 @@ export default function ProfileSetting(){
         evaluations:[]
     });
 
+    const [techStackData, setTechStackData] = useState([]);
+
+    const [genders, setGenders] = useState([]);
+
     const [jobs, setJobs] = useState([]);
 
     const [educations, setEducations] = useState([]);
 
+
+
+    //
     const [birthData, setBirthData] = useState({
         year:'',
         month:'',
@@ -152,7 +148,80 @@ export default function ProfileSetting(){
 
     const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
 
-    const [preSignedUrl, setPreSignedUrl] = useState([]);
+    const [preSignedUrl, setPreSignedUrl] = useState(['']);
+
+    const [submitPermit, setSubmitPermit] = useState(false);
+
+    const [newStackId, setNewStackId] = useState(-1);
+
+    //기술스택
+    const handleTechStackSelect = (selectedTechStack) => {
+        //fill here
+        //if selectedTechStack.id가 이미 formData.techStacks내에 존재한다면 -> alert("이미 추가된 기술스택입니다")
+        const techStackExists = formData.techStacks.some(
+            (techStack) => techStack.techStackItem.id === selectedTechStack.id
+        );
+        if (techStackExists) {
+            alert("이미 추가된 기술스택입니다.");
+            return; // Do not proceed further
+        }
+
+        const newTechStack = {
+            id: newStackId,
+            skillLevel: 1,
+            techStackItem: {
+              id: selectedTechStack.id,
+              name: selectedTechStack.name,
+              techCategory: selectedTechStack.techCategory,
+              imageUrl: selectedTechStack.imageUrl,
+              userGenerated: false,
+            },
+        };
+        const updatedTechStacks = [...formData.techStacks, newTechStack];
+
+        // formData 업데이트
+        setFormData({
+          ...formData,
+          techStacks: updatedTechStacks,
+        });
+        setNewStackId(newStackId-1);
+    };
+    
+    const handleTechStackRemove = (techStackIdToRemove) => {
+        const updatedTechStacks = formData.techStacks.filter(
+            (techStack) => techStack.id !== techStackIdToRemove
+        );
+          // 새로운 formData를 생성하고 업데이트
+        const updatedFormData = {
+            ...formData,
+            techStacks: updatedTechStacks,
+        };
+
+        setFormData(updatedFormData);
+    };
+
+    const handleTechStackSkillLevel = (techStackId, clickedLevel)=>{
+        //formData.techStacks의 techStackId를 가지는 것의 skillLevel을 clickedLevel로 업데이트
+        const updatedFormData = { ...formData };
+        const techStackToUpdate = updatedFormData.techStacks.find(
+            (techStack) => techStack.id === techStackId
+        );
+        if (techStackToUpdate) {
+            techStackToUpdate.skillLevel = clickedLevel;
+        }
+        setFormData(updatedFormData);
+    };
+
+    //기술스택 입력 모달
+    const [isTechStackModalOpen, setIsTechStackModalOpen] = useState(false);
+      
+    const handleOpenTechStackModal = () => {
+        setIsTechStackModalOpen(true);
+    };
+      
+    const handleCloseTechStackModal = () => {
+        setIsTechStackModalOpen(false);
+    };
 
     //이미지
     const handleImageUpload = async (event) => {
@@ -183,17 +252,40 @@ export default function ProfileSetting(){
         }
     };
 
-    const uploadImageToS3 = async (preSignedUrl, file) => {
-        try{
-            const response = await axios.put(preSignedUrl, file, {
-                headers: {
-                    'Content-Type': file.type
-                }
-            });
+    const getPresignedUrl = async () => {
+        const extension = imageFile.name.split('.').pop();
+        const newProfileImageURL = "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + formData.username + "." + extension;
+
+        try {
+          const response = await API.get("/api/v1/image/new-pre-signed-url?name=" + formData.username + "&extension=" + extension + "&purpose=PUT");
+          const returnedPreSignedUrl = response.data.preSignedUrl;
+
+          // setFormData와 setPreSignedUrl 호출
+          setFormData(prevData => ({
+            ...prevData,
+            profileImage: newProfileImageURL,
+          }));
+
+          setPreSignedUrl(returnedPreSignedUrl);
+
+          setSubmitPermit(true);
         } catch (error) {
-            console.log(error.response); 
-            alert(error.response);   
+            alert("getPresignedUrl error :",error.response.data.message);
         }
+    };
+
+    const uploadImageToS3 = () => {
+        axios.put(preSignedUrl, imageFile, {
+            headers: {
+                'Content-Type': imageFile.type
+            },
+            withCredentials : false
+        })
+        .then(response =>{
+        })
+        .catch(error =>{
+            alert(error.response);  
+        })
     }
 
     const updateBirth = () => {
@@ -259,31 +351,6 @@ export default function ProfileSetting(){
         }));
         
     }; 
-
-
-    //전화번호
-    const [phoneData, setPhoneData] = useState({
-        phone1:'',
-        phone2:'',
-        phone3:''
-    })
-
-    const handlePhoneChange = (event) => {
-        const { id, value } = event.target;
-        setPhoneData((prevData) => ({
-          ...prevData,
-          [id]: value,
-        }));
-    }; 
-
-    const updatePhone = () =>{
-        if (phoneData.phone1 == '' || phoneData.phone2 == '' || phoneData.phone3 == '') return;
-        const phoneString = `${phoneData.phone1}-${phoneData.phone2}-${phoneData.phone3}`;
-        setFormData((prevData) => ({
-            ...prevData,
-            phone: phoneString,
-        }));
-    }
 
     //활동
     const [selectedActivityIndex, setSelectedActivityIndex] = useState(null); // 클릭한 활동의 인덱스
@@ -436,35 +503,41 @@ export default function ProfileSetting(){
     const handleCalendarChange = (date) => {
         const formattedDate = formatDateToString(date);
         const keys = calendarUsage.split('.');
-        if (selectedActivityIndex !== null) {
-            const updatedActivities = [...formData.activities];
+        let flag = false;
+        if (selectedActivityIndex !== null || selectedCertificationIndex !== null) {
+            if(selectedActivityIndex !== null){
+                const updatedActivities = [...formData.activities];
 
-            console.log(calendarUsage);
-          
-            updatedActivities[selectedActivityIndex] = {
-                ...updatedActivities[selectedActivityIndex],
-                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
-            };
-            setFormData((prevData) => ({
-                ...prevData,
-                activities: updatedActivities,
-            }));
-            setSelectedActivityIndex(null);
-        }
-        if (selectedCertificationIndex !== null) {
-            const updatedCertifications = [...formData.certifications];
+                console.log(calendarUsage);
+              
+                updatedActivities[selectedActivityIndex] = {
+                    ...updatedActivities[selectedActivityIndex],
+                    [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+                };
+                setFormData((prevData) => ({
+                    ...prevData,
+                    activities: updatedActivities,
+                }));
+                setSelectedActivityIndex(null);
+                flag = true;
+            }
 
-            console.log(calendarUsage);
-          
-            updatedCertifications[selectedCertificationIndex] = {
-                ...updatedCertifications[selectedCertificationIndex],
-                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
-            };
-            setFormData((prevData) => ({
-                ...prevData,
-                certifications: updatedCertifications,
-            }));
-            setSelectedCertificationIndex(null);
+            if (selectedCertificationIndex !== null) {
+                const updatedCertifications = [...formData.certifications];
+    
+                console.log(calendarUsage);
+              
+                updatedCertifications[selectedCertificationIndex] = {
+                    ...updatedCertifications[selectedCertificationIndex],
+                    [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+                };
+                setFormData((prevData) => ({
+                    ...prevData,
+                    certifications: updatedCertifications,
+                }));
+                setSelectedCertificationIndex(null);
+                flag = true;
+            }
         }
         else{
             setFormData((prevData) => ({
@@ -536,6 +609,7 @@ export default function ProfileSetting(){
     const fetchEnum = async () => {
         try {
             const response = await API.get('/api/v1/member/signup/enums');
+            setGenders(response.data.gender.map(option => ({ value: option.name, label: option.label })));
             setJobs(response.data.job.map(option => ({ value: option.name, label: option.label })));
             setEducations(response.data.education.map(option => ({ value: option.name, label: option.label })));
         } catch (error) {
@@ -551,10 +625,87 @@ export default function ProfileSetting(){
                 ...prevData,
                 ...response.data
             }));
+
         } catch (error) {
             console.error('API 호출 오류:', error);
         }
     };
+
+    const fetchTechStacks = async () =>{
+        try{
+            const response = await API.get('/api/v1/profile/techStacks');
+            console.log(response);
+            setTechStackData(response.data);
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+
+    //평가
+    const [evaluationData,setevaluationData] = useState({
+        labels: ['창의성', '리더십', '성실함', '기술력', '커뮤니케이션'],
+        datasets: [
+          {
+            label: '',
+            data: [0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(255, 115, 0, 0.2)',
+            borderColor: 'rgba(255, 115, 0, 1)',
+            borderWidth: 1,
+          },
+        ],
+    });
+
+    const updateEvaluationData = () =>{
+
+        const evaluations = profileData.evaluations;
+    
+        // 각 stat의 합을 계산
+        const totalStats = {
+            stat1: 0,
+            stat2: 0,
+            stat3: 0,
+            stat4: 0,
+            stat5: 0,
+        };
+
+        evaluations.forEach((evaluation) => {
+            totalStats.stat1 += evaluation.stat1;
+            totalStats.stat2 += evaluation.stat2;
+            totalStats.stat3 += evaluation.stat3;
+            totalStats.stat4 += evaluation.stat4;
+            totalStats.stat5 += evaluation.stat5;
+        });
+
+        // 각 stat의 평균 계산
+        const avgStats = {
+            stat1: totalStats.stat1 / evaluations.length,
+            stat2: totalStats.stat2 / evaluations.length,
+            stat3: totalStats.stat3 / evaluations.length,
+            stat4: totalStats.stat4 / evaluations.length,
+            stat5: totalStats.stat5 / evaluations.length,
+        };
+
+        // evaluationData 업데이트
+        setevaluationData((prevData) => ({
+        ...prevData,
+        datasets: [
+            {
+            ...prevData.datasets[0],
+            data: [
+                avgStats.stat1,
+                avgStats.stat2,
+                avgStats.stat3,
+                avgStats.stat4,
+                avgStats.stat5,
+            ],
+            },
+        ],
+        }));
+    }
+
+    useEffect(()=>{
+        updateEvaluationData();
+    },[profileData.evaluations]);
 
     const fetchImage = async () =>{
         if(profileData.basicProfile.profileImage!=''){
@@ -564,6 +715,21 @@ export default function ProfileSetting(){
 
     const handleSubmit = () => {
         setEdit(!edit);
+        
+
+        // API.put("/api/v1/profile", formData)
+        //     .then(response => {
+        //         console.log(formData);
+        //         alert('프로필이 수정되었습니다.');
+        //         // 성공적으로 전송되었을 때 할 작업
+        //         window.location.href = "/";
+        //     })
+        //     .catch(error => {
+        //         console.error('회원가입에 실패했습니다:', error);
+        //         // 전송 실패 시 에러 처리
+        //     });
+        // }
+
         console.log(formData);
         //const isAllTrue = Object.values(submitCondition).every(value => value === true);
         // if(isAllTrue){
@@ -598,7 +764,7 @@ export default function ProfileSetting(){
     useEffect(() => {
         fetchEnum();
         fetchProfile();
-        console.log(profileData);
+        fetchTechStacks();
     }, []);
 
     useEffect(() =>{
@@ -631,6 +797,14 @@ export default function ProfileSetting(){
                                 <MyPageMenu select={"프로필관리"} />
                             </SideList>
                             <Content>
+                                {showCalendar && (
+                                    <div className="calendar-modal">
+                                        <Calendar
+                                            onChange={(date) => handleCalendarChange(date)}
+                                            value={calendarDate} // 캘린더의 초기 날짜
+                                        />
+                                    </div>
+                                )}
                                 <div className="title dp-flex space-between">
                                     <h1>프로필 관리</h1>
                                     {
@@ -681,42 +855,58 @@ export default function ProfileSetting(){
                                 <div className="skill-box">
                                     <h3 className="sub-title">기술스택</h3>
                                     <ul className="skill-list">
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ps.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Pr.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ai.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/An.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton>
-                                                    <RemoveCircleOutlineIcon/>
-                                                </IconButton>
-                                            }
-                                        </li>
+                                        {edit ? <>
+                                            {profileData.techStacks.map((techStack) => (
+                                                <li className="skillWrap" key={techStack.techStackItem.id}>
+                                                    <div className="skill-img">
+                                                        <img src={techStack.techStackItem.imageUrl} alt={techStack.techStackItem.name} />
+                                                    </div>
+                                                    <div className="skill-name">
+                                                        <span>{techStack.techStackItem.name}</span>
+                                                    </div>
+                                                    <div className="skill-level">
+                                                        <i class={`${techStack.skillLevel >= 1 ? 'active' : ''}` }></i>
+                                                        <i class={`${techStack.skillLevel >= 2 ? 'active' : ''}`}></i>
+                                                        <i class={`${techStack.skillLevel >= 3 ? 'active' : ''}`}></i>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </>
+                                        :
+                                        <>
+                                            {formData.techStacks.map((techStack) => (
+                                                <li className="skillWrap" key={techStack.techStackItem.id}>
+                                                    <div className="skill-img">
+                                                        <img src={techStack.techStackItem.imageUrl} alt={techStack.techStackItem.name} />
+                                                        <IconButton onClick={() => handleTechStackRemove(techStack.id)}>
+                                                            <RemoveCircleOutlineIcon />
+                                                        </IconButton>
+                                                    </div>
+                                                    <div className="skill-name">
+                                                        <p>{techStack.techStackItem.name}</p>
+                                                    </div>
+                                                    <div className="skill-level">
+                                                        <i class={`${techStack.skillLevel >= 1 ? 'active' : ''}` } onClick={() => handleTechStackSkillLevel(techStack.id,1)}></i>
+                                                        <i class={`${techStack.skillLevel >= 2 ? 'active' : ''}`} onClick={() => handleTechStackSkillLevel(techStack.id,2)}></i>
+                                                        <i class={`${techStack.skillLevel >= 3 ? 'active' : ''}`} onClick={() => handleTechStackSkillLevel(techStack.id,3)}></i>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </>
+                                        }
                                         {
                                             edit ? <></> :
                                             <li className="add-skill">
-                                                <IconButton>
+                                                <IconButton onClick={handleOpenTechStackModal}>
                                                     <AddIcon />
                                                 </IconButton>
+                                                {isTechStackModalOpen && (
+                                                    <TechStackModal
+                                                        techStackData={techStackData.techStackItems} // 사용 가능한 기술 목록
+                                                        onTechStackSelect={handleTechStackSelect} // 모달에서 기술 선택 시 호출될 콜백 함수
+                                                        onClose={handleCloseTechStackModal} // 모달 닫기
+                                                    />
+                                                )}
                                             </li>
                                         }
                                     </ul>
@@ -758,7 +948,7 @@ export default function ProfileSetting(){
                                             <h4>성별</h4>
                                             {
                                                 edit ?
-                                                <p>{profileData.basicProfile.gender}</p>
+                                                <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label}</p>
                                                 :
                                                 <div className="radio-wrap">
                                                     <FormControl>
@@ -802,12 +992,12 @@ export default function ProfileSetting(){
                                             <h4>직업</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.job}</p>:
+                                                    <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label}</p>:
                                                     <div className="input-wrap">
                                                         <Select
                                                             options={jobs}
                                                             value={jobs.find(option => option.value === jobs.jobs)}
-                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.label } })}
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.value } })}
                                                             placeholder="선택"
                                                         />
                                                     </div>
@@ -817,12 +1007,12 @@ export default function ProfileSetting(){
                                             <h4>최종학력</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.education}</p>:
+                                                    <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label}</p>:
                                                     <div className="birth-wrap">
                                                         <Select
                                                             options={educations}
                                                             value={educations.find(option => option.value === educations.educations)}
-                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.label } })}
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.value } })}
                                                             placeholder="선택"
                                                         />
                                                     </div>
@@ -866,14 +1056,6 @@ export default function ProfileSetting(){
                                                 </h4>
                                             }  
                                         </li>
-                                        {showCalendar && (
-                                            <div className="calendar-modal">
-                                                <Calendar
-                                                    onChange={(date) => handleCalendarChange(date)}
-                                                    value={calendarDate} // 캘린더의 초기 날짜
-                                                />
-                                            </div>
-                                        )}
                                         <li className="dp-flex">
                                             <h4>카카오아이디</h4>
                                                 {
@@ -928,14 +1110,6 @@ export default function ProfileSetting(){
                                                         <span>{activity.startDate} ~ {activity.endDate}</span>
                                                         <h4>{activity.subject}</h4>
                                                         <p>{activity.detail}</p>
-                                                        <div className="tag-wrap">
-                                                            {/* {activity.tags.map((tag, tagIndex) => (
-                                                                <h5 key={tagIndex}>{tag}</h5>
-                                                            ))} */}
-                                                            <h5>Spring Boot</h5>
-                                                            <h5>Spring Data JPA</h5>
-                                                            <h5>MVC</h5>
-                                                        </div>
                                                     </li>
                                                 ))}
                                             </>
@@ -952,7 +1126,6 @@ export default function ProfileSetting(){
                                                                 setCalendarUsage(`activities[${index}].startDate`);
                                                                 setCalendarDate(formData.activities[index].startDate)
                                                             }}
-                                                            onChange={(e) => handleActivityInputChange(e, index)}
                                                         >
                                                         {activity.startDate}
                                                         </span>
@@ -966,7 +1139,6 @@ export default function ProfileSetting(){
                                                                 setCalendarUsage(`activities[${index}].endDate`);
                                                                 setCalendarDate(formData.activities[index].endDate)
                                                             }}
-                                                            onChange={(e) => handleActivityInputChange(e, index)}
                                                         >
                                                         {activity.endDate}
                                                         </span>
@@ -1087,27 +1259,27 @@ export default function ProfileSetting(){
                                     </div>
                                     <div className="review-wrap">
                                         {
-                                            edit ? 
-                                            <div className="chart-box">
-                                            <Radar
-                                            data={data}
-                                            options={options}
-                                            />
-                                            </div>
-                                            :<></>
+                                            edit ? (
+                                                <div className="chart-box">
+                                                    <Radar
+                                                    data={evaluationData}
+                                                    options={options}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
                                         }
                                         {
-                                            edit ?
-                                            <div className="review-list">
-                                                <h3>성실하고 책임감이 커서 활...</h3>
-                                                <h3>시간을 잘 지켜요</h3>
-                                                <h3>리더십이 뛰어나요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                            </div>:
-                                            <></>
+                                            edit ? (
+                                                <div className="review-list">
+                                                    {profileData.evaluations.map((evaluation, index) => (
+                                                        <h3 key={index}>{evaluation.comment}</h3>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
                                         }
                                     </div>
                                 </div>
@@ -1260,29 +1432,64 @@ const Content = styled(Box)`
         .skill-list{
             display: flex;
             align-items: center;
-            .skill{
-                border-radius: 100px;
-                border: 1px solid rgba(0,0,0,.1);
-                width: 7rem;
-                height: 7rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 1rem;
-                background-color: #fff;
-                box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
-                position: relative;
-
-                button{
-                    position: absolute;
-                    top: 0;
-                    right: 0;
+            .skillWrap{
+                .skill-img{
+                    border-radius: 100px;
+                    border: 1px solid rgba(0,0,0,.1);
+                    width: 7rem;
+                    height: 7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1rem;
                     background-color: #fff;
-                    padding: 0;
-                    svg{
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        color: #F30C0C;
+                    box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
+                    position: relative;
+                    img {
+                        max-width: 70%;
+                        max-height: 70%;
+                    }
+                    button{
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        background-color: #fff;
+                        padding: 0;
+                        svg{
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            color: #F30C0C;
+                        }
+                    }
+                }
+                .skill-name {
+                    color: #000000;
+                    font-size : 1.5rem;
+                    text-align: center;
+                    margin-right: 1rem;
+                    margin-top: 1rem;
+                    font-family: Arial, sans-serif;
+                    font-weight: bold;
+                    font-style: italic; 
+                }
+                .skill-level {
+                    width: 6rem; /* 세 개의 별을 담을 크기 */
+                    height: 2rem;
+                    display: flex;
+                    margin-top: 1rem;
+                    margin-left: 0.5rem;
+                    margin-right: 0.5rem;
+                    i {
+                        width: 1.8rem; 
+                        height: 1.7rem;
+                        margin-right: 0.3rem;
+                        background-image: url('/img/icon/star2.png');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center; 
+                    }
+                    i.active {
+                        background-image: url('/img/icon/star1.png');
                     }
                 }
             }
@@ -1298,6 +1505,7 @@ const Content = styled(Box)`
                         height: 3rem;
                         color: #FF7300;
                     }
+                    margin-bottom : 5rem;
                 }
             }
         }
@@ -1341,12 +1549,6 @@ const Content = styled(Box)`
                 align-items: center;
                 gap: 1rem;
             }
-            .phone-wrap{
-                width: 65%;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
         }
     }
     .history-box{
@@ -1367,18 +1569,6 @@ const Content = styled(Box)`
                 }
             }
         }
-        .calendar-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            padding: 20px;
-            max-width: 400px;
-          }
         .activity-box{
             display: flex;
             align-items: center;
@@ -1498,6 +1688,21 @@ const Content = styled(Box)`
             display: flex;
             align-items: center;
             justify-content: space-between;
+            .blur-background {
+                position: relative;
+                background-color: rgba(0, 0, 0, 0.5); /* 검정 반투명 바탕 */
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                filter: blur(5px); /* 블러 처리 */
+            }
+            .message {
+                color: white; /* 흰색 글자 */
+                font-size: 24px; /* 원하는 폰트 크기 */
+                text-align: center;
+            }
         }
         .chart-box{
             width: 40%;
@@ -1524,6 +1729,18 @@ const Content = styled(Box)`
                 background-color: #FFEFE1;
             }
         }
+    }
+    .calendar-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: 20px;
+        max-width: 400px;
     }
     @media ${() => theme.device.desktop} {
         width: 100%;
