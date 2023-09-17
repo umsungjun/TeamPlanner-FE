@@ -31,7 +31,7 @@ export default function FilledBtn({text, handle,href,color,disabled}){
                         <FilledButton variant="contained" color="secondary" fullWidth  href={href}  onClick={handle}>{text}</FilledButton>
                         :
                         <FilledButton variant="contained" color="primary" fullWidth  href={href}   onClick={handle}>{text}</FilledButton>
-                    )               
+                    )           
                 }
            </ThemeProvider>
         </>

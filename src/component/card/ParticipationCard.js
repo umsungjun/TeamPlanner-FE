@@ -14,7 +14,9 @@ export default function ParticipationCard({boardId,
     recruitmentTitle,
     recruitmentContent,
     recruitmentId,
-    fetchData
+    applyUsernickname,
+    fetchData,
+    boardImage
 
 }){
 
@@ -44,6 +46,10 @@ export default function ParticipationCard({boardId,
         })
     }
 
+    const profilePage = () => {
+        window.location.href = `/profile/${applyUsernickname}`;
+    };
+
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -51,16 +57,16 @@ export default function ParticipationCard({boardId,
                     <div className="padding">
                         <ul className="participation-list">
                             <li className="img-box">
-                                {/* <img src="/img/card/sample3.png" /> */}
+                                <img src={boardImage} />
                             </li>
                             <li className="text-wrap">
-                                <a href={`/recruitment/${recruitmentId}`}><h2>{recruitmentTitle}</h2></a>
-                                <p>{recruitmentApplyContent}</p>
+                                 <a href={`/recruitment/${recruitmentId}`}><h2>모집 글 제목 : {recruitmentTitle}</h2></a>
+                                <p>참여신청 글 : {recruitmentApplyContent}</p>
                             </li>
                         </ul>
                         <div className="button-wrap">
                             <SolidBtn text={"취소"} handle={onCancel}></SolidBtn>
-                            {/* <FilledBtn text={"참여신청"} /> */}
+                            <FilledBtn text={"프로필 확인"} handle={profilePage}/>
                         </div>
                     </div>
                 </ParticipationCardWrap>

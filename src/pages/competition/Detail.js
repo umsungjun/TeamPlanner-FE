@@ -20,6 +20,7 @@ import Comment from "../../component/comment/Comment";
 import FilledBtn from "../../component/button/FilledBtn";
 import { API } from "../../api/api";
 import KakaoButton from "./kakaoButton";
+import NaverButton from "./naverButton";
 import { Opacity } from "@mui/icons-material";
 import CheckBtn from "../../component/button/CheckBtn";
 import CommonModal from "../../component/modal/CommonModal";
@@ -69,17 +70,18 @@ export default function Detail() {
   let [commentCount, setCommentCount] = useState([]);
   const [flag, setChangeFlag] = useState(false);
   const [commentFlag, setCommentFlag] = useState(false);
+  //스크랩 수
+  const [scrapCountFlag,setScrapCountFlag]=useState(false);
 
 
   useEffect(() => {
     API.get(`/api/v1/board/${boardId}`).then((res) => {
       setData(res.data[0]);
       setCommentData(res.data[0].comments);
-      console.log(res.data[0].comments)
       const filteredComments = res.data[0].comments.filter(commentItem => commentItem.state);
       setCommentCount(filteredComments.length);
     });
-  }, [flag, commentFlag]); 
+  }, [flag, commentFlag,scrapCountFlag]); 
 
   const theme = createTheme({
     typography: {
@@ -112,7 +114,6 @@ export default function Detail() {
         console.log(err);
       })
   }, [])
-  
 
   const fetchRecruitmentList = () => {
     API.get(`/api/v1/recruitment?page=${currentPage - 1}&size=5&boardIdContain=${boardId}`,
@@ -168,7 +169,7 @@ export default function Detail() {
                     <div className="dp-flex scrap-wrap">
                     <IconWrap type="noComment" likeCount={data.likeCount} viewCount={data.viewCount} commentCount={data.commentCount} />
                     {/*3차추가 */}
-                    <CheckBtn type={"scrap"}/>
+                    <CheckBtn type={"scrap"} scrapCountFlag={scrapCountFlag} setScrapCountFlag={setScrapCountFlag}/>
                     </div>
                     
                   </div>
@@ -225,7 +226,7 @@ export default function Detail() {
                             <img src="/img/icon/sns/twiter.png"></img>
                           </IconButton>
                           <IconButton>
-                            <img src="/img/icon/sns/naver.png"></img>
+                          <NaverButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
                           <IconButton>
                             <img src="/img/icon/sns/band.png"></img>
@@ -640,3 +641,4 @@ const Card = styled(Box)`
     width: 100%;
   }
 `;
+

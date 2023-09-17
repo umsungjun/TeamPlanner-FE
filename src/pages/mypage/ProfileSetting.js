@@ -35,6 +35,8 @@ import {
     Legend,
   } from 'chart.js';
 import { Radar } from 'react-chartjs-2';
+import RecomandTeamCard from "../../component/card/RecomandTeamCard";
+import ChatBox from "../../component/chat/ChatBox";
 
 ChartJS.register(
     RadialLinearScale,
@@ -1294,6 +1296,8 @@ export default function ProfileSetting(){
                     </PaddingWrap>
                 </Container>
                 <Footer />
+                {/* *채팅버튼 추가
+                <ChatBox /> */}
             </ThemeProvider>
         </>
     )
@@ -1320,7 +1324,7 @@ const PaddingWrap = styled(Box)`
     }
 `;
 
-const ContentWrap = styled(Box)`
+export const ContentWrap = styled(Box)`
     display: flex;
     align-items: flex-start;
     justify-content: space-between;
@@ -1337,7 +1341,7 @@ const SideList = styled(Box)`
     }
 `;
 
-const Content = styled(Box)`
+export const Content = styled(Box)`
     width: 80%;
     .title{
         margin-bottom: 5rem;
@@ -1712,6 +1716,25 @@ const Content = styled(Box)`
         }
         .review-list{
             width: 55%;
+            height: 30rem;
+            overflow-y: scroll;
+            border: 1px solid rgba(0,0,0,.1);
+            border-radius: 4px;
+            h3{
+                font-size: 1.6rem;
+                color: #3b3b3b;
+                line-height: 150%;
+                font-weight: 500;
+                padding: 1.5rem;
+                border-bottom: 1px solid rgba(0,0,0,.1);
+                background-color: #fff;
+            }
+            h3:hover{
+                background-color: #FFEFE1;
+            }
+        }
+        .review-list-modal{
+            width: 100%;
             height: 30rem;
             overflow-y: scroll;
             border: 1px solid rgba(0,0,0,.1);

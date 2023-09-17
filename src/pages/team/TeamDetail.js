@@ -13,6 +13,7 @@ import Comment from "../../component/recruitmentComment/Comment";
 import Button from "@mui/material/Button";
 import ApplicationModal from "../../component/modal/ApplicationModal";
 import { useParams } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { API } from "../../api/api";
 import { now } from "moment/moment";
 import CheckBtn from "../../component/button/CheckBtn";
@@ -30,6 +31,9 @@ export default function TeamDetail({done}){
             primary: {
               main: "#FF7300",
             },
+            secondary: {
+                main: "#D9D9D9",
+              },
          },
     })
     const [commentData, setCommentData] = useState([]);
@@ -38,6 +42,10 @@ export default function TeamDetail({done}){
     const [data, setData] = useState({
         commentList: []
     });
+    const navigate = useNavigate();
+    //스크랩 수
+  const [likeCountFlag,setLikeCountFlag]=useState(false);
+
     const {
         id,
         title,
@@ -51,18 +59,17 @@ export default function TeamDetail({done}){
         boardEndDate,
         authorNickname,
         authorProfileImg,
+        recruitmentState,
     } = data;
-
 
     useEffect(() => {
         fetchData();
-    },[])
+    },[likeCountFlag])
 
     const fetchData = () => {
         API.get(`/api/v1/recruitment/${recruitmentId}`)
         .then(resp => {
-            console.log(resp);
-            console.log(data);
+            console.log(resp)
             // console.log()
             
             const tmpList = resp.data.commentList;
@@ -99,6 +106,18 @@ export default function TeamDetail({done}){
         return diff;
     }
      
+    const handleUpdate = () => {
+        navigate(`/recruitment/${recruitmentId}/update`);
+    }
+    const handleDelete = () => {
+        API.delete(`/api/v1/recruitment/${recruitmentId}`)
+        .then(resp => {
+            console.log(`resp ${resp}`);
+            navigate('/');
+        }).catch(err => {
+            console.log(`err = ${err}`);
+        })
+    }
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -138,25 +157,28 @@ export default function TeamDetail({done}){
                                         <Avatar src={authorProfileImg}></Avatar>
                                         <h3>{authorNickname}</h3>
                                     </div>
+                                    {userInfo && (
                                         <div className="btn-wrap">
-                                        {userInfo && (
+                                        
                                                 <>
-                                                <SmallBtn variant="outlined" color="secondary">
+                                                <SmallBtn variant="outlined" color="secondary" onClick={handleUpdate}>
                                                     <p>수정</p>
                                                 </SmallBtn>
-                                                <SmallBtn variant="outlined" color="secondary">
+                                                <SmallBtn variant="outlined" color="secondary" onClick={handleDelete}>
                                                     <p className="delete">삭제</p>
                                                 </SmallBtn>
                                                 </>
-                                            )}
+                                       
                                         </div>
+                                         )}
                                     </div>
                                     <div className="text-wrap">
                                         <h4>{title}</h4>
                                         {content?.split('\n').map(l => <p>{l}</p>)}
                                     </div>
                                     {/*3차추가 */}
-                                    <CheckBtn type={"like"}/>
+                                    {!recruitmentState && <CheckBtn type={"like"} recruitmentState={false} likeCountFlag={likeCountFlag} setLikeCountFlag={setLikeCountFlag} />}
+                                    {recruitmentState && <CheckBtn type={"like"} recruitmentState={true} likeCountFlag={likeCountFlag} setLikeCountFlag={setLikeCountFlag}/>}
                                 </div>
                                 <div className="comment-wrap">
                                     <Comment changeFlag={setChangeFlag} flag={flag} commentData={data.commentList} />

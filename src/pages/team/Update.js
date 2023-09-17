@@ -12,10 +12,10 @@ import FormControl from '@mui/material/FormControl';
 import Select from '@mui/material/Select';
 import TextField from '@mui/material/TextField';
 import FilledBtn from "../../component/button/FilledBtn";
-import { useLocation, useNavigate } from "react-router";
+import { useLocation, useNavigate, useParams } from "react-router";
 import { API } from "../../api/api";
 
-export default function Writing(){
+export default function Update(){
     
     const theme = createTheme({
         typography:{
@@ -27,18 +27,53 @@ export default function Writing(){
             },
          },
     })
+    const {recruitmentId} = useParams();
     const location = useLocation();
     const navigate = useNavigate();
+    const [data, setData] = useState({
+    });
 
     const queryParams = new URLSearchParams(location.search);
     const boardId = queryParams.get("boardId") || 1;
     useEffect(() => {
-        console.log("write hello")
+        // console.log("write hello")
 
-        console.log(queryParams.get("boardId"));
-        
+        // console.log(queryParams.get("boardId"));
+        fetchData();
     }, [])
-    
+    const fetchData = () => {
+        API.get(`/api/v1/recruitment/${recruitmentId}`)
+        .then(resp => {
+            console.log(resp)
+            // console.log()
+            
+            // const tmpList = resp.data.commentList;
+            // setCommentCount(tmpList.length);
+            // let parents = tmpList.filter(c => c.parentCommentId === null);
+            // const childs = tmpList.filter(c => c.parentCommentId !== null);
+
+            // // console.log('parents', parents)
+            // // console.log('childs', childs)
+
+            // parents.map(p => {
+            //     p.childCommentList = childs.filter(c => c.parentCommentId === p.id);
+            // });
+
+            // resp.data.commentList = parents;
+            // console.log('resp.data.commentList', resp.data.commentList)
+            setData(resp.data);
+            const tmpInput = {
+                title: resp.data.title,
+                content: resp.data.content,
+                currentMemberSize: resp.data.currentMemberSize,
+                maxMemberSize: resp.data.maxMemberSize
+            }
+            setInputs(tmpInput);
+            // console.log('tmp', tmp)
+            // console.log(typeof(tmp));
+            // console.log(Object.values(tmp))
+        })
+    }
     const [inputs, setInputs] = useState({
         title: "",
         content: "",
@@ -55,24 +90,25 @@ export default function Writing(){
         });
     };
 
-    console.log("hello")
-
     const handleWriteButton = (event) => {
         console.log("handle write button")
         console.log(`input = ${inputs}`)
         console.log('inputs', JSON.stringify(inputs, null, 2))
-        API.post("/api/v1/recruitment", {
-            ...inputs,
-            boardId: boardId
+        API.put(`/api/v1/recruitment/${recruitmentId}`, {
+            newTitle: inputs.title,
+            newContent: inputs.content,
+            newCurrentMemberSize: inputs.currentMemberSize,
+            newMaxMemberSize: inputs.maxMemberSize,
         }).then(resp => {
             console.log(`resp ${resp}`);
-            navigate(`/competition/detail/${boardId}`)
+            navigate(`/recruitment/${recruitmentId}`)
         }).catch(err => {
             console.log(`err = ${err}`);
         })
     };
     const handleCancelButton = (event) => {
         console.log("handle cancel button")
+        navigate(-1);
     };
     return(
         <>
@@ -165,7 +201,7 @@ export default function Writing(){
                                 <div className="dp-end">
                                     <div className="btn-wrap">
                                         <FilledBtn text={"취소"} handle={handleCancelButton} color={"gray"}></FilledBtn>
-                                        <FilledBtn text={"모집글 작성"} handle={handleWriteButton}></FilledBtn>
+                                        <FilledBtn text={"모집글 수정"} handle={handleWriteButton}></FilledBtn>
                                     </div>
                                 </div>
                             </div>

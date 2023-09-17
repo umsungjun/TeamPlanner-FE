@@ -87,7 +87,7 @@ export default function TeamManagement(){
             
         })
         .catch (err => {
-            console.log(err);
+            console.log(err);   
             return alert(err.response.data.message)
       });
       }, []);

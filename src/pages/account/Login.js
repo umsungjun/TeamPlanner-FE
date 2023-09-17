@@ -86,6 +86,12 @@ const onOauthLogin_K = () => {
     target += "/kakao"
     window.location.href = target;
 }
+// const onOauthLogin_N = () => {
+//   // TODO:
+//   let target = API_BASE_URL + "/oauth2/authorization"
+//   target += "/naver"
+//   window.location.href = target;
+// }
 
   return (
     <>
@@ -125,9 +131,9 @@ const onOauthLogin_K = () => {
             </ul>
             <ul className="a-wrap">
               <li>
-                <a href="">아이디</a>
+                <a href="/Idpw">아이디</a>
                 <span>|</span>
-                <a href="">비밀번호 찾기</a>
+                <a href="/Idpw">비밀번호 찾기</a>
               </li>
               <li>
                 <a href="/join" className="joinBtn">
@@ -155,6 +161,16 @@ const onOauthLogin_K = () => {
                 <img src="/img/icon/kakao.svg" alt="카카오" />
                 카카오로 로그인
               </Button>
+
+              {/* <Button
+                variant="outlined"
+                color="secondary"
+                fullWidth
+                onClick={onOauthLogin_N}
+              >
+                <img src="/img/icon/naver.svg" alt="네이버" />
+                네이버로 로그인
+              </Button> */}
             </div>
           </div>
         </LoginWrap>
@@ -254,6 +270,9 @@ const LoginWrap = styled(Box)`
       }
       button:first-of-type {
         margin-bottom: 1rem;
+      }
+      button:last-of-type { /* Target the last button (네이버로 로그인) */
+      margin-top: 1rem; /* Add margin to adjust styling */
       }
       button:hover {
         background-color: #fff;
