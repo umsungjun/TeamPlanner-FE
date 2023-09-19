@@ -64,7 +64,10 @@ const TechStackModal = ({ techStackData, onTechStackSelect, onClose }) => {
                 {suggestedTechStacks.map((techStack) => (
                 <li className="tech-stack-item"
                     key={techStack.id}
-                    onClick={() => handleTechStackSelect(techStack)}
+                    onClick={() => {
+                        handleTechStackSelect(techStack);
+                        onClose();
+                    }}
                 >
                     {techStack.name}
                 </li>

@@ -86,7 +86,7 @@ export default function ProfileSetting(){
 
     const handleEdit = () => {
         const { evaluations, ...remains } = profileData;
-        setEdit(!edit);
+        setEdit((prevEdit) => !prevEdit);
         setFormData(remains);
     };
 
@@ -106,6 +106,14 @@ export default function ProfileSetting(){
         certifications:[],
         evaluations:[]
     });
+
+    const [formData2, setFormData2] = useState({
+        basicProfile:[],
+        techStacks:[],
+        activities:[],
+        certifications:[]
+    });
+
 
     const [techStackData, setTechStackData] = useState([]);
 
@@ -152,11 +160,14 @@ export default function ProfileSetting(){
 
     const [preSignedUrl, setPreSignedUrl] = useState(['']);
 
-    const [submitPermit, setSubmitPermit] = useState(false);
+    const [submitPermit1, setSubmitPermit1] = useState(false);
+
+    const [submitPermit2, setSubmitPermit2] = useState(false);
 
     const [newStackId, setNewStackId] = useState(-1);
 
     //기술스택
+    const [stackDuplicate, setStackDuplicate] = useState(false);
     const handleTechStackSelect = (selectedTechStack) => {
         //fill here
         //if selectedTechStack.id가 이미 formData.techStacks내에 존재한다면 -> alert("이미 추가된 기술스택입니다")
@@ -164,6 +175,7 @@ export default function ProfileSetting(){
             (techStack) => techStack.techStackItem.id === selectedTechStack.id
         );
         if (techStackExists) {
+            setStackDuplicate(true);
             alert("이미 추가된 기술스택입니다.");
             return; // Do not proceed further
         }
@@ -187,6 +199,7 @@ export default function ProfileSetting(){
           techStacks: updatedTechStacks,
         });
         setNewStackId(newStackId-1);
+        return;
     };
     
     const handleTechStackRemove = (techStackIdToRemove) => {
@@ -202,30 +215,38 @@ export default function ProfileSetting(){
         setFormData(updatedFormData);
     };
 
-    const handleTechStackSkillLevel = (techStackId, clickedLevel)=>{
-        //formData.techStacks의 techStackId를 가지는 것의 skillLevel을 clickedLevel로 업데이트
-        const updatedFormData = { ...formData };
-        const techStackToUpdate = updatedFormData.techStacks.find(
-            (techStack) => techStack.id === techStackId
-        );
-        if (techStackToUpdate) {
-            techStackToUpdate.skillLevel = clickedLevel;
-        }
-        setFormData(updatedFormData);
+    const handleTechStackSkillLevel = (techStackId, clickedLevel) => {
+        // 새로운 객체를 생성하여 상태를 업데이트
+        setFormData((prevFormData) => {
+            const updatedTechStacks = prevFormData.techStacks.map((techStack) => {
+                if (techStack.id === techStackId) {
+                    // 클릭된 기술 스택의 스킬 레벨을 업데이트
+                    return { ...techStack, skillLevel: clickedLevel };
+                }
+                return techStack;
+            });
+    
+            return { ...prevFormData, techStacks: updatedTechStacks };
+        });
     };
 
     //기술스택 입력 모달
     const [isTechStackModalOpen, setIsTechStackModalOpen] = useState(false);
       
     const handleOpenTechStackModal = () => {
+        setStackDuplicate(false);
         setIsTechStackModalOpen(true);
     };
       
     const handleCloseTechStackModal = () => {
-        setIsTechStackModalOpen(false);
+        if(!stackDuplicate){
+            setIsTechStackModalOpen(false);
+        }
     };
 
     //이미지
+    const [imageFileChanged, setImageFileChanged] = useState(false);
+
     const handleImageUpload = async (event) => {
         // presignedurl 발급
         const selectedFile = event.target.files[0];
@@ -235,14 +256,22 @@ export default function ProfileSetting(){
                 const extension = selectedFile.name.split('.').pop();
                 setImageFile(selectedFile);
 
+                const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
+
+                // 확장자를 제외한 파일 이름
+                const username = usernameAndExtension.split(".")[0];
+
                 setFormData((prevData) => ({
                     ...prevData,
-                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
-                  }));
+                    basicProfile: {
+                        ...prevData.basicProfile,
+                        profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + username + "." + extension,
+                    },
+                }));
                 try{
                     const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
                     setPreSignedUrl(response.data.preSignedUrl);
-                    console.log(preSignedUrl);
+                    setImageFileChanged(true);
                     handleFileClose();
                 } catch (error){
                     console.log(error.response);
@@ -254,12 +283,23 @@ export default function ProfileSetting(){
         }
     };
 
+    useEffect(()=>{
+        if(imageFile!=''){
+            setImageFileURL(URL.createObjectURL(imageFile));
+        }
+    },[imageFile]);
+
     const getPresignedUrl = async () => {
         const extension = imageFile.name.split('.').pop();
-        const newProfileImageURL = "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + formData.username + "." + extension;
+
+        const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
+
+        const username = usernameAndExtension.split(".")[0];
+
+        const newProfileImageURL = "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + username + "." + extension;
 
         try {
-          const response = await API.get("/api/v1/image/new-pre-signed-url?name=" + formData.username + "&extension=" + extension + "&purpose=PUT");
+          const response = await API.get("/api/v1/image/new-pre-signed-url?name=" + username + "&extension=" + extension + "&purpose=PUT");
           const returnedPreSignedUrl = response.data.preSignedUrl;
 
           // setFormData와 setPreSignedUrl 호출
@@ -270,7 +310,7 @@ export default function ProfileSetting(){
 
           setPreSignedUrl(returnedPreSignedUrl);
 
-          setSubmitPermit(true);
+          setSubmitPermit1(true);
         } catch (error) {
             alert("getPresignedUrl error :",error.response.data.message);
         }
@@ -286,7 +326,7 @@ export default function ProfileSetting(){
         .then(response =>{
         })
         .catch(error =>{
-            alert(error.response);  
+            alert("이미지가 오류로인해 업로드되지 못했습니다.",error.response);  
         })
     }
 
@@ -319,7 +359,6 @@ export default function ProfileSetting(){
                 admissionDate: admissionDateString
             },
         }));
-        console.log(formData);
     };
     
     const handleAdmissionDateChange = (field, value) => {
@@ -388,23 +427,17 @@ export default function ProfileSetting(){
     };
 
     const handleRemoveActivity = (index) => {
-        console.log("formData",formData);
-
         const updatedActivities = [...formData.activities];
-        console.log(index,updatedActivities);
         updatedActivities.splice(index, 1);
-        console.log(updatedActivities);
         setFormData((prevData) =>({
             ...prevData,
             "activities": updatedActivities
         }));
-        console.log(formData);
     };
 
     const handleActivityInputChange = (event, index) => {
         const { id, value } = event.target;
         const keys = id.split('.');
-        console.log(index,keys);
         setFormData((prevData) => ({
             ...prevData,
             activities: prevData.activities.map((activity, i) => {
@@ -417,7 +450,6 @@ export default function ProfileSetting(){
                 return activity;
             }),
         }));
-        console.log(formData);
     };
 
     //자격증,수상이력
@@ -453,23 +485,17 @@ export default function ProfileSetting(){
     };
 
     const handleRemoveCertification = (index) => {
-        console.log("formData",formData);
-
         const updatedCertifications = [...formData.certifications];
-        console.log(index,updatedCertifications);
         updatedCertifications.splice(index, 1);
-        console.log(updatedCertifications);
         setFormData((prevData) =>({
             ...prevData,
             "certifications": updatedCertifications
         }));
-        console.log(formData);
     };
 
     const handleCertificationInputChange = (event, index) => {
         const { id, value } = event.target;
         const keys = id.split('.');
-        console.log(index,keys);
         setFormData((prevData) => ({
             ...prevData,
             certifications: prevData.certifications.map((certification, i) => {
@@ -482,7 +508,6 @@ export default function ProfileSetting(){
                 return certification;
             }),
         }));
-        console.log(formData);
     };
 
     //캘린더
@@ -509,8 +534,6 @@ export default function ProfileSetting(){
         if (selectedActivityIndex !== null || selectedCertificationIndex !== null) {
             if(selectedActivityIndex !== null){
                 const updatedActivities = [...formData.activities];
-
-                console.log(calendarUsage);
               
                 updatedActivities[selectedActivityIndex] = {
                     ...updatedActivities[selectedActivityIndex],
@@ -526,8 +549,6 @@ export default function ProfileSetting(){
 
             if (selectedCertificationIndex !== null) {
                 const updatedCertifications = [...formData.certifications];
-    
-                console.log(calendarUsage);
               
                 updatedCertifications[selectedCertificationIndex] = {
                     ...updatedCertifications[selectedCertificationIndex],
@@ -559,12 +580,7 @@ export default function ProfileSetting(){
     //범용
     const handleInputChange = (event) => {
         const { id, value } = event.target;
-        console.log("event.target",event.target);
-        console.log("id",id);
-        console.log("value",value);
         const keys = id.split('.');
-        console.log(id,value);
-        console.log("keys0",keys[0],"keys1",keys[1]);
         setFormData((prevData) => ({
             ...prevData,
             [keys[0]]: {
@@ -572,12 +588,10 @@ export default function ProfileSetting(){
                 [keys[1]]: value
             },
         }));
-        console.log(formData);
     }; 
     
     const handleRadioInputChange = (key, value) => {
         const keys = key.split('.');
-        console.log(keys,value);
         //true, false string으로 받아지는 문제
         if(value==="true" || value==="false"){
 
@@ -589,8 +603,6 @@ export default function ProfileSetting(){
                 [keys[1]]: value
             },
         }));
-        console.log(formData[keys[0]][keys[1]])
-        console.log(formData);
       };
 
     const years = Array.from({ length: 100 }, (_, i) => ({
@@ -717,44 +729,165 @@ export default function ProfileSetting(){
 
     const handleSubmit = () => {
         setEdit(!edit);
+
+        if(imageFileChanged){
+            getPresignedUrl();
+        }
+
+        const differences = [];
+
+        //basicProfile
+        setFormData2((prevData) => ({
+            ...prevData,
+            basicProfile: {
+              ...formData.basicProfile, // formData.basicProfile의 모든 속성을 포함
+              crudType: 'UPDATE' // 새로운 속성 추가
+            }
+        }));
+
+        //techStacks
+        // 1. formData.techStacks를 순회하면서 처리
+        while(formData.techStacks.length!==0){
+            const formDataTechStack = formData.techStacks[0];
+            const matchingProfileTechStack = profileData.techStacks.find((profileTechStack) => profileTechStack.id === formDataTechStack.id);
+        
+            if (matchingProfileTechStack) {
+                if (JSON.stringify(formDataTechStack) !== JSON.stringify(matchingProfileTechStack)) {
+                    formDataTechStack.crudType = 'UPDATE';
+                    formData2.techStacks.push(formDataTechStack);
+                }
+                
+                // 해당 기술 스택을 formData와 profileData에서 제거
+                const formDataIndex = formData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+                const profileDataIndex = profileData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+
+                if (formDataIndex !== -1) {
+                    formData.techStacks.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.techStacks.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataTechStack.crudType = 'CREATE';
+                formData2.techStacks.push(formDataTechStack);
+            
+                // 해당 기술 스택을 formData에서 제거
+                const formDataIndex = formData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+                if (formDataIndex !== -1) {
+                    formData.techStacks.splice(formDataIndex, 1);
+                }
+            }
+        };
+        
+        // 2. profileData.techStacks의 모든 요소에 대해서 CRUD 타입을 설정
+        profileData.techStacks.forEach((profileTechStack) => {
+            formData2.techStacks.push({ id: profileTechStack.id, techStackItem: profileTechStack.techStackItem, crudType: 'DELETE' });
+        });
+
         
 
-        // API.put("/api/v1/profile", formData)
-        //     .then(response => {
-        //         console.log(formData);
-        //         alert('프로필이 수정되었습니다.');
-        //         // 성공적으로 전송되었을 때 할 작업
-        //         window.location.href = "/";
-        //     })
-        //     .catch(error => {
-        //         console.error('회원가입에 실패했습니다:', error);
-        //         // 전송 실패 시 에러 처리
-        //     });
-        // }
+        //activities
+        while(formData.activities.length!==0){
+            const formDataActivity = formData.activities[0];
+            const matchingProfileActivity = profileData.activities.find((profileActivity) => profileActivity.id === formDataActivity.id);
+        
+            if (matchingProfileActivity) {
+                if (JSON.stringify(formDataActivity) !== JSON.stringify(matchingProfileActivity)) {
+                    formDataActivity.crudType = 'UPDATE';
+                    formData2.activities.push(formDataActivity);
+                }
+                
+                const formDataIndex = formData.activities.findIndex((activity) => activity.id === formDataActivity.id);
+                const profileDataIndex = profileData.activities.findIndex((activity) => activity.id === formDataActivity.id);
 
-        console.log(formData);
-        //const isAllTrue = Object.values(submitCondition).every(value => value === true);
-        // if(isAllTrue){
-        // API.put("/api/v1/profile", formData)
-        // .then(response => {
-        //     console.log(formData);
-        //     console.log('회원가입이 완료되었습니다.');
-        //     // 성공적으로 전송되었을 때 할 작업
-        //     window.location.href = "/";
-        // })
-        // .catch(error => {
-        //     console.error('회원가입에 실패했습니다:', error);
-        //     // 전송 실패 시 에러 처리
-        // });
-        // // }
-        // // else{
-        // //     alert("필수 입력란을 채워주세요.")
-        // // }
-        // if(preSignedUrl!=''){
-        //     uploadImageToS3(preSignedUrl,imageFile);
-        // }
+                if (formDataIndex !== -1) {
+                    formData.activities.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.activities.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataActivity.crudType = 'CREATE';
+                formData2.activities.push(formDataActivity);
+            
+                const formDataIndex = formData.activities.findIndex((activity) => activity.id === formDataActivity.id);
+                if (formDataIndex !== -1) {
+                    formData.activities.splice(formDataIndex, 1);
+                }
+            }
+        };
 
+        profileData.activities.forEach((profileActivity) => {
+            formData2.activities.push({ id: profileActivity.id, crudType: 'DELETE' });
+        });
+
+        //certifications
+        while(formData.certifications.length!==0){
+            const formDataCertification = formData.certifications[0];
+            const matchingProfileCertification = profileData.certifications.find((profileCertification) => profileCertification.id === formDataCertification.id);
+        
+            if (matchingProfileCertification) {
+                if (JSON.stringify(formDataCertification) !== JSON.stringify(matchingProfileCertification)) {
+                    formDataCertification.crudType = 'UPDATE';
+                    formData2.certifications.push(formDataCertification);
+                }
+                
+                const formDataIndex = formData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+                const profileDataIndex = profileData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+
+                if (formDataIndex !== -1) {
+                    formData.certifications.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.certifications.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataCertification.crudType = 'CREATE';
+                formData2.certifications.push(formDataCertification);
+            
+                const formDataIndex = formData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+                if (formDataIndex !== -1) {
+                    formData.certifications.splice(formDataIndex, 1);
+                }
+            }
+        };
+
+        profileData.certifications.forEach((profileCertification) => {
+            formData2.certifications.push({ id: profileCertification.id, crudType: 'DELETE' });
+        });
+
+        setSubmitPermit2(true);
     };
+
+    const submitFormData2 = () => {
+        API.put("/api/v1/profile", formData2)
+        .then(response =>{
+            console.log(response);
+            if(response.status==200){
+                alert("프로필 수정이 완료되었습니다.");
+                window.location.href = "/mypage/profileSetting";
+            }
+        })
+        .catch(error =>{
+            alert('프로필 수정이 실패했습니다:', error);
+        })
+    };
+
+    useEffect(()=>{
+        console.log(formData2);
+        if (submitPermit1&&submitPermit2){
+            uploadImageToS3();
+            submitFormData2();
+        }
+        if (!imageFileChanged&&submitPermit2){
+            submitFormData2();
+        }
+    },[submitPermit1,submitPermit2]);
+
+
 
     useEffect(()=>{
         if(newImageFile!=''){
@@ -963,8 +1096,8 @@ export default function ProfileSetting(){
                                                             onChange={(e) => handleRadioInputChange("basicProfile.gender", e.target.value)}
                                                         >
                                                         <div id="basicProfile.gender">
-                                                            <FormControlLabel id="basicProfile.gender" value="남성" control={<Radio  />} label="남성" checked={formData.basicProfile.gender==="남성"}/>
-                                                            <FormControlLabel id="basicProfile.gender" value="여성" control={<Radio  />} label="여성" checked={formData.basicProfile.gender==="여성"}/>
+                                                            <FormControlLabel id="basicProfile.gender" value="MALE" control={<Radio  />} label="남성" checked={formData.basicProfile.gender==="MALE"}/>
+                                                            <FormControlLabel id="basicProfile.gender" value="FEMALE" control={<Radio  />} label="여성" checked={formData.basicProfile.gender==="FEMALE"}/>
                                                         </div>
                                                         </RadioGroup>
                                                     </FormControl>
@@ -1000,7 +1133,7 @@ export default function ProfileSetting(){
                                                             options={jobs}
                                                             value={jobs.find(option => option.value === jobs.jobs)}
                                                             onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.value } })}
-                                                            placeholder="선택"
+                                                            placeholder={jobs.find(option => option.value === formData.basicProfile.job)?.label}
                                                         />
                                                     </div>
                                                 }
@@ -1015,7 +1148,7 @@ export default function ProfileSetting(){
                                                             options={educations}
                                                             value={educations.find(option => option.value === educations.educations)}
                                                             onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.value } })}
-                                                            placeholder="선택"
+                                                            placeholder={educations.find(option => option.value === formData.basicProfile.education)?.label}
                                                         />
                                                     </div>
                                                 }
@@ -1158,14 +1291,6 @@ export default function ProfileSetting(){
                                                                 activity.detail
                                                             )}
                                                         </p>
-                                                        <div className="tag-wrap">
-                                                            {/* {activity.tags.map((tag, tagIndex) => (
-                                                                <h5 key={tagIndex}>{tag}</h5>
-                                                            ))} */}
-                                                            <h5>Spring Boot</h5>
-                                                            <h5>Spring Data JPA</h5>
-                                                            <h5>MVC</h5>
-                                                        </div>
                                                         <IconButton onClick={() => handleRemoveActivity(index)}>
                                                             <RemoveCircleOutlineIcon />
                                                         </IconButton>

@@ -124,7 +124,9 @@ export default function Join(){
                 } catch (error){
                     console.log(error.response);
                     alert(error.response.data.message);
-            } else{
+                } 
+            }
+            else{
                 alert('이미지 파일이 아닙니다.');
             }
         }
@@ -463,7 +465,7 @@ export default function Join(){
         .catch(error =>{
             console.error('회원가입에 실패했습니다:', error);
         })
-    }
+    };
 
     useEffect(()=>{
         if (submitPermit){
