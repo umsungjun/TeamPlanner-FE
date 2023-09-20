@@ -111,20 +111,22 @@ export default function Join(){
                 const extension = selectedFile.name.split('.').pop();
                 setImageFile(selectedFile);
 
-                // setFormData((prevData) => ({
-                //     ...prevData,
-                //     profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
-                // }));
-                // try{
-                //     // const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
-                //     // setPreSignedUrl(response.data.preSignedUrl);
-                //     // console.log(preSignedUrl);
-                //     handleFileClose();
-                // } catch (error){
-                //     console.log(error.response);
-                // }
-                handleFileClose();
-            } else{
+
+                setFormData((prevData) => ({
+                    ...prevData,
+                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
+                  }));
+                try{
+                    const response = await API.get("/api/v1/image/new-pre-signed-url?extension="+extension+"&purpose=PUT");
+                    setPreSignedUrl(response.data.preSignedUrl);
+                    console.log(preSignedUrl);
+                    handleFileClose();
+                } catch (error){
+                    console.log(error.response);
+                    alert(error.response.data.message);
+                } 
+            }
+            else{
                 alert('이미지 파일이 아닙니다.');
             }
         }
@@ -463,7 +465,7 @@ export default function Join(){
         .catch(error =>{
             console.error('회원가입에 실패했습니다:', error);
         })
-    }
+    };
 
     useEffect(()=>{
         if (submitPermit){
@@ -644,7 +646,7 @@ export default function Join(){
                             <h3>프로필이미지</h3>
                             <div className="profileImage">
                                 <img src={imageFileURL} alt="프로필 이미지"/>
-                                <IconButton onClick={handleFileOpen}><AddCircleIcon/></IconButton>
+                                <IconButton disabled={!submitCondition.usernameValid} onClick={handleFileOpen}><AddCircleIcon/></IconButton>
                                 <Modal open={fileOpen} onClose={handleFileClose} aria-labelledby="image-upload-modal" aria-describedby="image-upload-description">
                                     <Paper>
                                         <div className="modal-header">

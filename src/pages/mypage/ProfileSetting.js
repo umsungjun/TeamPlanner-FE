@@ -23,6 +23,7 @@ import 'react-calendar/dist/Calendar.css';
 import Select from 'react-select';
 import axios from "axios";
 import { API } from "../../api/api";
+import TechStackModal from '../../component/modal/TechStackModal';
 
 import {
     Chart as ChartJS,
@@ -44,20 +45,7 @@ ChartJS.register(
     Filler,
     Tooltip,
     Legend
-  );
-
-  export const data = {
-    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
-    datasets: [
-      {
-        label: '',
-        data: [4, 5, 7, 6, 5],
-        backgroundColor: 'rgba(255, 115, 0, 0.2)',
-        borderColor: 'rgba(255, 115, 0, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
+);
 
 export const options = {
     responsive: true,
@@ -98,10 +86,11 @@ export default function ProfileSetting(){
 
     const handleEdit = () => {
         const { evaluations, ...remains } = profileData;
-        setEdit(!edit);
+        setEdit((prevEdit) => !prevEdit);
         setFormData(remains);
     };
 
+     //fetched data
     const [profileData, setProfileData] = useState({
         basicProfile:[],
         techStacks:[],
@@ -118,10 +107,25 @@ export default function ProfileSetting(){
         evaluations:[]
     });
 
+    const [formData2, setFormData2] = useState({
+        basicProfile:[],
+        techStacks:[],
+        activities:[],
+        certifications:[]
+    });
+
+
+    const [techStackData, setTechStackData] = useState([]);
+
+    const [genders, setGenders] = useState([]);
+
     const [jobs, setJobs] = useState([]);
 
     const [educations, setEducations] = useState([]);
 
+
+
+    //
     const [birthData, setBirthData] = useState({
         year:'',
         month:'',
@@ -154,9 +158,95 @@ export default function ProfileSetting(){
 
     const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
 
-    const [preSignedUrl, setPreSignedUrl] = useState([]);
+    const [preSignedUrl, setPreSignedUrl] = useState(['']);
+
+    const [submitPermit1, setSubmitPermit1] = useState(false);
+
+    const [submitPermit2, setSubmitPermit2] = useState(false);
+
+    const [newStackId, setNewStackId] = useState(-1);
+
+    //기술스택
+    const [stackDuplicate, setStackDuplicate] = useState(false);
+    const handleTechStackSelect = (selectedTechStack) => {
+        //fill here
+        //if selectedTechStack.id가 이미 formData.techStacks내에 존재한다면 -> alert("이미 추가된 기술스택입니다")
+        const techStackExists = formData.techStacks.some(
+            (techStack) => techStack.techStackItem.id === selectedTechStack.id
+        );
+        if (techStackExists) {
+            setStackDuplicate(true);
+            alert("이미 추가된 기술스택입니다.");
+            return; // Do not proceed further
+        }
+
+        const newTechStack = {
+            id: newStackId,
+            skillLevel: 1,
+            techStackItem: {
+              id: selectedTechStack.id,
+              name: selectedTechStack.name,
+              techCategory: selectedTechStack.techCategory,
+              imageUrl: selectedTechStack.imageUrl,
+              userGenerated: false,
+            },
+        };
+        const updatedTechStacks = [...formData.techStacks, newTechStack];
+
+        // formData 업데이트
+        setFormData({
+          ...formData,
+          techStacks: updatedTechStacks,
+        });
+        setNewStackId(newStackId-1);
+        return;
+    };
+    
+    const handleTechStackRemove = (techStackIdToRemove) => {
+        const updatedTechStacks = formData.techStacks.filter(
+            (techStack) => techStack.id !== techStackIdToRemove
+        );
+          // 새로운 formData를 생성하고 업데이트
+        const updatedFormData = {
+            ...formData,
+            techStacks: updatedTechStacks,
+        };
+
+        setFormData(updatedFormData);
+    };
+
+    const handleTechStackSkillLevel = (techStackId, clickedLevel) => {
+        // 새로운 객체를 생성하여 상태를 업데이트
+        setFormData((prevFormData) => {
+            const updatedTechStacks = prevFormData.techStacks.map((techStack) => {
+                if (techStack.id === techStackId) {
+                    // 클릭된 기술 스택의 스킬 레벨을 업데이트
+                    return { ...techStack, skillLevel: clickedLevel };
+                }
+                return techStack;
+            });
+    
+            return { ...prevFormData, techStacks: updatedTechStacks };
+        });
+    };
+
+    //기술스택 입력 모달
+    const [isTechStackModalOpen, setIsTechStackModalOpen] = useState(false);
+      
+    const handleOpenTechStackModal = () => {
+        setStackDuplicate(false);
+        setIsTechStackModalOpen(true);
+    };
+      
+    const handleCloseTechStackModal = () => {
+        if(!stackDuplicate){
+            setIsTechStackModalOpen(false);
+        }
+    };
 
     //이미지
+    const [imageFileChanged, setImageFileChanged] = useState(false);
+
     const handleImageUpload = async (event) => {
         // presignedurl 발급
         const selectedFile = event.target.files[0];
@@ -166,14 +256,22 @@ export default function ProfileSetting(){
                 const extension = selectedFile.name.split('.').pop();
                 setImageFile(selectedFile);
 
+                const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
+
+                // 확장자를 제외한 파일 이름
+                const username = usernameAndExtension.split(".")[0];
+
                 setFormData((prevData) => ({
                     ...prevData,
-                    profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/"+formData.username+"."+extension,
-                  }));
+                    basicProfile: {
+                        ...prevData.basicProfile,
+                        profileImage: "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + username + "." + extension,
+                    },
+                }));
                 try{
                     const response = await API.get("/api/v1/image/pre-signed-url?extension="+extension+"&purpose=PUT");
                     setPreSignedUrl(response.data.preSignedUrl);
-                    console.log(preSignedUrl);
+                    setImageFileChanged(true);
                     handleFileClose();
                 } catch (error){
                     console.log(error.response);
@@ -185,17 +283,51 @@ export default function ProfileSetting(){
         }
     };
 
-    const uploadImageToS3 = async (preSignedUrl, file) => {
-        try{
-            const response = await axios.put(preSignedUrl, file, {
-                headers: {
-                    'Content-Type': file.type
-                }
-            });
-        } catch (error) {
-            console.log(error.response); 
-            alert(error.response);   
+    useEffect(()=>{
+        if(imageFile!=''){
+            setImageFileURL(URL.createObjectURL(imageFile));
         }
+    },[imageFile]);
+
+    const getPresignedUrl = async () => {
+        const extension = imageFile.name.split('.').pop();
+
+        const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
+
+        const username = usernameAndExtension.split(".")[0];
+
+        const newProfileImageURL = "https://teamplanner-bucket.s3.ap-northeast-2.amazonaws.com/" + username + "." + extension;
+
+        try {
+          const response = await API.get("/api/v1/image/new-pre-signed-url?name=" + username + "&extension=" + extension + "&purpose=PUT");
+          const returnedPreSignedUrl = response.data.preSignedUrl;
+
+          // setFormData와 setPreSignedUrl 호출
+          setFormData(prevData => ({
+            ...prevData,
+            profileImage: newProfileImageURL,
+          }));
+
+          setPreSignedUrl(returnedPreSignedUrl);
+
+          setSubmitPermit1(true);
+        } catch (error) {
+            alert("getPresignedUrl error :",error.response.data.message);
+        }
+    };
+
+    const uploadImageToS3 = () => {
+        axios.put(preSignedUrl, imageFile, {
+            headers: {
+                'Content-Type': imageFile.type
+            },
+            withCredentials : false
+        })
+        .then(response =>{
+        })
+        .catch(error =>{
+            alert("이미지가 오류로인해 업로드되지 못했습니다.",error.response);  
+        })
     }
 
     const updateBirth = () => {
@@ -227,7 +359,6 @@ export default function ProfileSetting(){
                 admissionDate: admissionDateString
             },
         }));
-        console.log(formData);
     };
     
     const handleAdmissionDateChange = (field, value) => {
@@ -261,31 +392,6 @@ export default function ProfileSetting(){
         }));
         
     }; 
-
-
-    //전화번호
-    const [phoneData, setPhoneData] = useState({
-        phone1:'',
-        phone2:'',
-        phone3:''
-    })
-
-    const handlePhoneChange = (event) => {
-        const { id, value } = event.target;
-        setPhoneData((prevData) => ({
-          ...prevData,
-          [id]: value,
-        }));
-    }; 
-
-    const updatePhone = () =>{
-        if (phoneData.phone1 == '' || phoneData.phone2 == '' || phoneData.phone3 == '') return;
-        const phoneString = `${phoneData.phone1}-${phoneData.phone2}-${phoneData.phone3}`;
-        setFormData((prevData) => ({
-            ...prevData,
-            phone: phoneString,
-        }));
-    }
 
     //활동
     const [selectedActivityIndex, setSelectedActivityIndex] = useState(null); // 클릭한 활동의 인덱스
@@ -321,23 +427,17 @@ export default function ProfileSetting(){
     };
 
     const handleRemoveActivity = (index) => {
-        console.log("formData",formData);
-
         const updatedActivities = [...formData.activities];
-        console.log(index,updatedActivities);
         updatedActivities.splice(index, 1);
-        console.log(updatedActivities);
         setFormData((prevData) =>({
             ...prevData,
             "activities": updatedActivities
         }));
-        console.log(formData);
     };
 
     const handleActivityInputChange = (event, index) => {
         const { id, value } = event.target;
         const keys = id.split('.');
-        console.log(index,keys);
         setFormData((prevData) => ({
             ...prevData,
             activities: prevData.activities.map((activity, i) => {
@@ -350,7 +450,6 @@ export default function ProfileSetting(){
                 return activity;
             }),
         }));
-        console.log(formData);
     };
 
     //자격증,수상이력
@@ -386,23 +485,17 @@ export default function ProfileSetting(){
     };
 
     const handleRemoveCertification = (index) => {
-        console.log("formData",formData);
-
         const updatedCertifications = [...formData.certifications];
-        console.log(index,updatedCertifications);
         updatedCertifications.splice(index, 1);
-        console.log(updatedCertifications);
         setFormData((prevData) =>({
             ...prevData,
             "certifications": updatedCertifications
         }));
-        console.log(formData);
     };
 
     const handleCertificationInputChange = (event, index) => {
         const { id, value } = event.target;
         const keys = id.split('.');
-        console.log(index,keys);
         setFormData((prevData) => ({
             ...prevData,
             certifications: prevData.certifications.map((certification, i) => {
@@ -415,7 +508,6 @@ export default function ProfileSetting(){
                 return certification;
             }),
         }));
-        console.log(formData);
     };
 
     //캘린더
@@ -438,35 +530,37 @@ export default function ProfileSetting(){
     const handleCalendarChange = (date) => {
         const formattedDate = formatDateToString(date);
         const keys = calendarUsage.split('.');
-        if (selectedActivityIndex !== null) {
-            const updatedActivities = [...formData.activities];
+        let flag = false;
+        if (selectedActivityIndex !== null || selectedCertificationIndex !== null) {
+            if(selectedActivityIndex !== null){
+                const updatedActivities = [...formData.activities];
+              
+                updatedActivities[selectedActivityIndex] = {
+                    ...updatedActivities[selectedActivityIndex],
+                    [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+                };
+                setFormData((prevData) => ({
+                    ...prevData,
+                    activities: updatedActivities,
+                }));
+                setSelectedActivityIndex(null);
+                flag = true;
+            }
 
-            console.log(calendarUsage);
-          
-            updatedActivities[selectedActivityIndex] = {
-                ...updatedActivities[selectedActivityIndex],
-                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
-            };
-            setFormData((prevData) => ({
-                ...prevData,
-                activities: updatedActivities,
-            }));
-            setSelectedActivityIndex(null);
-        }
-        if (selectedCertificationIndex !== null) {
-            const updatedCertifications = [...formData.certifications];
-
-            console.log(calendarUsage);
-          
-            updatedCertifications[selectedCertificationIndex] = {
-                ...updatedCertifications[selectedCertificationIndex],
-                [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
-            };
-            setFormData((prevData) => ({
-                ...prevData,
-                certifications: updatedCertifications,
-            }));
-            setSelectedCertificationIndex(null);
+            if (selectedCertificationIndex !== null) {
+                const updatedCertifications = [...formData.certifications];
+              
+                updatedCertifications[selectedCertificationIndex] = {
+                    ...updatedCertifications[selectedCertificationIndex],
+                    [keys[1]]: formattedDate, // 선택한 날짜로 업데이트
+                };
+                setFormData((prevData) => ({
+                    ...prevData,
+                    certifications: updatedCertifications,
+                }));
+                setSelectedCertificationIndex(null);
+                flag = true;
+            }
         }
         else{
             setFormData((prevData) => ({
@@ -486,12 +580,7 @@ export default function ProfileSetting(){
     //범용
     const handleInputChange = (event) => {
         const { id, value } = event.target;
-        console.log("event.target",event.target);
-        console.log("id",id);
-        console.log("value",value);
         const keys = id.split('.');
-        console.log(id,value);
-        console.log("keys0",keys[0],"keys1",keys[1]);
         setFormData((prevData) => ({
             ...prevData,
             [keys[0]]: {
@@ -499,12 +588,10 @@ export default function ProfileSetting(){
                 [keys[1]]: value
             },
         }));
-        console.log(formData);
     }; 
     
     const handleRadioInputChange = (key, value) => {
         const keys = key.split('.');
-        console.log(keys,value);
         //true, false string으로 받아지는 문제
         if(value==="true" || value==="false"){
 
@@ -516,8 +603,6 @@ export default function ProfileSetting(){
                 [keys[1]]: value
             },
         }));
-        console.log(formData[keys[0]][keys[1]])
-        console.log(formData);
       };
 
     const years = Array.from({ length: 100 }, (_, i) => ({
@@ -538,6 +623,7 @@ export default function ProfileSetting(){
     const fetchEnum = async () => {
         try {
             const response = await API.get('/api/v1/member/signup/enums');
+            setGenders(response.data.gender.map(option => ({ value: option.name, label: option.label })));
             setJobs(response.data.job.map(option => ({ value: option.name, label: option.label })));
             setEducations(response.data.education.map(option => ({ value: option.name, label: option.label })));
         } catch (error) {
@@ -553,10 +639,87 @@ export default function ProfileSetting(){
                 ...prevData,
                 ...response.data
             }));
+
         } catch (error) {
             console.error('API 호출 오류:', error);
         }
     };
+
+    const fetchTechStacks = async () =>{
+        try{
+            const response = await API.get('/api/v1/profile/techStacks');
+            console.log(response);
+            setTechStackData(response.data);
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+
+    //평가
+    const [evaluationData,setevaluationData] = useState({
+        labels: ['창의성', '리더십', '성실함', '기술력', '커뮤니케이션'],
+        datasets: [
+          {
+            label: '',
+            data: [0, 0, 0, 0, 0],
+            backgroundColor: 'rgba(255, 115, 0, 0.2)',
+            borderColor: 'rgba(255, 115, 0, 1)',
+            borderWidth: 1,
+          },
+        ],
+    });
+
+    const updateEvaluationData = () =>{
+
+        const evaluations = profileData.evaluations;
+    
+        // 각 stat의 합을 계산
+        const totalStats = {
+            stat1: 0,
+            stat2: 0,
+            stat3: 0,
+            stat4: 0,
+            stat5: 0,
+        };
+
+        evaluations.forEach((evaluation) => {
+            totalStats.stat1 += evaluation.stat1;
+            totalStats.stat2 += evaluation.stat2;
+            totalStats.stat3 += evaluation.stat3;
+            totalStats.stat4 += evaluation.stat4;
+            totalStats.stat5 += evaluation.stat5;
+        });
+
+        // 각 stat의 평균 계산
+        const avgStats = {
+            stat1: totalStats.stat1 / evaluations.length,
+            stat2: totalStats.stat2 / evaluations.length,
+            stat3: totalStats.stat3 / evaluations.length,
+            stat4: totalStats.stat4 / evaluations.length,
+            stat5: totalStats.stat5 / evaluations.length,
+        };
+
+        // evaluationData 업데이트
+        setevaluationData((prevData) => ({
+        ...prevData,
+        datasets: [
+            {
+            ...prevData.datasets[0],
+            data: [
+                avgStats.stat1,
+                avgStats.stat2,
+                avgStats.stat3,
+                avgStats.stat4,
+                avgStats.stat5,
+            ],
+            },
+        ],
+        }));
+    }
+
+    useEffect(()=>{
+        updateEvaluationData();
+    },[profileData.evaluations]);
 
     const fetchImage = async () =>{
         if(profileData.basicProfile.profileImage!=''){
@@ -566,29 +729,165 @@ export default function ProfileSetting(){
 
     const handleSubmit = () => {
         setEdit(!edit);
-        console.log(formData);
-        //const isAllTrue = Object.values(submitCondition).every(value => value === true);
-        // if(isAllTrue){
-        // API.put("/api/v1/profile", formData)
-        // .then(response => {
-        //     console.log(formData);
-        //     console.log('회원가입이 완료되었습니다.');
-        //     // 성공적으로 전송되었을 때 할 작업
-        //     window.location.href = "/";
-        // })
-        // .catch(error => {
-        //     console.error('회원가입에 실패했습니다:', error);
-        //     // 전송 실패 시 에러 처리
-        // });
-        // // }
-        // // else{
-        // //     alert("필수 입력란을 채워주세요.")
-        // // }
-        // if(preSignedUrl!=''){
-        //     uploadImageToS3(preSignedUrl,imageFile);
-        // }
 
+        if(imageFileChanged){
+            getPresignedUrl();
+        }
+
+        const differences = [];
+
+        //basicProfile
+        setFormData2((prevData) => ({
+            ...prevData,
+            basicProfile: {
+              ...formData.basicProfile, // formData.basicProfile의 모든 속성을 포함
+              crudType: 'UPDATE' // 새로운 속성 추가
+            }
+        }));
+
+        //techStacks
+        // 1. formData.techStacks를 순회하면서 처리
+        while(formData.techStacks.length!==0){
+            const formDataTechStack = formData.techStacks[0];
+            const matchingProfileTechStack = profileData.techStacks.find((profileTechStack) => profileTechStack.id === formDataTechStack.id);
+        
+            if (matchingProfileTechStack) {
+                if (JSON.stringify(formDataTechStack) !== JSON.stringify(matchingProfileTechStack)) {
+                    formDataTechStack.crudType = 'UPDATE';
+                    formData2.techStacks.push(formDataTechStack);
+                }
+                
+                // 해당 기술 스택을 formData와 profileData에서 제거
+                const formDataIndex = formData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+                const profileDataIndex = profileData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+
+                if (formDataIndex !== -1) {
+                    formData.techStacks.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.techStacks.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataTechStack.crudType = 'CREATE';
+                formData2.techStacks.push(formDataTechStack);
+            
+                // 해당 기술 스택을 formData에서 제거
+                const formDataIndex = formData.techStacks.findIndex((techStack) => techStack.id === formDataTechStack.id);
+                if (formDataIndex !== -1) {
+                    formData.techStacks.splice(formDataIndex, 1);
+                }
+            }
+        };
+        
+        // 2. profileData.techStacks의 모든 요소에 대해서 CRUD 타입을 설정
+        profileData.techStacks.forEach((profileTechStack) => {
+            formData2.techStacks.push({ id: profileTechStack.id, techStackItem: profileTechStack.techStackItem, crudType: 'DELETE' });
+        });
+
+        
+
+        //activities
+        while(formData.activities.length!==0){
+            const formDataActivity = formData.activities[0];
+            const matchingProfileActivity = profileData.activities.find((profileActivity) => profileActivity.id === formDataActivity.id);
+        
+            if (matchingProfileActivity) {
+                if (JSON.stringify(formDataActivity) !== JSON.stringify(matchingProfileActivity)) {
+                    formDataActivity.crudType = 'UPDATE';
+                    formData2.activities.push(formDataActivity);
+                }
+                
+                const formDataIndex = formData.activities.findIndex((activity) => activity.id === formDataActivity.id);
+                const profileDataIndex = profileData.activities.findIndex((activity) => activity.id === formDataActivity.id);
+
+                if (formDataIndex !== -1) {
+                    formData.activities.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.activities.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataActivity.crudType = 'CREATE';
+                formData2.activities.push(formDataActivity);
+            
+                const formDataIndex = formData.activities.findIndex((activity) => activity.id === formDataActivity.id);
+                if (formDataIndex !== -1) {
+                    formData.activities.splice(formDataIndex, 1);
+                }
+            }
+        };
+
+        profileData.activities.forEach((profileActivity) => {
+            formData2.activities.push({ id: profileActivity.id, crudType: 'DELETE' });
+        });
+
+        //certifications
+        while(formData.certifications.length!==0){
+            const formDataCertification = formData.certifications[0];
+            const matchingProfileCertification = profileData.certifications.find((profileCertification) => profileCertification.id === formDataCertification.id);
+        
+            if (matchingProfileCertification) {
+                if (JSON.stringify(formDataCertification) !== JSON.stringify(matchingProfileCertification)) {
+                    formDataCertification.crudType = 'UPDATE';
+                    formData2.certifications.push(formDataCertification);
+                }
+                
+                const formDataIndex = formData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+                const profileDataIndex = profileData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+
+                if (formDataIndex !== -1) {
+                    formData.certifications.splice(formDataIndex, 1);
+                }
+                if (profileDataIndex !== -1) {
+                    profileData.certifications.splice(profileDataIndex, 1);
+                }
+            } 
+            else {
+                formDataCertification.crudType = 'CREATE';
+                formData2.certifications.push(formDataCertification);
+            
+                const formDataIndex = formData.certifications.findIndex((certification) => certification.id === formDataCertification.id);
+                if (formDataIndex !== -1) {
+                    formData.certifications.splice(formDataIndex, 1);
+                }
+            }
+        };
+
+        profileData.certifications.forEach((profileCertification) => {
+            formData2.certifications.push({ id: profileCertification.id, crudType: 'DELETE' });
+        });
+
+        setSubmitPermit2(true);
     };
+
+    const submitFormData2 = () => {
+        API.put("/api/v1/profile", formData2)
+        .then(response =>{
+            console.log(response);
+            if(response.status==200){
+                alert("프로필 수정이 완료되었습니다.");
+                window.location.href = "/mypage/profileSetting";
+            }
+        })
+        .catch(error =>{
+            alert('프로필 수정이 실패했습니다:', error);
+        })
+    };
+
+    useEffect(()=>{
+        console.log(formData2);
+        if (submitPermit1&&submitPermit2){
+            uploadImageToS3();
+            submitFormData2();
+        }
+        if (!imageFileChanged&&submitPermit2){
+            submitFormData2();
+        }
+    },[submitPermit1,submitPermit2]);
+
+
 
     useEffect(()=>{
         if(newImageFile!=''){
@@ -600,7 +899,7 @@ export default function ProfileSetting(){
     useEffect(() => {
         fetchEnum();
         fetchProfile();
-        console.log(profileData);
+        fetchTechStacks();
     }, []);
 
     useEffect(() =>{
@@ -633,6 +932,14 @@ export default function ProfileSetting(){
                                 <MyPageMenu select={"프로필관리"} />
                             </SideList>
                             <Content>
+                                {showCalendar && (
+                                    <div className="calendar-modal">
+                                        <Calendar
+                                            onChange={(date) => handleCalendarChange(date)}
+                                            value={calendarDate} // 캘린더의 초기 날짜
+                                        />
+                                    </div>
+                                )}
                                 <div className="title dp-flex space-between">
                                     <h1>프로필 관리</h1>
                                     {
@@ -683,42 +990,58 @@ export default function ProfileSetting(){
                                 <div className="skill-box">
                                     <h3 className="sub-title">기술스택</h3>
                                     <ul className="skill-list">
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ps.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Pr.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ai.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/An.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton>
-                                                    <RemoveCircleOutlineIcon/>
-                                                </IconButton>
-                                            }
-                                        </li>
+                                        {edit ? <>
+                                            {profileData.techStacks.map((techStack) => (
+                                                <li className="skillWrap" key={techStack.techStackItem.id}>
+                                                    <div className="skill-img">
+                                                        <img src={techStack.techStackItem.imageUrl} alt={techStack.techStackItem.name} />
+                                                    </div>
+                                                    <div className="skill-name">
+                                                        <span>{techStack.techStackItem.name}</span>
+                                                    </div>
+                                                    <div className="skill-level">
+                                                        <i class={`${techStack.skillLevel >= 1 ? 'active' : ''}` }></i>
+                                                        <i class={`${techStack.skillLevel >= 2 ? 'active' : ''}`}></i>
+                                                        <i class={`${techStack.skillLevel >= 3 ? 'active' : ''}`}></i>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </>
+                                        :
+                                        <>
+                                            {formData.techStacks.map((techStack) => (
+                                                <li className="skillWrap" key={techStack.techStackItem.id}>
+                                                    <div className="skill-img">
+                                                        <img src={techStack.techStackItem.imageUrl} alt={techStack.techStackItem.name} />
+                                                        <IconButton onClick={() => handleTechStackRemove(techStack.id)}>
+                                                            <RemoveCircleOutlineIcon />
+                                                        </IconButton>
+                                                    </div>
+                                                    <div className="skill-name">
+                                                        <p>{techStack.techStackItem.name}</p>
+                                                    </div>
+                                                    <div className="skill-level">
+                                                        <i class={`${techStack.skillLevel >= 1 ? 'active' : ''}` } onClick={() => handleTechStackSkillLevel(techStack.id,1)}></i>
+                                                        <i class={`${techStack.skillLevel >= 2 ? 'active' : ''}`} onClick={() => handleTechStackSkillLevel(techStack.id,2)}></i>
+                                                        <i class={`${techStack.skillLevel >= 3 ? 'active' : ''}`} onClick={() => handleTechStackSkillLevel(techStack.id,3)}></i>
+                                                    </div>
+                                                </li>
+                                            ))}
+                                        </>
+                                        }
                                         {
                                             edit ? <></> :
                                             <li className="add-skill">
-                                                <IconButton>
+                                                <IconButton onClick={handleOpenTechStackModal}>
                                                     <AddIcon />
                                                 </IconButton>
+                                                {isTechStackModalOpen && (
+                                                    <TechStackModal
+                                                        techStackData={techStackData.techStackItems} // 사용 가능한 기술 목록
+                                                        onTechStackSelect={handleTechStackSelect} // 모달에서 기술 선택 시 호출될 콜백 함수
+                                                        onClose={handleCloseTechStackModal} // 모달 닫기
+                                                    />
+                                                )}
                                             </li>
                                         }
                                     </ul>
@@ -760,7 +1083,7 @@ export default function ProfileSetting(){
                                             <h4>성별</h4>
                                             {
                                                 edit ?
-                                                <p>{profileData.basicProfile.gender}</p>
+                                                <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label}</p>
                                                 :
                                                 <div className="radio-wrap">
                                                     <FormControl>
@@ -773,8 +1096,8 @@ export default function ProfileSetting(){
                                                             onChange={(e) => handleRadioInputChange("basicProfile.gender", e.target.value)}
                                                         >
                                                         <div id="basicProfile.gender">
-                                                            <FormControlLabel id="basicProfile.gender" value="남성" control={<Radio  />} label="남성" checked={formData.basicProfile.gender==="남성"}/>
-                                                            <FormControlLabel id="basicProfile.gender" value="여성" control={<Radio  />} label="여성" checked={formData.basicProfile.gender==="여성"}/>
+                                                            <FormControlLabel id="basicProfile.gender" value="MALE" control={<Radio  />} label="남성" checked={formData.basicProfile.gender==="MALE"}/>
+                                                            <FormControlLabel id="basicProfile.gender" value="FEMALE" control={<Radio  />} label="여성" checked={formData.basicProfile.gender==="FEMALE"}/>
                                                         </div>
                                                         </RadioGroup>
                                                     </FormControl>
@@ -804,13 +1127,13 @@ export default function ProfileSetting(){
                                             <h4>직업</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.job}</p>:
+                                                    <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label}</p>:
                                                     <div className="input-wrap">
                                                         <Select
                                                             options={jobs}
                                                             value={jobs.find(option => option.value === jobs.jobs)}
-                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.label } })}
-                                                            placeholder="선택"
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.job', value: selectedOption.value } })}
+                                                            placeholder={jobs.find(option => option.value === formData.basicProfile.job)?.label}
                                                         />
                                                     </div>
                                                 }
@@ -819,13 +1142,13 @@ export default function ProfileSetting(){
                                             <h4>최종학력</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.education}</p>:
+                                                    <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label}</p>:
                                                     <div className="birth-wrap">
                                                         <Select
                                                             options={educations}
                                                             value={educations.find(option => option.value === educations.educations)}
-                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.label } })}
-                                                            placeholder="선택"
+                                                            onChange={(selectedOption) => handleInputChange({ target: { id: 'basicProfile.education', value: selectedOption.value } })}
+                                                            placeholder={educations.find(option => option.value === formData.basicProfile.education)?.label}
                                                         />
                                                     </div>
                                                 }
@@ -868,14 +1191,6 @@ export default function ProfileSetting(){
                                                 </h4>
                                             }  
                                         </li>
-                                        {showCalendar && (
-                                            <div className="calendar-modal">
-                                                <Calendar
-                                                    onChange={(date) => handleCalendarChange(date)}
-                                                    value={calendarDate} // 캘린더의 초기 날짜
-                                                />
-                                            </div>
-                                        )}
                                         <li className="dp-flex">
                                             <h4>카카오아이디</h4>
                                                 {
@@ -930,14 +1245,6 @@ export default function ProfileSetting(){
                                                         <span>{activity.startDate} ~ {activity.endDate}</span>
                                                         <h4>{activity.subject}</h4>
                                                         <p>{activity.detail}</p>
-                                                        <div className="tag-wrap">
-                                                            {/* {activity.tags.map((tag, tagIndex) => (
-                                                                <h5 key={tagIndex}>{tag}</h5>
-                                                            ))} */}
-                                                            <h5>Spring Boot</h5>
-                                                            <h5>Spring Data JPA</h5>
-                                                            <h5>MVC</h5>
-                                                        </div>
                                                     </li>
                                                 ))}
                                             </>
@@ -954,7 +1261,6 @@ export default function ProfileSetting(){
                                                                 setCalendarUsage(`activities[${index}].startDate`);
                                                                 setCalendarDate(formData.activities[index].startDate)
                                                             }}
-                                                            onChange={(e) => handleActivityInputChange(e, index)}
                                                         >
                                                         {activity.startDate}
                                                         </span>
@@ -968,7 +1274,6 @@ export default function ProfileSetting(){
                                                                 setCalendarUsage(`activities[${index}].endDate`);
                                                                 setCalendarDate(formData.activities[index].endDate)
                                                             }}
-                                                            onChange={(e) => handleActivityInputChange(e, index)}
                                                         >
                                                         {activity.endDate}
                                                         </span>
@@ -986,14 +1291,6 @@ export default function ProfileSetting(){
                                                                 activity.detail
                                                             )}
                                                         </p>
-                                                        <div className="tag-wrap">
-                                                            {/* {activity.tags.map((tag, tagIndex) => (
-                                                                <h5 key={tagIndex}>{tag}</h5>
-                                                            ))} */}
-                                                            <h5>Spring Boot</h5>
-                                                            <h5>Spring Data JPA</h5>
-                                                            <h5>MVC</h5>
-                                                        </div>
                                                         <IconButton onClick={() => handleRemoveActivity(index)}>
                                                             <RemoveCircleOutlineIcon />
                                                         </IconButton>
@@ -1089,27 +1386,27 @@ export default function ProfileSetting(){
                                     </div>
                                     <div className="review-wrap">
                                         {
-                                            edit ? 
-                                            <div className="chart-box">
-                                            <Radar
-                                            data={data}
-                                            options={options}
-                                            />
-                                            </div>
-                                            :<></>
+                                            edit ? (
+                                                <div className="chart-box">
+                                                    <Radar
+                                                    data={evaluationData}
+                                                    options={options}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
                                         }
                                         {
-                                            edit ?
-                                            <div className="review-list">
-                                                <h3>성실하고 책임감이 커서 활...</h3>
-                                                <h3>시간을 잘 지켜요</h3>
-                                                <h3>리더십이 뛰어나요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                                <h3>소통이 잘돼요</h3>
-                                            </div>:
-                                            <></>
+                                            edit ? (
+                                                <div className="review-list">
+                                                    {profileData.evaluations.map((evaluation, index) => (
+                                                        <h3 key={index}>{evaluation.comment}</h3>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
                                         }
                                     </div>
                                 </div>
@@ -1264,29 +1561,64 @@ export const Content = styled(Box)`
         .skill-list{
             display: flex;
             align-items: center;
-            .skill{
-                border-radius: 100px;
-                border: 1px solid rgba(0,0,0,.1);
-                width: 7rem;
-                height: 7rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 1rem;
-                background-color: #fff;
-                box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
-                position: relative;
-
-                button{
-                    position: absolute;
-                    top: 0;
-                    right: 0;
+            .skillWrap{
+                .skill-img{
+                    border-radius: 100px;
+                    border: 1px solid rgba(0,0,0,.1);
+                    width: 7rem;
+                    height: 7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1rem;
                     background-color: #fff;
-                    padding: 0;
-                    svg{
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        color: #F30C0C;
+                    box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
+                    position: relative;
+                    img {
+                        max-width: 70%;
+                        max-height: 70%;
+                    }
+                    button{
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        background-color: #fff;
+                        padding: 0;
+                        svg{
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            color: #F30C0C;
+                        }
+                    }
+                }
+                .skill-name {
+                    color: #000000;
+                    font-size : 1.5rem;
+                    text-align: center;
+                    margin-right: 1rem;
+                    margin-top: 1rem;
+                    font-family: Arial, sans-serif;
+                    font-weight: bold;
+                    font-style: italic; 
+                }
+                .skill-level {
+                    width: 6rem; /* 세 개의 별을 담을 크기 */
+                    height: 2rem;
+                    display: flex;
+                    margin-top: 1rem;
+                    margin-left: 0.5rem;
+                    margin-right: 0.5rem;
+                    i {
+                        width: 1.8rem; 
+                        height: 1.7rem;
+                        margin-right: 0.3rem;
+                        background-image: url('/img/icon/star2.png');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center; 
+                    }
+                    i.active {
+                        background-image: url('/img/icon/star1.png');
                     }
                 }
             }
@@ -1302,6 +1634,7 @@ export const Content = styled(Box)`
                         height: 3rem;
                         color: #FF7300;
                     }
+                    margin-bottom : 5rem;
                 }
             }
         }
@@ -1345,12 +1678,6 @@ export const Content = styled(Box)`
                 align-items: center;
                 gap: 1rem;
             }
-            .phone-wrap{
-                width: 65%;
-                display: flex;
-                align-items: center;
-                gap: 1rem;
-            }
         }
     }
     .history-box{
@@ -1371,18 +1698,6 @@ export const Content = styled(Box)`
                 }
             }
         }
-        .calendar-modal {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            border: 1px solid #ccc;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-            z-index: 1000;
-            padding: 20px;
-            max-width: 400px;
-          }
         .activity-box{
             display: flex;
             align-items: center;
@@ -1502,6 +1817,21 @@ export const Content = styled(Box)`
             display: flex;
             align-items: center;
             justify-content: space-between;
+            .blur-background {
+                position: relative;
+                background-color: rgba(0, 0, 0, 0.5); /* 검정 반투명 바탕 */
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                filter: blur(5px); /* 블러 처리 */
+            }
+            .message {
+                color: white; /* 흰색 글자 */
+                font-size: 24px; /* 원하는 폰트 크기 */
+                text-align: center;
+            }
         }
         .chart-box{
             width: 40%;
@@ -1547,6 +1877,18 @@ export const Content = styled(Box)`
                 background-color: #FFEFE1;
             }
         }
+    }
+    .calendar-modal {
+        position: fixed;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        background-color: white;
+        border: 1px solid #ccc;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        z-index: 1000;
+        padding: 20px;
+        max-width: 400px;
     }
     @media ${() => theme.device.desktop} {
         width: 100%;
