@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import styled from "@emotion/styled";
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Nav from "../../component/common/Nav";
@@ -91,18 +91,48 @@ export default function Profile({handleClick}){
          },
     })
 
+    const img="/img/profile/profile.png";
+    const { nickname } = useParams();
 
+    const [genders, setGenders] = useState([]);
+
+    const [jobs, setJobs] = useState([]);
+
+    const [educations, setEducations] = useState([]);
+
+    
+    //fetched data
+    const [profileData, setProfileData] = useState({
+        basicProfile:[],
+        techStacks:[],
+        activities:[],
+        certifications:[],
+        evaluations:[]
+    });
 
 
     const [edit, setEdit] = React.useState(true);
+
     const [chatBoxOpen,setChatboxOpen]=useState(false);
 
     const handleChange = () => {
         setEdit(!edit);
     };
 
-    const img="/img/profile/profile.png";
-    const { nickname } = useParams();
+
+    //이미지
+    const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
+
+    useEffect(() =>{
+        fetchImage();
+    },[profileData.basicProfile.profileImage]);
+
+    const fetchImage = async () =>{
+        if(profileData.basicProfile.profileImage!=''){
+            setImageFileURL(profileData.basicProfile.profileImage);
+        }
+    };
+
     const toggleChatbox = () => {
 
 
@@ -120,6 +150,104 @@ export default function Profile({handleClick}){
             console.log('err', err)
         }).finally()
     };
+
+    const fetchEnum = async () => {
+        try {
+            const response = await API.get('/api/v1/member/signup/enums');
+            setGenders(response.data.gender.map(option => ({ value: option.name, label: option.label })));
+            setJobs(response.data.job.map(option => ({ value: option.name, label: option.label })));
+            setEducations(response.data.education.map(option => ({ value: option.name, label: option.label })));
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+
+    //프로필 정보 get
+    const fetchProfile = async () => {
+        try {
+            const response = await API.get('/api/v1/profile/'+nickname);
+            console.log(response);
+            setProfileData(prevData => ({
+                ...prevData,
+                ...response.data
+            }));
+
+        } catch (error) {
+            console.error('API 호출 오류:', error);
+        }
+    };
+
+    //평가
+    const [evaluationData,setevaluationData] = useState({
+        labels: ['창의성', '리더십', '성실함', '기술력', '커뮤니케이션'],
+        datasets: [
+            {
+                label: '',
+                data: [0, 0, 0, 0, 0],
+                backgroundColor: 'rgba(255, 115, 0, 0.2)',
+                borderColor: 'rgba(255, 115, 0, 1)',
+                borderWidth: 1,
+            },
+        ],
+    });
+
+    const updateEvaluationData = () =>{
+
+        const evaluations = profileData.evaluations;
+    
+        // 각 stat의 합을 계산
+        const totalStats = {
+            stat1: 0,
+            stat2: 0,
+            stat3: 0,
+            stat4: 0,
+            stat5: 0,
+        };
+
+        evaluations.forEach((evaluation) => {
+            totalStats.stat1 += evaluation.stat1;
+            totalStats.stat2 += evaluation.stat2;
+            totalStats.stat3 += evaluation.stat3;
+            totalStats.stat4 += evaluation.stat4;
+            totalStats.stat5 += evaluation.stat5;
+        });
+
+        // 각 stat의 평균 계산
+        const avgStats = {
+            stat1: totalStats.stat1 / evaluations.length,
+            stat2: totalStats.stat2 / evaluations.length,
+            stat3: totalStats.stat3 / evaluations.length,
+            stat4: totalStats.stat4 / evaluations.length,
+            stat5: totalStats.stat5 / evaluations.length,
+        };
+
+        // evaluationData 업데이트
+        setevaluationData((prevData) => ({
+        ...prevData,
+        datasets: [
+            {
+            ...prevData.datasets[0],
+            data: [
+                avgStats.stat1,
+                avgStats.stat2,
+                avgStats.stat3,
+                avgStats.stat4,
+                avgStats.stat5,
+            ],
+            },
+        ],
+        }));
+    }
+
+    //useEffect
+    useEffect(()=>{
+        fetchEnum();
+        fetchProfile();
+    },[]);
+
+    useEffect(()=>{
+        updateEvaluationData();
+    },[profileData.evaluations]);
 
 
     return(
@@ -146,7 +274,7 @@ export default function Profile({handleClick}){
                                 <div className="profile-box">
                                     
                                     <div className="profile-img">
-                                        <img src="/img/profile/profile.png" alt="프로필 이미지" />
+                                        <img src={imageFileURL} alt="프로필 이미지" />
                                         {
                                             edit? <></> :
                                             <IconButton><AddCircleIcon/></IconButton>
@@ -161,11 +289,10 @@ export default function Profile({handleClick}){
                                     }
                                     {
                                         edit ?
-                                        <div className="introduce-box">
-                                            <h2>소개글</h2>
+                                        <div className="profileIntro">
+                                            <h2>자기소개</h2>
                                             <p>
-                                            안녕하세요. 소개글입니다.<br/>
-                                            안녕하세요. 소개글입니다.
+                                                {profileData.basicProfile.profileIntro}
                                             </p>
                                         </div>
                                         : 
@@ -179,178 +306,90 @@ export default function Profile({handleClick}){
                                 </div>
                                 <div className="review-box">
                                     <h3 className="sub-title">팀원평가</h3>
-                                    <div className="check-box">
-                                        <h4>공개범위설정</h4>
-                                        <FormControl>
-                                            <RadioGroup
-                                                row
-                                                aria-labelledby="demo-row-radio-buttons-group-label"
-                                                name="row-radio-buttons-group"
-                                            >
-                                                {
-                                                    edit ?
-                                                    <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
-                                                    </>
-                                                    :
-                                                    <>
-                                                    <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                    <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
-                                                    <FormControlLabel value="other" control={<Radio />} label="비공개" />
-                                                    </>
-                                                }
-                                            </RadioGroup>
-                                        </FormControl>
-                                    </div>
                                     <div className="review-wrap">
                                         {
-                                            edit ? 
-                                            <div className="chart-box">
-                                            <Radar
-                                            data={data}
-                                            options={options}
-                                            />
-                                            </div>
-                                            :<></>
+                                            edit ? (
+                                                <div className="chart-box">
+                                                    <Radar
+                                                    data={evaluationData}
+                                                    options={options}
+                                                    />
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
                                         }
-                                        <div className="review-list">
-                                            <h3>성실하고 책임감이 커서 활...</h3>
-                                            <h3>시간을 잘 지켜요</h3>
-                                            <h3>리더십이 뛰어나요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                            <h3>소통이 잘돼요</h3>
-                                        </div>
+                                        {
+                                            edit ? (
+                                                <div className="review-list">
+                                                    {profileData.evaluations.map((evaluation, index) => (
+                                                        <h3 key={index}>{evaluation.comment}</h3>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <></>
+                                            )
+                                        }
                                     </div>
                                 </div>
                                 <div className="skill-box">
                                     <h3 className="sub-title">기술스택</h3>
                                     <ul className="skill-list">
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ps.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Pr.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/Ai.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li className="skill">
-                                            <img src="/img/profile/icon/An.svg"/>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        {
-                                            edit ? <></> :
-                                            <li className="add-skill">
-                                                <IconButton>
-                                                    <AddIcon />
-                                                </IconButton>
+                                        {profileData.techStacks.map((techStack) => (
+                                            <li className="skillWrap" key={techStack.techStackItem.id}>
+                                                <div className="skill-img">
+                                                    <img src={techStack.techStackItem.imageUrl} alt={techStack.techStackItem.name} />
+                                                </div>
+                                                <div className="skill-name">
+                                                    <span>{techStack.techStackItem.name}</span>
+                                                </div>
+                                                <div className="skill-level">
+                                                    <i class={`${techStack.skillLevel >= 1 ? 'active' : ''}` }></i>
+                                                    <i class={`${techStack.skillLevel >= 2 ? 'active' : ''}`}></i>
+                                                    <i class={`${techStack.skillLevel >= 3 ? 'active' : ''}`}></i>
+                                                </div>
                                             </li>
-                                        }
+                                        ))}
                                     </ul>
                                 </div>
                                 <div className="info-box">
                                     <h3 className="sub-title">기본정보</h3>
                                     <ul className="info-list">
                                         <li className="dp-flex">
-                                            <h4>공개범위설정</h4>
-                                            <div className="radio-wrap">
-                                                <FormControl>
-                                                    <RadioGroup
-                                                        row
-                                                        aria-labelledby="demo-row-radio-buttons-group-label"
-                                                        name="row-radio-buttons-group"
-                                                        
-                                                    >
-                                                        {
-                                                            edit ?
-                                                            <>
-                                                                <FormControlLabel value="female" control={<Radio  />} label="전체공개" checked/>
-                                                                <FormControlLabel value="male" control={<Radio  />} label="팀원공개" disabled/>
-                                                                <FormControlLabel value="other" control={<Radio />} label="비공개" disabled/>
-                                                            </>
-                                                            :
-                                                            <>
-                                                                <FormControlLabel value="female" control={<Radio  />} label="전체공개" defaultChecked/>
-                                                                <FormControlLabel value="male" control={<Radio  />} label="팀원공개" />
-                                                                <FormControlLabel value="other" control={<Radio />} label="비공개" />
-                                                            </>
-                                                        }
-                                                    </RadioGroup>
-                                                </FormControl>
-                                            </div>
+                                            <h4>성별</h4>
+                                            <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>생년월일</h4>
+                                            <p>{profileData.basicProfile.birth}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>직업</h4>
+                                            <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label}</p>        
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>최종학력</h4>
+                                            <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>입학날짜</h4>
+                                            <p>{profileData.basicProfile.admissionDate}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>졸업날짜</h4>
+                                            <p>{profileData.basicProfile.graduationDate}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>카카오아이디</h4>
+                                            <p>{profileData.basicProfile.kakaoId}</p>
+                                        </li>
+                                        <li className="dp-flex">
+                                            <h4>연락처(이메일)</h4>
+                                            <p>{profileData.basicProfile.contactEmail}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>거주지</h4>
-                                            {
-                                                edit ?
-                                                <p>거주지</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="거주지"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>대학</h4>
-                                            {
-                                                edit ?
-                                                <p>대학</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="대학"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>이메일</h4>
-                                            {
-                                                edit ?
-                                                <p>이메일</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="이메일"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>나이</h4>
-                                            {
-                                                edit ?
-                                                <p>나이</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="나이"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>학년</h4>
-                                            {
-                                                edit ?
-                                                <p>학년</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="학년"/>
-                                            }
-                                        </li>
-                                        <li className="dp-flex">
-                                            <h4>전화번호</h4>
-                                            {
-                                                edit ?
-                                                <p>전화번호</p>
-                                                :
-                                                <StyledTextField variant="outlined" size="small" value="전화번호"/>
-                                            }
+                                            <p>{profileData.basicProfile.address}</p>
                                         </li>
                                     </ul>
                                 </div>
@@ -358,77 +397,26 @@ export default function Profile({handleClick}){
                                     <h3 className="sub-title">수상이력 및 활동내역</h3>
                                     <div className="dp-flex space-between add-title">
                                         <h4>완료활동</h4>
-                                        {
-                                            edit ? <></>
-                                            :
-                                            <Button>
-                                                추가하기<AddIcon />
-                                            </Button>
-                                        }
                                     </div>
                                     <ul className="activity-box">
-                                        <li>
-                                            <span>2023.05</span>
-                                            <h4>게시판 프로젝트</h4>
-                                            <p>
-                                            스프링 게시판<br/>
-                                            Spring JPA , MVC 학습 및 활용
-                                            </p>
-                                            <div className="tag-wrap">
-                                                <h5>Spring Boot</h5>
-                                                <h5>Spring Data JPA</h5>
-                                                <h5>MVC</h5>
-                                            </div>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li>
-                                            <span>2023.05</span>
-                                            <h4>게시판 프로젝트</h4>
-                                            <p>
-                                            스프링 게시판<br/>
-                                            Spring JPA , MVC 학습 및 활용
-                                            </p>
-                                            <div className="tag-wrap">
-                                                <h5>Spring Boot</h5>
-                                                <h5>Spring Data JPA</h5>
-                                                <h5>MVC</h5>
-                                            </div>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
+                                        {profileData.activities.map((activity, index) => (
+                                            <li key={index}>
+                                                <span>{activity.startDate} ~ {activity.endDate}</span>
+                                                <h4>{activity.subject}</h4>
+                                                <p>{activity.detail}</p>
+                                            </li>
+                                        ))}
                                     </ul>
                                     <div className="dp-flex space-between add-title">
-                                        <h4>자격증</h4>
-                                        {
-                                            edit ? <></>
-                                            :
-                                            <Button>
-                                                추가하기<AddIcon />
-                                            </Button>
-                                        }
+                                        <h4>자격증/수상이력</h4>
                                     </div>
                                     <ul className="certificate-box">
-                                        <li>
-                                            <span>2023. 05</span>
-                                            <h4>정보처리기사 (Engineer Information Processing)</h4>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
-                                        <li>
-                                            <span>2023. 05</span>
-                                            <h4>제 9회 한양대학교 프로그래밍 경시대회 HCPC (Advanced division) 우수상 3등</h4>
-                                            {
-                                                edit? <></> :
-                                                <IconButton><RemoveCircleOutlineIcon/></IconButton>
-                                            }
-                                        </li>
+                                        {profileData.certifications.map((certification, index) => (
+                                            <li key={index}>
+                                                <span>{certification.gainDate}</span>
+                                                <h4>{certification.name}</h4>
+                                            </li>
+                                        ))}
                                     </ul>
                                 </div>
                                 {
@@ -598,7 +586,7 @@ const Content = styled(Box)`
                 line-height: 150%;
             }
         }
-        .introduce-box{
+        .profileIntro{
             width: 100%;
             p{
                 border: 1px solid rgba(0,0,0,.1);
@@ -617,29 +605,64 @@ const Content = styled(Box)`
         .skill-list{
             display: flex;
             align-items: center;
-            .skill{
-                border-radius: 100px;
-                border: 1px solid rgba(0,0,0,.1);
-                width: 7rem;
-                height: 7rem;
-                display: flex;
-                align-items: center;
-                justify-content: center;
-                margin-right: 1rem;
-                background-color: #fff;
-                box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
-                position: relative;
-
-                button{
-                    position: absolute;
-                    top: 0;
-                    right: 0;
+            .skillWrap{
+                .skill-img{
+                    border-radius: 100px;
+                    border: 1px solid rgba(0,0,0,.1);
+                    width: 7rem;
+                    height: 7rem;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    margin-right: 1rem;
                     background-color: #fff;
-                    padding: 0;
-                    svg{
-                        width: 2.5rem;
-                        height: 2.5rem;
-                        color: #F30C0C;
+                    box-shadow: 0 0 5px 2px rgba(0,0,0,.03);
+                    position: relative;
+                    img {
+                        max-width: 70%;
+                        max-height: 70%;
+                    }
+                    button{
+                        position: absolute;
+                        top: 0;
+                        right: 0;
+                        background-color: #fff;
+                        padding: 0;
+                        svg{
+                            width: 2.5rem;
+                            height: 2.5rem;
+                            color: #F30C0C;
+                        }
+                    }
+                }
+                .skill-name {
+                    color: #000000;
+                    font-size : 1.5rem;
+                    text-align: center;
+                    margin-right: 1rem;
+                    margin-top: 1rem;
+                    font-family: Arial, sans-serif;
+                    font-weight: bold;
+                    font-style: italic; 
+                }
+                .skill-level {
+                    width: 6rem; /* 세 개의 별을 담을 크기 */
+                    height: 2rem;
+                    display: flex;
+                    margin-top: 1rem;
+                    margin-left: 0.5rem;
+                    margin-right: 0.5rem;
+                    i {
+                        width: 1.8rem; 
+                        height: 1.7rem;
+                        margin-right: 0.3rem;
+                        background-image: url('/img/icon/star2.png');
+                        background-size: contain;
+                        background-repeat: no-repeat;
+                        background-position: center; 
+                    }
+                    i.active {
+                        background-image: url('/img/icon/star1.png');
                     }
                 }
             }
@@ -890,7 +913,7 @@ const Content = styled(Box)`
         .profile-img{
             width: 70%;
         }
-        .introduce-box{
+        .profileIntro{
             margin-top: 2rem;
             width: 100%;
         }
