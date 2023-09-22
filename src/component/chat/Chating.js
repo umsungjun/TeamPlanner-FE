@@ -31,8 +31,6 @@ const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function Chating({chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
 
-
-
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -50,9 +48,6 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
         setAdd(!add);
     };
 
-
-
-
     //  //소켓연결
     //  useEffect(() => {
     //     // Initialize the STOMP client and connect when component mounts
@@ -66,29 +61,91 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
     //     }
     //     };
     // }, []);
-
     // 소켓 연결 설정 및 정리
-    useEffect(() => {
-        let socket;
-        let stompClient;
+    // useEffect(() => {
+    //     // Clean up existing subscriptions
+    //     if (client.current) {
+    //         client.current.disconnect();
+    //     }
+    
+    //     // Set up a new socket connection
+    //     let socket = new SockJS(API_BASE_URL+'/ws/chat');
+    //     let headers={};
+    //     const cookies = document.cookie.split(";");
 
-        // 함수 내부에서 소켓 연결을 설정
-        const setupSocket = () => {
-            socket = new SockJS(API_BASE_URL+'/ws/chat');
-            client.current = Stomp.over(socket);
-            client.current.connect({}, onConnected, onError);
-        };
+    //                 let accessToken = null;
 
-        // 컴포넌트 마운트 시 소켓 연결 설정
-        setupSocket();
+    //                 for (const cookie of cookies) {
+    //                     const [name, value] = cookie.trim().split("=");
+    //                     if (name === "accessToken") {
+    //                         accessToken = value;
+    //                     break;
+    //                     }
+    //                 }
 
-        return () => {
-            // 컴포넌트 언마운트 시 소켓 연결 해제
-            if (client.current) {
-                client.current.disconnect();
-            }
-        };
-    }, []);
+    //     console.log("testsetsets",chattingRoomId);
+
+    //     headers = {
+    //             Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+    //             chatRoomNo: `${chattingRoomId}`
+    //     };
+        
+    //     if (chattingRoomId) {
+    //         client.current = Stomp.over(socket);
+    //         client.current.connect(headers, onConnected, onError);
+    //     }
+    
+    //     return () => {
+    //         // Clean up subscriptions when the component unmounts
+    //         if (client.current) {
+    //             client.current.disconnect();
+    //         }
+    //     };
+    // }, [chattingRoomId]); // Make sure to include roomId as a dependency
+
+    // 함수로 소켓 연결 설정과 정리를 분리
+    // 함수로 소켓 연결 설정과 정리를 분리
+const connectToWebSocket = (roomId, onConnectedCallback) => {
+    // Clean up existing subscriptions
+    if (client.current) {
+        client.current.disconnect();
+    }
+
+    // Set up a new socket connection
+    let socket = new SockJS(API_BASE_URL + '/ws/chat');
+    let headers = {};
+    const cookies = document.cookie.split(";");
+
+    let accessToken = null;
+
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "accessToken") {
+            accessToken = value;
+            break;
+        }
+    }
+
+    headers = {
+        Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+        chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
+    };
+
+    if (roomId) {
+        client.current = Stomp.over(socket);
+        client.current.connect(headers, () => {
+            onConnectedCallback(roomId); // Execute the callback after connection
+        }, onError);
+    }
+   
+    return () => {
+        // Clean up subscriptions when the component unmounts
+        if (client.current) {
+            client.current.disconnect();
+        }
+    };
+};
+
 
     function onConnected() {
         console.log("onConnected")
@@ -119,17 +176,18 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
             window.alert("채팅 할 유저를 선택해주세요");
             return;
         }
-        console.log(user,chattingRoomId)
         if (!chattingRoomId) {
         API.post("/api/v1/chat/room", {
             targetNickname: user
         }).then(res => {
             console.log('방 생성 응답값 : ', res);
             setRoomId(res.data);
-            createChatRoomthenSend(res.data);
+            connectToWebSocket(res.data, createChatRoomthenSend);
+            // createChatRoomthenSend(res.data);
         })
         } else {
-            isPresentChatRoomthenSend();
+            connectToWebSocket(chattingRoomId,isPresentChatRoomthenSend);
+            // isPresentChatRoomthenSend();
         }
     }
 
@@ -141,19 +199,22 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
 
         const createChatRoomthenSend = (roomId) => {
             console.log("처음 채팅방을 생성 후 메세지를 전송");
-            client.current.publish({
-            // destination: `/queue/${roomId}`,
-            destination: `/pub/chattings/rooms/${roomId}`,
-            body: `${JSON.stringify({
-                content: message,
-                // sender: localStorage.getItem("userInfo").nickname,
-                senderId: userInfo.memberId,
-                readCount: 2,
-                chattingRoomId: roomId
-            })}`,
-            headers: { priority: '9' },
-            });
-          setMessage("");
+
+            if (roomId) {
+                client.current.publish({
+                    // destination: `/queue/${roomId}`,
+                    destination: `/pub/chattings/rooms/${roomId}`,
+                    body: `${JSON.stringify({
+                        content: message,
+                        // sender: localStorage.getItem("userInfo").nickname,
+                        senderId: userInfo.memberId,
+                        readCount: 1,
+                        chattingRoomId: roomId
+                    })}`,
+                    headers: { priority: '9' },
+                    });
+                    setMessage("");
+            }
         }
     
         /*
@@ -169,7 +230,7 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
               content: message,
               // sender: localStorage.getItem("userInfo").nickname,
               senderId: userInfo.memberId,
-              readCount: 2,
+              readCount: 1,
               chattingRoomId: chattingRoomId
             })}`,
             headers: { priority: '9' },
@@ -205,18 +266,18 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                         icon={<NotificationsOffIcon />}
                         checkedIcon={<NotificationsIcon />}
                         />
-                        <IconButton onClick={handle}><CloseIcon/></IconButton>
+                        <IconButton onClick={() => {
+                            handle()
+                            handle2(chattingRoomId)
+                        }
+                            }><CloseIcon/></IconButton>
                     </li>
                 </ul>
                 <ChatingList ref={scrollRef}>
-                  
-                    
-
-                
-
+                {/* {console.log("chatList:", chatList)}  */}
                 {chatList && chatList.length > 0 ? (
                         chatList.map((message, index) => {
-
+                        
                         // 메시지의 발신자 ID와 사용자 ID 비교
                         const isUserMessage = message.senderId === memberId;
                         const currentMessageTime = message.createdTime;
@@ -263,9 +324,9 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
                                                 </p>
                                                 <span>{message.createdTime}</span>
                                                 <span>{message.createdDate}</span>
-                                                <span style={{ color: message.readCount === 0 ? 'initial' : 'red' }}>
+                                                {/* <span style={{ color: message.readCount === 0 ? 'initial' : 'red' }}>
                                                         {message.readCount === 0 ? '' : '읽지 않음'}
-                                                </span>
+                                                </span> */}
                                             </div>
                                         </div>
                                     </ReceiveMsg>
@@ -421,7 +482,7 @@ const Mobile = styled(Box)`
 `;
 
 
-const ChatingWrap = styled(Box)`
+export const ChatingWrap = styled(Box)`
     height: 100%;
     .user-title{
         display: flex;
@@ -468,7 +529,7 @@ const UserImg = styled(Box)`
     }
 `;
 
-const ChatingList = styled(Box)`
+export const ChatingList = styled(Box)`
     display: flex;
     align-items: center;
     flex-direction: column;

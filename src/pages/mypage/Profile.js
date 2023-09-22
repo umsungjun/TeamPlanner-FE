@@ -250,6 +250,27 @@ export default function Profile({handleClick}){
     },[profileData.evaluations]);
 
 
+
+
+    const [showButton, setShowButton] = useState(false);
+
+
+    useEffect(() => {
+        // 로컬 스토리지에서 userInfo 가져오기
+        const userInfoStr = localStorage.getItem('userInfo');
+    
+        if (userInfoStr) {
+          // userInfo 문자열을 파싱하여 객체로 변환
+          const userInfo = JSON.parse(userInfoStr);
+    
+          // userInfo의 nickname과 userParam 비교
+          if (userInfo.nickname !== nickname) {
+            setShowButton(true);
+          }
+        }
+      }, [nickname]);
+
+
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -283,7 +304,7 @@ export default function Profile({handleClick}){
                                     {
                                         edit ? 
                                         <div className="profile-btn-wrap">
-                                            <SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>
+                                            {showButton && (<SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>) }
                                         </div>
                                         : <></>
                                     }
@@ -531,10 +552,11 @@ const Content = styled(Box)`
         align-items: center;
         margin-bottom: 5rem;
         .profile-btn-wrap{
+
             display: flex;
             align-items: center;
             justify-content: space-between;
-            width: 30%;
+            width: 50%;
             button{
                 width: 49%;
             }
