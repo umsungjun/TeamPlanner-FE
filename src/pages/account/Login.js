@@ -65,7 +65,9 @@ export default function Login() {
             API.get("/api/v1/member/info").then(resp => {
                 localStorage.setItem("userInfo", JSON.stringify({...resp.data, ...resp1.data}))
                 setUserInfo({...resp.data, ...resp1.data})
-                navigate(redirectUrl);
+                // navigate(redirectUrl)
+                // App.js에서 dependencyArray에 초기 렌더링때 로그인 여부를 확인하기 때문에 로그인 시에 href를 통해 redirectUrl로 이동
+                window.location.href = redirectUrl;
             });
         })
         .catch (err => {
