@@ -725,7 +725,7 @@ export default function ProfileSetting(){
         if(profileData.basicProfile.profileImage!=''){
             setImageFileURL(profileData.basicProfile.profileImage);
         }
-    }
+    };
 
     const handleSubmit = () => {
         setEdit(!edit);
