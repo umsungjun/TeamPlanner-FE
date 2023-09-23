@@ -59,6 +59,7 @@ export default function ChatBox({handleClick, open}){
     const [subscribeState,setSubscribeState]=useState(false);
     const client = useRef(null); // Use a ref to hold the client instance
     const [tmp, setTmp] = useState([]);
+    const [readCountNotification,setReadCountNotification]=useState(false);
 
 
     function onConnected() {
@@ -66,56 +67,61 @@ export default function ChatBox({handleClick, open}){
       }
     
       function onError() {
+        alert("채팅 에러!!.. 소켓 재연결 시도")
+        connectToWebSocket(() => {
+            subscribeSocket();
+        });
         console.log("onError")
     }
 
 
 
-    // 함수로 소켓 연결 설정과 정리를 분리
-    const connectToWebSocket = (onConnectedCallback) => {
-        // Clean up existing subscriptions
+   // 함수로 소켓 연결 설정과 정리를 분리
+   const connectToWebSocket = (onConnectedCallback) => {
+    // Clean up existing subscriptions
+    if (client && client.connected) {
+        // If connected, just execute the callback and return
+        onConnectedCallback(roomId);
+        return;
+    }
+    // Set up a new socket connection
+    let socket = new SockJS(API_BASE_URL + '/ws/chat');
+    let headers = {};
+    const cookies = document.cookie.split(";");
+
+    let accessToken = null;
+
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "accessToken") {
+            accessToken = value;
+            break;
+        }
+    }
+
+    headers = {
+        Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+        chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
+    };
+
+    if(roomId){
+        client.current = Stomp.over(socket);
+        client.current.connect(headers, () => {
+            onConnectedCallback(roomId); // 소켓 연결 완료 후 콜백 실행
+        }, onError);
+
+    }
+        
+
+    return () => {
+        // Clean up subscriptions when the component unmounts
         if (client.current) {
             client.current.disconnect();
+
+            disconnectChatRoom(roomId);
         }
-
-        // Set up a new socket connection
-        let socket = new SockJS(API_BASE_URL + '/ws/chat');
-        let headers = {};
-        const cookies = document.cookie.split(";");
-
-        let accessToken = null;
-
-        for (const cookie of cookies) {
-            const [name, value] = cookie.trim().split("=");
-            if (name === "accessToken") {
-                accessToken = value;
-                break;
-            }
-        }
-
-        headers = {
-            Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
-            chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
-        };
-
-        if(roomId){
-            client.current = Stomp.over(socket);
-            client.current.connect(headers, () => {
-                onConnectedCallback(roomId); // 소켓 연결 완료 후 콜백 실행
-            }, onError);
-  
-        }
-            
-
-        return () => {
-            // Clean up subscriptions when the component unmounts
-            if (client.current) {
-                client.current.disconnect();
-
-                disconnectChatRoom(roomId);
-            }
-        };
     };
+};
 
 
     const disconnectChatRoom = (roomId) => {
@@ -182,14 +188,16 @@ export default function ChatBox({handleClick, open}){
             API.get(`/api/v1/chat/room/${roomId}`)
                 .then(res => {
                     console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와", res.data);
-                    setChatList(res.data.chattings);
                     
                     // 여기에서 채팅방 정보를 성공적으로 가져왔으므로
                     // 소켓을 구독할 수 있습니다.
-
+                   
                     connectToWebSocket(() => {
                         subscribeSocket();
                     });
+                    setChatList(res.data.chattings);
+                    
+                   
                 })
                 .catch(error => {
                     console.error("채팅방 정보를 가져오는 데 실패했습니다:", error);
@@ -219,8 +227,18 @@ export default function ChatBox({handleClick, open}){
         
         if(!newChat.content){
             console.log("상대방이 내 채팅방에 입장했어요!!",newChat)
-            fetchChatRoomList();
-        }else{
+            API.get(`/api/v1/chat/room/${roomId}`)
+                .then(res => {
+                    console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와", res.data);
+                    setChatList(res.data.chattings);
+                    
+                   
+                })
+                .catch(error => {
+                    console.error("채팅방 정보를 가져오는 데 실패했습니다:", error);
+                });
+        }
+        else{
             console.log("구독하신 topic 에서 새로운 채팅이 전달되었어요!",newChat)
             setChatList((prevChatList) => {
                 return [...prevChatList, newChat]; // 기존 채팅 리스트에 추가

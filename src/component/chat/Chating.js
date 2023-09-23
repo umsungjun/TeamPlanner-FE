@@ -107,10 +107,11 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
     // 함수로 소켓 연결 설정과 정리를 분리
 const connectToWebSocket = (roomId, onConnectedCallback) => {
     // Clean up existing subscriptions
-    if (client.current) {
-        client.current.disconnect();
+    if (client && client.connected) {
+        // If connected, just execute the callback and return
+        onConnectedCallback(roomId);
+        return;
     }
-
     // Set up a new socket connection
     let socket = new SockJS(API_BASE_URL + '/ws/chat');
     let headers = {};
@@ -152,6 +153,7 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
       }
     
       function onError() {
+        alert("채팅 에러!!.. 소켓 재연결 시도")
         console.log("onError")
     }
 
@@ -176,6 +178,7 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
             window.alert("채팅 할 유저를 선택해주세요");
             return;
         }
+
         if (!chattingRoomId) {
         API.post("/api/v1/chat/room", {
             targetNickname: user
