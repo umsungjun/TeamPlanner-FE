@@ -193,7 +193,7 @@ export default function Nav(){
                             >
                                 <StyledMenuItem onClick={handleClose}>
                                 <Link to="/mypage/profileSetting">
-                                        프로필 보기
+                                        마이페이지
                                     </Link>
                                 </StyledMenuItem>
                                 <StyledMenuItem onClick={handleClose}>
