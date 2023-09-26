@@ -105,9 +105,11 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
 
     // 함수로 소켓 연결 설정과 정리를 분리
     // 함수로 소켓 연결 설정과 정리를 분리
+const client2 = useRef(null); // Use a ref to hold the client instance
+
 const connectToWebSocket = (roomId, onConnectedCallback) => {
     // Clean up existing subscriptions
-    if (client && client.connected) {
+    if (client && client2.connected) {
         // If connected, just execute the callback and return
         onConnectedCallback(roomId);
         return;
@@ -133,16 +135,16 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
     };
 
     if (roomId) {
-        client.current = Stomp.over(socket);
-        client.current.connect(headers, () => {
+        client2.current = Stomp.over(socket);
+        client2.current.connect(headers, () => {
             onConnectedCallback(roomId); // Execute the callback after connection
         }, onError);
     }
    
     return () => {
         // Clean up subscriptions when the component unmounts
-        if (client.current) {
-            client.current.disconnect();
+        if (client2.current) {
+            client2.current.disconnect();
         }
     };
 };
@@ -204,7 +206,7 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
         const createChatRoomthenSend = (roomId) => {
             console.log("처음 채팅방을 생성 후 메세지를 전송");
             if (roomId) {
-                client.current.publish({
+                client2.current.publish({
                     // destination: `/queue/${roomId}`,
                     destination: `/pub/chattings/rooms/${roomId}`,
                     body: `${JSON.stringify({
