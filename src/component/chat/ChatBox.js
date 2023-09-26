@@ -138,47 +138,6 @@ export default function ChatBox({handleClick, open}){
             console.error("API Error", error);
           });
       };
-
-    // // 소켓 연결 설정 및 정리
-    // useEffect(() => {
-    //     // Clean up existing subscriptions
-    //     if (client.current) {
-    //         client.current.disconnect();
-    //     }
-    
-    //     // Set up a new socket connection
-    //     let socket = new SockJS(API_BASE_URL+'/ws/chat');
-    //     let headers={};
-    //     const cookies = document.cookie.split(";");
-
-    //                 let accessToken = null;
-
-    //                 for (const cookie of cookies) {
-    //                     const [name, value] = cookie.trim().split("=");
-    //                     if (name === "accessToken") {
-    //                         accessToken = value;
-    //                     break;
-    //                     }
-    //                 }
-
- 
-    //         headers = {
-    //             Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
-    //             chatRoomNo: 10
-    //         };
-      
-        
-
-    //     client.current = Stomp.over(socket);
-    //     client.current.connect(headers, onConnected, onError);
-    
-    //     return () => {
-    //         // Clean up subscriptions when the component unmounts
-    //         if (client.current) {
-    //             client.current.disconnect();
-    //         }
-    //     };
-    // }, []); // Make sure to include roomId as a dependency
     /*
     * 채팅방을 가져오는 api 
     */
@@ -314,91 +273,7 @@ export default function ChatBox({handleClick, open}){
         }
     }
 
-    
 
-    chatRoomList.map((item, key) => {
-        if(userInfo){
-            tabContArr.push(
-                {
-                    tabTitle:(
-                        <div className={activeIndex !== null && activeIndex === key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
-                            <MsgListBox 
-                            id={item.roomId} 
-                            none={true} 
-                            user={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
-                            lastMessageText={item.lastMessageText}
-                            lastMessageTime={item.lastMessageTime}
-                            profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
-                            />
-                        </div>
-                    ),
-                    tabCont:(
-                        <Chating
-                        client={client}
-                        handle={handleClick} 
-                        handle2={disconnectChatRoom} 
-                        chatList={chatList}
-                        user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
-                        memberId={userInfo.memberId}
-                        chattingRoomId={roomId}
-                        setRoomId={setRoomId}
-                        />
-                    )
-                }
-            )
-        }
-    })
-
-
-    useEffect(() => {
-        fetchChatRoomNumberList();
-    }, [chatList])  
-
-
-    // 이전 채팅방 ID를 기억하는 변수를 추가합니다.
-    let previousRoomId = null;
-
-
-    
-
-    // useEffect(() => {
-    //     // 현재 채팅방이 있는 경우에만 구독을 시도합니다.
-    //     let sameCheck = false;
-    //     if (roomId !== null) {
-    //         if (previousRoomId !== null) {
-    //             client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
-    //         }
-    //         // 현재 채팅방에 대한 구독을 설정합니다.
-    //         if (tmp) {
-    //             tmp.map((item) => {
-    //                 if (item.roomId === roomId) {
-    //                     sameCheck = true;
-    //                     console.log(tmp);
-    //                     return false;
-    //                 }
-    //             })
-    //         }
-    
-    //         if (!sameCheck) {
-    //             // 구독 시도하기 전에 fetchChatRoomList()를 호출합니다.
-    //             fetchChatRoomList()
-    //                 .then(() => {
-    //                     let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
-    //                     if (socket) {
-    //                         setTmp((tmp) => [...tmp, {roomId: roomId, socket: socket.id}])
-    //                     }
-    //                     // 이전 채팅방 ID를 업데이트합니다.
-    //                     previousRoomId = roomId;
-    //                 })
-    //                 .catch((error) => {
-    //                     console.error("fetchChatRoomList() 에러:", error);
-    //                 });
-    //         }
-    //     }
-    // }, [roomId]);
-    
-    
-    
     const subscribeSocket = () => {
         
         if (roomId) {
@@ -427,6 +302,50 @@ export default function ChatBox({handleClick, open}){
             }
         }
     }
+
+
+    chatRoomList.map((item, key) => {
+        if(userInfo){
+            tabContArr.push(
+                {
+                    tabTitle:(
+                        <div className={activeIndex !== null && activeIndex === key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
+                            <MsgListBox 
+                            id={item.roomId} 
+                            none={true} 
+                            user={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                            lastMessageText={item.lastMessageText}
+                            lastMessageTime={item.lastMessageTime}
+                            profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
+                            />
+                        </div>
+                    ),
+                    tabCont:(
+                        <Chating
+                        fetchChatRoomList={fetchChatRoomList}
+                        client={client}
+                        handle={handleClick} 
+                        handle2={disconnectChatRoom} 
+                        chatList={chatList}
+                        user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
+                        memberId={userInfo.memberId}
+                        chattingRoomId={roomId}
+                        setRoomId={setRoomId}
+                        />
+                    )
+                }
+            )
+        }
+    })
+
+
+    useEffect(() => {
+        fetchChatRoomNumberList();
+    }, [chatList])  
+
+
+    // 이전 채팅방 ID를 기억하는 변수를 추가합니다.
+    let previousRoomId = null;
     
     useEffect(() => {
         // 현재 채팅방이 있는 경우에만 fetchChatRoomList()를 호출합니다.
