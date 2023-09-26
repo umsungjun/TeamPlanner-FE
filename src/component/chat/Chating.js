@@ -105,57 +105,57 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
 
     // 함수로 소켓 연결 설정과 정리를 분리
     // 함수로 소켓 연결 설정과 정리를 분리
-// const connectToWebSocket = (roomId, onConnectedCallback) => {
-//     // Clean up existing subscriptions
-//     if (client && client.connected) {
-//         // If connected, just execute the callback and return
-//         onConnectedCallback(roomId);
-//         return;
-//     }
-//     // Set up a new socket connection
-//     let socket = new SockJS(API_BASE_URL + '/ws/chat');
-//     let headers = {};
-//     const cookies = document.cookie.split(";");
+const connectToWebSocket = (roomId, onConnectedCallback) => {
+    // Clean up existing subscriptions
+    if (client && client.connected) {
+        // If connected, just execute the callback and return
+        onConnectedCallback(roomId);
+        return;
+    }
+    // Set up a new socket connection
+    let socket = new SockJS(API_BASE_URL + '/ws/chat');
+    let headers = {};
+    const cookies = document.cookie.split(";");
 
-//     let accessToken = null;
+    let accessToken = null;
 
-//     for (const cookie of cookies) {
-//         const [name, value] = cookie.trim().split("=");
-//         if (name === "accessToken") {
-//             accessToken = value;
-//             break;
-//         }
-//     }
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "accessToken") {
+            accessToken = value;
+            break;
+        }
+    }
 
-//     headers = {
-//         Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
-//         chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
-//     };
+    headers = {
+        Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+        chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
+    };
 
-//     if (roomId) {
-//         client.current = Stomp.over(socket);
-//         client.current.connect(headers, () => {
-//             onConnectedCallback(roomId); // Execute the callback after connection
-//         }, onError);
-//     }
+    if (roomId) {
+        client.current = Stomp.over(socket);
+        client.current.connect(headers, () => {
+            onConnectedCallback(roomId); // Execute the callback after connection
+        }, onError);
+    }
    
-//     return () => {
-//         // Clean up subscriptions when the component unmounts
-//         if (client.current) {
-//             client.current.disconnect();
-//         }
-//     };
-// };
+    return () => {
+        // Clean up subscriptions when the component unmounts
+        if (client.current) {
+            client.current.disconnect();
+        }
+    };
+};
 
 
-    // function onConnected() {
-    //     console.log("onConnected")
-    //   }
+    function onConnected() {
+        console.log("onConnected")
+      }
     
-    //   function onError() {
-    //     alert("채팅 에러!!.. 소켓 재연결 시도")
-    //     console.log("onError")
-    // }
+      function onError() {
+        alert("채팅 에러!!.. 소켓 재연결 시도")
+        console.log("onError")
+    }
 
     const [message, setMessage] = useState("")
     // const client = useRef(null); // Use a ref to hold the client instance
@@ -169,7 +169,7 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
     
     // 채팅을 보낸다. 보낼 유저를 클릭해야 보내짐
     // -> 기존의 채팅방이 없으면 -> 채팅방 생성 
-    const sendMessageBtnHandler = () => {
+    const sendMessageBtnHandler = async() => {
         if(message===""){
             window.alert("채팅을 입력해주세요");
             return;
@@ -182,11 +182,12 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
         if (!chattingRoomId) {
         API.post("/api/v1/chat/room", {
             targetNickname: user
-        }).then(res => {
+        }).then(async res => {
             console.log('방 생성 응답값 : ', res);
-            setRoomId(res.data);
-            // connectToWebSocket(res.data, createChatRoomthenSend);
-            createChatRoomthenSend(res.data);
+            // connectToWebSocket(() => {
+            //     createChatRoomthenSend(res.data);
+            // });
+            connectToWebSocket(res.data, createChatRoomthenSend);
         })
         } else {
             // connectToWebSocket(chattingRoomId,isPresentChatRoomthenSend);
@@ -202,7 +203,6 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
 
         const createChatRoomthenSend = (roomId) => {
             console.log("처음 채팅방을 생성 후 메세지를 전송");
-
             if (roomId) {
                 client.current.publish({
                     // destination: `/queue/${roomId}`,
@@ -218,6 +218,7 @@ export default function Chating({client,chatList,handle, user, handle2,memberId,
                     });
                     setMessage("");
             }
+            setRoomId(roomId);
         }
     
         /*
