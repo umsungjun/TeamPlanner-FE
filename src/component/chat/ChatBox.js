@@ -334,6 +334,7 @@ export default function ChatBox({handleClick, open}){
                     ),
                     tabCont:(
                         <Chating
+                        client={client}
                         handle={handleClick} 
                         handle2={disconnectChatRoom} 
                         chatList={chatList}

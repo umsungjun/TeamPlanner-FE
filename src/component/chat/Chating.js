@@ -29,7 +29,7 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function Chating({chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
+export default function Chating({client,chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
 
     const theme = createTheme({
         typography:{
@@ -105,60 +105,60 @@ export default function Chating({chatList,handle, user, handle2,memberId,chattin
 
     // 함수로 소켓 연결 설정과 정리를 분리
     // 함수로 소켓 연결 설정과 정리를 분리
-const connectToWebSocket = (roomId, onConnectedCallback) => {
-    // Clean up existing subscriptions
-    if (client && client.connected) {
-        // If connected, just execute the callback and return
-        onConnectedCallback(roomId);
-        return;
-    }
-    // Set up a new socket connection
-    let socket = new SockJS(API_BASE_URL + '/ws/chat');
-    let headers = {};
-    const cookies = document.cookie.split(";");
+// const connectToWebSocket = (roomId, onConnectedCallback) => {
+//     // Clean up existing subscriptions
+//     if (client && client.connected) {
+//         // If connected, just execute the callback and return
+//         onConnectedCallback(roomId);
+//         return;
+//     }
+//     // Set up a new socket connection
+//     let socket = new SockJS(API_BASE_URL + '/ws/chat');
+//     let headers = {};
+//     const cookies = document.cookie.split(";");
 
-    let accessToken = null;
+//     let accessToken = null;
 
-    for (const cookie of cookies) {
-        const [name, value] = cookie.trim().split("=");
-        if (name === "accessToken") {
-            accessToken = value;
-            break;
-        }
-    }
+//     for (const cookie of cookies) {
+//         const [name, value] = cookie.trim().split("=");
+//         if (name === "accessToken") {
+//             accessToken = value;
+//             break;
+//         }
+//     }
 
-    headers = {
-        Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
-        chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
-    };
+//     headers = {
+//         Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+//         chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
+//     };
 
-    if (roomId) {
-        client.current = Stomp.over(socket);
-        client.current.connect(headers, () => {
-            onConnectedCallback(roomId); // Execute the callback after connection
-        }, onError);
-    }
+//     if (roomId) {
+//         client.current = Stomp.over(socket);
+//         client.current.connect(headers, () => {
+//             onConnectedCallback(roomId); // Execute the callback after connection
+//         }, onError);
+//     }
    
-    return () => {
-        // Clean up subscriptions when the component unmounts
-        if (client.current) {
-            client.current.disconnect();
-        }
-    };
-};
+//     return () => {
+//         // Clean up subscriptions when the component unmounts
+//         if (client.current) {
+//             client.current.disconnect();
+//         }
+//     };
+// };
 
 
-    function onConnected() {
-        console.log("onConnected")
-      }
+    // function onConnected() {
+    //     console.log("onConnected")
+    //   }
     
-      function onError() {
-        alert("채팅 에러!!.. 소켓 재연결 시도")
-        console.log("onError")
-    }
+    //   function onError() {
+    //     alert("채팅 에러!!.. 소켓 재연결 시도")
+    //     console.log("onError")
+    // }
 
     const [message, setMessage] = useState("")
-    const client = useRef(null); // Use a ref to hold the client instance
+    // const client = useRef(null); // Use a ref to hold the client instance
     const { userInfo, setUserInfo } = useContext(AuthContext);
     const info = JSON.parse(localStorage.getItem("userInfo"));
     const scrollRef = useRef();
@@ -185,12 +185,12 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
         }).then(res => {
             console.log('방 생성 응답값 : ', res);
             setRoomId(res.data);
-            connectToWebSocket(res.data, createChatRoomthenSend);
-            // createChatRoomthenSend(res.data);
+            // connectToWebSocket(res.data, createChatRoomthenSend);
+            createChatRoomthenSend(res.data);
         })
         } else {
-            connectToWebSocket(chattingRoomId,isPresentChatRoomthenSend);
-            // isPresentChatRoomthenSend();
+            // connectToWebSocket(chattingRoomId,isPresentChatRoomthenSend);
+            isPresentChatRoomthenSend();
         }
     }
 
