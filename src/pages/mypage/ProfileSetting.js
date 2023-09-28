@@ -63,6 +63,11 @@ export const options = {
        },
      },
    },
+   plugins: {
+    legend: {
+      display: false,
+    }
+  }
 }
 
 export default function ProfileSetting(){
@@ -96,7 +101,8 @@ export default function ProfileSetting(){
         techStacks:[],
         activities:[],
         certifications:[],
-        evaluations:[]
+        evaluations:[],
+        nickname: ''
     });
 
     const [formData, setFormData] = useState({
@@ -104,7 +110,8 @@ export default function ProfileSetting(){
         techStacks:[],
         activities:[],
         certifications:[],
-        evaluations:[]
+        evaluations:[],
+        nickname: ''
     });
 
     const [formData2, setFormData2] = useState({
@@ -971,6 +978,13 @@ export default function ProfileSetting(){
                                             </Modal>
                                             </div>
                                         }
+                                        <div className="profile-nickname">
+                                            {edit ? <>
+                                                <p>{profileData.nickname}</p>
+                                            </>:
+                                            <p>{formData.nickname}</p>
+                                        }
+                                    </div>
                                     </div>
                                     {
                                         edit ?
@@ -983,7 +997,7 @@ export default function ProfileSetting(){
                                         : 
                                         <div className="textarea-box">
                                              <h2>자기소개</h2>
-                                             <textarea cols={5} id="basicProfile.profileIntro" value={formData.basicProfile.profileIntro} onChange={handleInputChange}></textarea>
+                                             <textarea cols={5} id="basicProfile.profileIntro" value={formData.basicProfile.profileIntro} onChange={handleInputChange} placeholder="자기소개를 입력해주세요!"></textarea>
                                         </div>
                                     }
                                 </div>
@@ -1083,7 +1097,7 @@ export default function ProfileSetting(){
                                             <h4>성별</h4>
                                             {
                                                 edit ?
-                                                <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label}</p>
+                                                <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label ? genders.find(option => option.value === profileData.basicProfile.gender)?.label : "미입력"}</p>
                                                 :
                                                 <div className="radio-wrap">
                                                     <FormControl>
@@ -1108,7 +1122,7 @@ export default function ProfileSetting(){
                                             <h4>생년월일</h4>
                                             {
                                                 edit ?
-                                                <p>{profileData.basicProfile.birth}</p>:
+                                                <p>{profileData.basicProfile.birth ? profileData.basicProfile.birth : "미입력"}</p>:
                                                 <h4
                                                     id="basicProfile.birth"
                                                     value={formData.basicProfile.birth} 
@@ -1119,7 +1133,7 @@ export default function ProfileSetting(){
                                                     }}
                                                     onChange={handleInputChange}
                                                 >
-                                                {formData.basicProfile.birth}
+                                                {formData.basicProfile.birth ? formData.basicProfile.birth : "미입력"}
                                                 </h4>
                                             }
                                         </li>
@@ -1127,7 +1141,7 @@ export default function ProfileSetting(){
                                             <h4>직업</h4>
                                                 {
                                                     edit ?
-                                                    <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label}</p>:
+                                                    <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label ? jobs.find(option => option.value === profileData.basicProfile.job)?.label : "미입력"}</p>:
                                                     <div className="input-wrap">
                                                         <Select
                                                             options={jobs}
@@ -1142,7 +1156,7 @@ export default function ProfileSetting(){
                                             <h4>최종학력</h4>
                                                 {
                                                     edit ?
-                                                    <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label}</p>:
+                                                    <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label ? educations.find(option => option.value === profileData.basicProfile.education)?.label : "미입력"}</p>:
                                                     <div className="birth-wrap">
                                                         <Select
                                                             options={educations}
@@ -1157,7 +1171,7 @@ export default function ProfileSetting(){
                                             <h4>입학날짜</h4>
                                             {
                                                 edit ?
-                                                <p>{profileData.basicProfile.admissionDate}</p>:
+                                                <p>{profileData.basicProfile.admissionDate ? profileData.basicProfile.admissionDate : "미입력"}</p>:
                                                 <h4
                                                     id="basicProfile.admissionDate" 
                                                     value={formData.basicProfile.admissionDate} 
@@ -1168,7 +1182,7 @@ export default function ProfileSetting(){
                                                     }}
                                                     onChange={handleInputChange}
                                                 >
-                                                {formData.basicProfile.admissionDate}
+                                                {formData.basicProfile.admissionDate ? formData.basicProfile.admissionDate : "미입력"}
                                                 </h4>
                                             } 
                                         </li>
@@ -1176,7 +1190,7 @@ export default function ProfileSetting(){
                                             <h4>졸업날짜</h4>
                                             {
                                                 edit ?
-                                                <p>{profileData.basicProfile.graduationDate}</p>:
+                                                <p>{profileData.basicProfile.graduationDate ? profileData.basicProfile.graduationDate : "미입력"}</p>:
                                                 <h4
                                                     id="basicProfile.graduationDate"
                                                     value={formData.basicProfile.graduationDate} 
@@ -1187,7 +1201,7 @@ export default function ProfileSetting(){
                                                     }}
                                                     onChange={handleInputChange}
                                                 >
-                                                {formData.basicProfile.graduationDate}
+                                                {formData.basicProfile.graduationDate ? formData.basicProfile.graduationDate : "미입력"}
                                                 </h4>
                                             }  
                                         </li>
@@ -1195,9 +1209,9 @@ export default function ProfileSetting(){
                                             <h4>카카오아이디</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.kakaoId}</p>:
+                                                    <p>{profileData.basicProfile.kakaoId ? profileData.basicProfile.kakaoId : "미입력"}</p>:
                                                     <div className="input-wrap">
-                                                        <TextField id="basicProfile.kakaoId" value={formData.basicProfile.kakaoId} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                        <TextField id="basicProfile.kakaoId" value={formData.basicProfile.kakaoId} onChange={handleInputChange} variant="outlined" placeholder="ex) teamplanner1234" fullWidth />
                                                     </div>
                                                 }
                                         </li>
@@ -1205,9 +1219,9 @@ export default function ProfileSetting(){
                                             <h4>연락처(이메일)</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.contactEmail}</p>:
+                                                    <p>{profileData.basicProfile.contactEmail ? profileData.basicProfile.contactEmail : "미입력"}</p>:
                                                     <div className="input-wrap">
-                                                        <TextField id="basicProfile.contactEmail" value={formData.basicProfile.contactEmail} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                        <TextField id="basicProfile.contactEmail" value={formData.basicProfile.contactEmail} onChange={handleInputChange} variant="outlined" placeholder="ex) teamplanner@example.com" fullWidth />
                                                     </div>
                                                 }
                                         </li>
@@ -1215,9 +1229,9 @@ export default function ProfileSetting(){
                                             <h4>거주지</h4>
                                                 {
                                                     edit ?
-                                                    <p>{profileData.basicProfile.address}</p>:
+                                                    <p>{profileData.basicProfile.address ? profileData.basicProfile.address : "미입력"}</p>:
                                                     <div className="input-wrap">
-                                                        <TextField id="basicProfile.address" value={formData.basicProfile.address} onChange={handleInputChange} variant="outlined" fullWidth />
+                                                        <TextField id="basicProfile.address" value={formData.basicProfile.address} onChange={handleInputChange} variant="outlined" placeholder="ex) 서울시 관악구" fullWidth />
                                                     </div>
                                                 }
                                         </li>
@@ -1494,22 +1508,34 @@ export const Content = styled(Box)`
     }
     .profile-box{
         display: flex;
-        align-items: center;
         margin-bottom: 5rem;
         .profileImage{
             width: 25%;
             display: flex;
+            flex-direction: column; 
             align-items: center;
             justify-content: center;
             position: relative;
+            .profile-nickname{
+                justify-content: center;
+                font-size: 2rem;
+                flex-direction: row;
+                color: #3b3b3b;
+                line-height: 1.6rem;
+                margin-top: 1rem;
+                margin-bottom: 2.3rem;
+                font-weight: 700;
+                align-items : center;
+                position: relative;
+            }
             img{
                 width: 60%;
                 border-radius: 100%;
             }
             button{
                 position: absolute;
-                bottom: 0;
-                right: 40px;
+                bottom: 5rem;
+                right: 4rem;
                 background-color: #fff;
                 padding: .5rem;
                 svg{

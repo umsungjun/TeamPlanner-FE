@@ -45,19 +45,6 @@ ChartJS.register(
     Legend
   );
 
-  export const data = {
-    labels: ['연구실 분위기', '강의 전달력', '논문 지도력', '실질 인건비', '인품'],
-    datasets: [
-      {
-        label: '',
-        data: [4, 5, 7, 6, 5],
-        backgroundColor: 'rgba(255, 115, 0, 0.2)',
-        borderColor: 'rgba(255, 115, 0, 1)',
-        borderWidth: 1,
-      },
-    ],
-  };
-
 export const options = {
     responsive: true,
     scales: {
@@ -74,6 +61,11 @@ export const options = {
        },
      },
    },
+   plugins: {
+    legend: {
+      display: false,
+    }
+  }
 }
 
 
@@ -115,10 +107,6 @@ export default function Profile({handleClick}){
 
     const [chatBoxOpen,setChatboxOpen]=useState(false);
 
-    const handleChange = () => {
-        setEdit(!edit);
-    };
-
 
     //이미지
     const [imageFileURL, setImageFileURL] = useState(["/img/profile/profile.png"]);
@@ -144,7 +132,6 @@ export default function Profile({handleClick}){
                 handleClick(img,nickname);
                 localStorage.setItem("img",img);
                 localStorage.setItem("targetNickname",nickname);
-                setEdit(!edit)
             }
         }).catch(err => {
             console.log('err', err)
@@ -262,74 +249,39 @@ export default function Profile({handleClick}){
                                 <MyPageMenu select={"프로필관리"} />
                             </SideList> */}
                             <Content>
-                                <div className="title dp-flex space-between">
-                                    <h1>프로필 정보</h1>
-                                    {/* {
-                                        edit ?
-                                        <FilledBtn text={"프로필 수정하기"} handle={handleChange}></FilledBtn>
-                                        :
-                                        <></>
-                                    } */}
-                                </div>
+                                <div className="title dp-flex space-between"></div>
                                 <div className="profile-box">
                                     
                                     <div className="profile-img">
                                         <img src={imageFileURL} alt="프로필 이미지" />
-                                        {
-                                            edit? <></> :
-                                            <IconButton><AddCircleIcon/></IconButton>
-                                        }
                                     </div>
-                                    {
-                                        edit ? 
-                                        <div className="profile-btn-wrap">
-                                            <SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>
-                                        </div>
-                                        : <></>
-                                    }
-                                    {
-                                        edit ?
-                                        <div className="profileIntro">
-                                            <h2>자기소개</h2>
-                                            <p>
-                                                {profileData.basicProfile.profileIntro}
-                                            </p>
-                                        </div>
-                                        : 
-                                        <>
-                                        <div className="textarea-box">
-                                             <h2>소개글</h2>
-                                             <textarea cols={5} value="안녕하세요. 소개글입니다."></textarea>
-                                        </div>
-                                        </>
-                                    }
+                                    <div className="profile-nickname">
+                                        <p>{nickname}</p>
+                                    </div>
+                                    <div className="profile-btn-wrap">
+                                        <SolidBtn text={"1:1 대화하기"} handle={toggleChatbox}/>
+                                    </div>
+                                    <div className="profileIntro">
+                                        <h2>자기소개</h2>
+                                        <p>
+                                            {profileData.basicProfile.profileIntro}
+                                        </p>
+                                    </div>
                                 </div>
                                 <div className="review-box">
                                     <h3 className="sub-title">팀원평가</h3>
                                     <div className="review-wrap">
-                                        {
-                                            edit ? (
-                                                <div className="chart-box">
-                                                    <Radar
-                                                    data={evaluationData}
-                                                    options={options}
-                                                    />
-                                                </div>
-                                            ) : (
-                                                <></>
-                                            )
-                                        }
-                                        {
-                                            edit ? (
-                                                <div className="review-list">
-                                                    {profileData.evaluations.map((evaluation, index) => (
-                                                        <h3 key={index}>{evaluation.comment}</h3>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <></>
-                                            )
-                                        }
+                                        <div className="chart-box">
+                                            <Radar
+                                                data={evaluationData}
+                                                options={options}
+                                            />
+                                        </div>
+                                        <div className="review-list">
+                                            {profileData.evaluations.map((evaluation, index) => (
+                                                <h3 key={index}>{evaluation.comment}</h3>
+                                            ))}
+                                        </div>
                                     </div>
                                 </div>
                                 <div className="skill-box">
@@ -419,40 +371,30 @@ export default function Profile({handleClick}){
                                         ))}
                                     </ul>
                                 </div>
-                                {
-                                    edit ?
-                                    <RecomandTeam>
-                                        <h3><strong>사용자</strong> 님과 비슷한 프로필을 추천해드려요</h3>
-                                        <div className="recomand-team-wrap">
-                                            <ul className="scorll-wrap">
-                                                <li>
-                                                    <RecomandTeamCard />
-                                                </li>
-                                                <li>
-                                                    <RecomandTeamCard />
-                                                </li>
-                                                <li>
-                                                    <RecomandTeamCard />
-                                                </li>
-                                                <li>
-                                                    <RecomandTeamCard />
-                                                </li>
-                                                <li>
-                                                    <RecomandTeamCard />
-                                                </li>
-                                            </ul>
-                                        </div>
-                                    </RecomandTeam>
-                                    : <></>
-                                }
+                                <RecomandTeam>
+                                    <h3><strong>사용자</strong> 님과 비슷한 프로필을 추천해드려요</h3>
+                                    <div className="recomand-team-wrap">
+                                        <ul className="scorll-wrap">
+                                            <li>
+                                                <RecomandTeamCard />
+                                            </li>
+                                            <li>
+                                                <RecomandTeamCard />
+                                            </li>
+                                            <li>
+                                                <RecomandTeamCard />
+                                            </li>
+                                            <li>
+                                                <RecomandTeamCard />
+                                            </li>
+                                            <li>
+                                                <RecomandTeamCard />
+                                            </li>
+                                        </ul>
+                                    </div>
+                                </RecomandTeam>
                             </Content>
                         </ContentWrap>
-                            {
-                                edit ? <></> :
-                                <SaveBtn>
-                                    <FilledBtn text={"저장하기"}></FilledBtn>
-                                </SaveBtn>
-                            }
                     </PaddingWrap>
                 </Container>
                 <Footer />
@@ -533,10 +475,10 @@ const Content = styled(Box)`
         .profile-btn-wrap{
             display: flex;
             align-items: center;
-            justify-content: space-between;
+            justify-content: center;
             width: 30%;
             button{
-                width: 49%;
+                width: 59%;
             }
         }
         .profile-img{
@@ -545,7 +487,6 @@ const Content = styled(Box)`
             align-items: center;
             justify-content: center;
             position: relative;
-            margin-bottom: 2rem;
             img{
                 width: 60%;
                 border-radius: 100%;
@@ -585,6 +526,18 @@ const Content = styled(Box)`
                 color: #3b3b3b;
                 line-height: 150%;
             }
+        }
+        .profile-nickname{
+            justify-content: center;
+            font-size: 2rem;
+            flex-direction: row;
+            color: #3b3b3b;
+            line-height: 1.6rem;
+            margin-top: 1rem;
+            margin-bottom: 2.3rem;
+            font-weight: 700;
+            align-items : center;
+            position: relative;
         }
         .profileIntro{
             width: 100%;

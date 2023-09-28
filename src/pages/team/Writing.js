@@ -170,9 +170,6 @@ export default function Writing(){
                                 </div>
                             </div>
                         </Content>
-                        <SideScroll>
-                            <ScrollList />
-                        </SideScroll>
                     </PaddingWrap>
                 </Container>
                 <Footer />
