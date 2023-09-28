@@ -118,6 +118,8 @@ export default function TeamDetail({done}){
             console.log(`err = ${err}`);
         })
     }
+
+    console.log(authorNickname,JSON.parse(userInfo).nickname)
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -141,6 +143,8 @@ export default function TeamDetail({done}){
                                                 <h2>현재인원/최대인원 : <strong>{currentMemberSize}/{maxMemberSize}</strong></h2>
                                             </div>
                                         </li>
+                                        { authorNickname != JSON.parse(userInfo).nickname && (
+                                            
                                         <li className="button-wrap">
                                             {
                                                 done ? 
@@ -148,6 +152,8 @@ export default function TeamDetail({done}){
                                                 <ApplicationModal recruitmentId={recruitmentId}/>
                                             }
                                         </li>
+                                        )
+                                        }
                                     </ul>
                              
                                 </div>
@@ -157,7 +163,7 @@ export default function TeamDetail({done}){
                                         <Avatar src={authorProfileImg}></Avatar>
                                         <h3>{authorNickname}</h3>
                                     </div>
-                                    {userInfo && (
+                                    { userInfo && authorNickname == JSON.parse(userInfo).nickname && (
                                         <div className="btn-wrap">
                                         
                                                 <>

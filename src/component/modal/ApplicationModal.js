@@ -21,6 +21,7 @@ import { API } from "../../api/api";
 
 export default function ApplicationModal({recruitmentId}){
 
+    const userInfo=localStorage.getItem("userInfo");
 
     const theme = createTheme({
         typography:{
@@ -78,9 +79,9 @@ export default function ApplicationModal({recruitmentId}){
                         <DialogContent>
                             <div className="profile">
                                 <IconButton sx={{p : 0}}>
-                                    <AccountCircleIcon/>
+                                <img src={JSON.parse(userInfo).profileImg} height={40} style={{ borderRadius: '50%' }}/>
                                 </IconButton>
-                                <h3>유저 1</h3>
+                                <h3>{JSON.parse(userInfo).nickname}</h3>
                             </div>
                             <div className="textarea">
                                 <textarea 

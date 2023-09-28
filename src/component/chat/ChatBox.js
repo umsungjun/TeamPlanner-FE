@@ -7,8 +7,9 @@ import Box from "@mui/material/Box";
 import SmsIcon from '@mui/icons-material/Sms';
 import MapsUgcIcon from '@mui/icons-material/MapsUgc';
 import MsgListBox from "./MsgListBox";
-import Chating from "./Chating";
+import Chating, { ChatingList, ChatingWrap } from "./Chating";
 import CloseIcon from '@mui/icons-material/Close';
+import MenuIcon from '@mui/icons-material/Menu';
 import theme from "../../style/theme";
 import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
@@ -17,9 +18,6 @@ import { AuthContext } from "../../AuthContext";
 import { API_BASE_URL } from "../../common/constant/constant";
 
 export default function ChatBox({handleClick, open}){
-
-   
- 
     
     const theme = createTheme({
         typography:{
@@ -32,7 +30,7 @@ export default function ChatBox({handleClick, open}){
          },
     })
 
-    const [activeIndex, setActiveIndex]=useState(0);
+    const [activeIndex, setActiveIndex]=useState(null);
     const tabClickHandler=(index, roomId)=>{
         setActiveIndex(index);
         setRoomId(roomId);
@@ -61,6 +59,7 @@ export default function ChatBox({handleClick, open}){
     const [subscribeState,setSubscribeState]=useState(false);
     const client = useRef(null); // Use a ref to hold the client instance
     const [tmp, setTmp] = useState([]);
+    const [readCountNotification,setReadCountNotification]=useState(false);
 
 
     function onConnected() {
@@ -68,54 +67,100 @@ export default function ChatBox({handleClick, open}){
       }
     
       function onError() {
+        alert("채팅 에러!!.. 소켓 재연결 시도")
+        connectToWebSocket(() => {
+            subscribeSocket();
+        });
         console.log("onError")
     }
-    // 소켓 연결 설정 및 정리
-    useEffect(() => {
-        // Clean up existing subscriptions
+
+
+
+   // 함수로 소켓 연결 설정과 정리를 분리
+   const connectToWebSocket = (onConnectedCallback) => {
+    // Clean up existing subscriptions
+    if (client && client.connected) {
+        // If connected, just execute the callback and return
+        onConnectedCallback(roomId);
+        return;
+    }
+    // Set up a new socket connection
+    let socket = new SockJS(API_BASE_URL + '/ws/chat');
+    let headers = {};
+    const cookies = document.cookie.split(";");
+
+    let accessToken = null;
+
+    for (const cookie of cookies) {
+        const [name, value] = cookie.trim().split("=");
+        if (name === "accessToken") {
+            accessToken = value;
+            break;
+        }
+    }
+
+    headers = {
+        Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
+        chatRoomNo: `${roomId}`, // Change this to the appropriate chatRoomNo
+    };
+
+    if(roomId){
+        client.current = Stomp.over(socket);
+        client.current.connect(headers, () => {
+            onConnectedCallback(roomId); // 소켓 연결 완료 후 콜백 실행
+        }, onError);
+
+    }
+        
+
+    return () => {
+        // Clean up subscriptions when the component unmounts
         if (client.current) {
             client.current.disconnect();
+
+            disconnectChatRoom(roomId);
         }
-    
-        // Set up a new socket connection
-        let socket = new SockJS(API_BASE_URL+'/ws/chat');
+    };
+};
 
-        const cookies = document.cookie.split(";");
 
-                    let accessToken = null;
-
-                    for (const cookie of cookies) {
-                        const [name, value] = cookie.trim().split("=");
-                        if (name === "accessToken") {
-                            accessToken = value;
-                        break;
-                        }
-                    }
-
-        const headers = {
-            Authorization: `Bearer ${accessToken}`, // Replace with your JWT token
-        };
-
-        client.current = Stomp.over(socket);
-        client.current.connect(headers, onConnected, onError);
-    
-        return () => {
-            // Clean up subscriptions when the component unmounts
-            if (client.current) {
-                client.current.disconnect();
-            }
-        };
-    }, []); // Make sure to include roomId as a dependency
+    const disconnectChatRoom = (roomId) => {
+        // Parse roomId as an integer
+        roomId = parseInt(roomId);
+        
+        API.post(`/api/v1/chat/chatroom/${roomId}`)
+          .then((res) => {
+            setRoomId("");
+            setActiveIndex(null);
+            console.log("disconnet Chat room API Response", res.data);
+          })
+          .catch((error) => {
+            console.error("API Error", error);
+          });
+      };
     /*
     * 채팅방을 가져오는 api 
     */
     const fetchChatRoomList = () => {
-        if(roomId){
-        API.get(`/api/v1/chat/room/${roomId}`)
-        .then(res => {
-            console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와",res.data)
-            setChatList(res.data.chattings);
-        })
+
+        if (roomId) {
+            API.get(`/api/v1/chat/room/${roomId}`)
+                .then(res => {
+                    console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와", res.data);
+                    
+                    // 여기에서 채팅방 정보를 성공적으로 가져왔으므로
+                    // 소켓을 구독할 수 있습니다.
+                   
+                    connectToWebSocket(() => {
+                        subscribeSocket();
+                    });
+                    setChatList(res.data.chattings);
+                    
+                   
+                })
+                .catch(error => {
+                    console.error("채팅방 정보를 가져오는 데 실패했습니다:", error);
+                });
         }
     }
     //* 현재 생성되어 있는 채팅방 번호를 가져오는 코드*/
@@ -133,22 +178,49 @@ export default function ChatBox({handleClick, open}){
 
     // 구독한 토픽에 대한 message를 response하고 chatList에 담는다.
     const onMessageReceived = (message) => {
+        console.log("구독 한 메세지를 받는중...");
         // console.log('message', message)
         // console.log('message', message.body)
         let newChat = JSON.parse(message.body);
-
-        //해당 메세지를 제대로 받았으면 count 값 -=1
+        // console.log("구독해서 받은 meesage", newChat);
         
-        API.get(`/api/v1/chat/${newChat.id}`)
-        .then(res => {
-            console.log("구독 성공 readcount 한개취소",newChat.readCount);
-            newChat.readCount = newChat.readCount - 1;
-
-            setChatList((prevChatList) => [...prevChatList, newChat]);
+        if(!newChat.content){
+            console.log("상대방이 내 채팅방에 입장했어요!!",newChat)
+            API.get(`/api/v1/chat/room/${roomId}`)
+                .then(res => {
+                    console.log("하나의 채팅방에 있는 멤버와 채팅내용 가져와", res.data);
+                    setChatList(res.data.chattings);
+                    
+                   
+                })
+                .catch(error => {
+                    console.error("채팅방 정보를 가져오는 데 실패했습니다:", error);
+                });
+        }
+        else{
+            console.log("구독하신 topic 에서 새로운 채팅이 전달되었어요!",newChat)
+            setChatList((prevChatList) => {
+                return [...prevChatList, newChat]; // 기존 채팅 리스트에 추가
+                
+            });
+        }
+        
+        //해당 메세지를 제대로 받았으면 count 값 -=1
+        // if(newChat.readCount>0){
+        //     API.get(`/api/v1/chat/${newChat.id}`)
+        //     .then(res => {
+        //     newChat.readCount = res.data.readCount;
+        //     console.log(newChat.readCount);
+        //     console.log("구독 성공 readcount 한개취소");
+        //     setChatList((prevChatList) => {
+        //         return [...prevChatList, newChat]; // 기존 채팅 리스트에 추가
+                
+        //     });
             
-        }).catch(err => {
-            alert(err.response.data.message);
-        })
+        // }).catch(err => {
+        //     alert(err.response.data.message);
+        // })
+        // }
     };
 
     const tabContArr=[];
@@ -201,14 +273,43 @@ export default function ChatBox({handleClick, open}){
         }
     }
 
-    
+
+    const subscribeSocket = () => {
+        
+        if (roomId) {
+            let sameCheck = false;
+            if (previousRoomId !== null) {
+                client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
+            }
+            // 현재 채팅방에 대한 구독을 설정합니다.
+            if (tmp) {
+                tmp.map((item) => {
+                    if (item.roomId === roomId) {
+                        sameCheck = true;
+                        return false;
+                    }
+                })
+            }
+
+            if (!sameCheck) {
+                console.log("구독하는 중 ...");
+                let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
+                if (socket) {
+                    setTmp((tmp) => [...tmp, { roomId: roomId, socket: socket.id }])
+                }
+                // 이전 채팅방 ID를 업데이트합니다.
+                previousRoomId = roomId;
+            }
+        }
+    }
+
 
     chatRoomList.map((item, key) => {
         if(userInfo){
             tabContArr.push(
                 {
                     tabTitle:(
-                        <div className={activeIndex===key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
+                        <div className={activeIndex !== null && activeIndex === key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
                             <MsgListBox 
                             id={item.roomId} 
                             none={true} 
@@ -221,8 +322,10 @@ export default function ChatBox({handleClick, open}){
                     ),
                     tabCont:(
                         <Chating
+                        fetchChatRoomList={fetchChatRoomList}
+                        client={client}
                         handle={handleClick} 
-                        handle2={handleClick2} 
+                        handle2={disconnectChatRoom} 
                         chatList={chatList}
                         user={userInfo.nickname  === item.memberList[0].nickname ? item.memberList[1].nickname : item.memberList[0].nickname}
                         memberId={userInfo.memberId}
@@ -243,57 +346,29 @@ export default function ChatBox({handleClick, open}){
 
     // 이전 채팅방 ID를 기억하는 변수를 추가합니다.
     let previousRoomId = null;
-
-
     
-
     useEffect(() => {
-        // 현재 채팅방이 있는 경우에만 구독을 시도합니다.
-        let sameCheck = false;
+        // 현재 채팅방이 있는 경우에만 fetchChatRoomList()를 호출합니다.
         if (roomId !== null) {
-            if (previousRoomId !== null) {
-                client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
-            }
-            // 현재 채팅방에 대한 구독을 설정합니다.
-            if (tmp) {
-                tmp.map((item) => {
-                    if (item.roomId === roomId) {
-                        sameCheck = true;
-                        console.log(tmp);
-                        return false;
-                    }
-                })
-            }
-
-            if (!sameCheck) {
-                let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
-                // API.get(`/api/v1/chat/{}`)
-                // .then(res => {
-                //     console.log("채팅방 리스트",res.data)
-                //     setChatRoomList(res.data);
-                // }).catch(err => {
-                //     alert(err.response.data.message);
-                // })
-
-                if (socket) {
-                    setTmp((tmp) => [...tmp, {roomId: roomId, socket: socket.id}])
-                }
-                // 이전 채팅방 ID를 업데이트합니다.
-                previousRoomId = roomId;
-            }
+            fetchChatRoomList();
         }
 
-        // 여기에서 채팅 목록을 가져오는 코드를 실행합니다.
-        fetchChatRoomList();
-
-        // 컴포넌트가 언마운트될 때 이전 채팅방의 구독을 해제합니다.
-        // return () => {
-        //     if (previousRoomId !== null) {
-        //         client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
-        //     }
-
-        // };
+        const handleBeforeUnload = () => {
+            // Check if a chat room is active (roomId is not null)
+            if (roomId !== null) {
+              // Disconnect the chat room
+              disconnectChatRoom(roomId);
+            }
+          };
+      
+          window.addEventListener("beforeunload", handleBeforeUnload);
+      
+          return () => {
+            // Remove the event listener when the component unmounts
+            window.removeEventListener("beforeunload", handleBeforeUnload);
+          };
     }, [roomId]);
+    
 
     return(
         <>
@@ -329,9 +404,34 @@ export default function ChatBox({handleClick, open}){
                                 </Mobile>
                             </div>
                             <ChatingBox>
-                                {tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
+                                {activeIndex === null && 
+                                    <>
+                                        <ChatingWrap>
+                                            <ul className="user-title">
+                                                <li>
+                                                <Mobile>
+                                                    <IconButton><MenuIcon onClick={handleClick2}/></IconButton>
+                                                </Mobile>
+                                                </li>
+                                                <li>
+                                                    <IconButton><CloseIcon onClick={handleClick}/></IconButton>
+                                                </li>
+                                            </ul>
+                                        </ChatingWrap>
+                                        <ChatingList>
+                                            <div>
+                                                대화를 나누고 싶은 상대와 메시지를 주고받을 수 있어요.
+                                                지금 바로 시작해 보세요!
+                                            </div>
+                                        </ChatingList>
+                                    </>
+                                }
+                                {activeIndex !== null && tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
                             </ChatingBox>
-                            {!tabContArr.length >0 &&  <IconButton onClick={handleClick} style={{ width: '5%' , height: '10%' }}><CloseIcon/></IconButton>}
+                            {!tabContArr.length > 0 &&  
+                                <IconButton onClick={handleClick} style={{ width: '5%' , height: '10%' }}>
+                                    <CloseIcon/>
+                                </IconButton>}
                         </Chat>
                         : <></>
                     }
