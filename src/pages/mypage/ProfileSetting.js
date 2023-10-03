@@ -94,6 +94,18 @@ export default function ProfileSetting(){
         setEdit((prevEdit) => !prevEdit);
         setFormData(remains);
     };
+    
+    //localStorage
+    const initialUserInfo = JSON.parse(localStorage.getItem('userInfo')) || {
+        accessToken: '',
+        memberId: null,
+        nickname: '',
+        profileImg: '',
+        refreshToken: '',
+        username: '',
+    };
+
+    const [userInfo, setUserInfo] = useState(initialUserInfo);
 
      //fetched data
     const [profileData, setProfileData] = useState({
@@ -335,6 +347,8 @@ export default function ProfileSetting(){
         .catch(error =>{
             alert("이미지가 오류로인해 업로드되지 못했습니다.",error.response);  
         })
+        setUserInfo({ ...userInfo, profileImg: formData.profileImage});
+        localStorage.setItem("userInfo",JSON.stringify(userInfo));
     }
 
     const updateBirth = () => {
