@@ -69,6 +69,11 @@ export const options = {
        },
      },
    },
+   plugins: {
+    legend: {
+      display: false,
+    }
+  }
 }
 
 
