@@ -29,7 +29,7 @@ import CollectionsIcon from '@mui/icons-material/Collections';
 
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
-export default function Chating({client,chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId}){
+export default function Chating({client,chatList,handle, user, handle2,memberId,chattingRoomId,setRoomId,profileImage}){
 
     const theme = createTheme({
         typography:{
@@ -252,6 +252,13 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
      };
      let prevMessageTime = null;
 
+
+     const handleEnterPress = (e) => {
+        if (e.key === 'Enter' && !e.shiftKey) {
+          e.preventDefault(); // 엔터 키 기본 동작(개행) 방지
+          sendMessageBtnHandler(); // 메시지 전송 함수 호출
+        }
+      };
     return(
         <>
         <ThemeProvider theme={theme}>
@@ -320,8 +327,9 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
                                 ) : (
                                     <ReceiveMsg>
                                         <UserImg>
-                                            <PersonOutlineIcon />
+                                        <img src={profileImage} height={35} style={{ borderRadius: '50%' }}/>
                                         </UserImg>
+                                        
                                         <div className="msg-wrap">
                                             <h3>{user}</h3>
                                             <div className="msg-box-wrap">
@@ -463,7 +471,8 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
                                  cols={1} 
                                  rows={1}
                                  value={message} 
-                                 onChange={handleInputChange}></textarea>
+                                 onChange={handleInputChange}
+                                 onKeyPress={handleEnterPress}></textarea>
                                 <SendBtn variant="contained" onClick={sendMessageBtnHandler}><SendIcon/></SendBtn>
                             </div>
                         </div>

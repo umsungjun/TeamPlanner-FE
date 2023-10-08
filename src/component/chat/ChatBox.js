@@ -331,6 +331,7 @@ export default function ChatBox({handleClick, open}){
                         memberId={userInfo.memberId}
                         chattingRoomId={roomId}
                         setRoomId={setRoomId}
+                        profileImage={userInfo.nickname === item.memberList[0].nickname ? item.memberList[1].profileImage : item.memberList[0].profileImage}
                         />
                     )
                 }

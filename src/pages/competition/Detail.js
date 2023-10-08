@@ -197,8 +197,12 @@ export default function Detail() {
                     <li className="dp-flex space-between">
                       <div className="col dp-flex">
                         <h3>홈페이지</h3>
-                        <a href={data.activityUrl} target="_blank">
-                          <p style={{ color: "#FF7300", opacity: "80%", fontWeight: "bold"}}>지원하러 바로가기</p></a>
+                      
+                        {data.activityUrl !== "" && data.activityUrl !== "-" && <a href={data.activityUrl} target="_blank">
+                          
+                        <p style={{ color: "#FF7300", opacity: "80%", fontWeight: "bold"}}>지원하러 바로가기</p>
+                        </a>}
+
                       </div>
                       <div className="col dp-flex">
                         <h3>활동혜택</h3>
@@ -328,13 +332,19 @@ export default function Detail() {
                 <StyledTabPanel value={value} index={1}>
                   {/* 팀원 모집글 탭 */}
                   <TeamCardWrap>
-                    {
+                  {
+                    recruitmentList.length > 0 ? (
                       recruitmentList.map(r =>  
                         <Card>
                           <TaemCard {...r}/>
                         </Card>
                       )
-                    }
+                    ) : (
+                      
+                         <h1>모집글이 존재하지 않습니다</h1>
+                  
+                    )
+                  }
                     {/* <Card>
                       <TaemCard />
                     </Card>

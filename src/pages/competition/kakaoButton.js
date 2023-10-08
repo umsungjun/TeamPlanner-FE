@@ -8,7 +8,7 @@ const { Kakao } = window;
 const KakaoButton = ({activityName, activityImg, boardId}) => {
 
   // 배포한 자신의 사이트
-  const realUrl = "http://teamplanner-frontend.s3-website.ap-northeast-2.amazonaws.com";
+  const realUrl = "https://teamplanner.co.kr";
   // 로컬 주소 (localhost 3000 같은거)
   const resultUrl = window.location.href;
 
