@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import theme from "../../style/theme";
 import {createTheme,Divider,Icon,ThemeProvider} from '@mui/material';
@@ -21,38 +21,89 @@ import MenuItem from '@mui/material/MenuItem';
 import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
-
+import { API } from "../../api/api";
 export default function Notice(){
+
+
+    const[notificationList,setNotificationList]=useState([]);
+    useEffect(()=>{
+
+        API.get(`/api/v1/notifications`)
+          .then((res) => {  
+            setNotificationList(res.data);
+            const notificationCount = res.data.length;
+        localStorage.setItem('notificationCount', notificationCount.toString());
+          })
+          .catch((error) => {
+            alert(error);
+          });
+    },[])
+
+
+
+        // 공지사항을 날짜별로 그룹화하고 최신순으로 정렬하는 함수
+    const groupAndSortNotifications = (notifications) => {
+        // 날짜별로 그룹화
+        const groupedNotifications = {};
+        notifications.forEach((notification) => {
+            const dateKey = notification.createdDate.split('T')[0]; // 날짜 부분만 사용
+            if (!groupedNotifications[dateKey]) {
+                groupedNotifications[dateKey] = [];
+            }
+            groupedNotifications[dateKey].push(notification);
+        });
+
+        // 날짜로 정렬된 배열 생성 (최신순으로)
+        const sortedDates = Object.keys(groupedNotifications).sort((a, b) => {
+            // 날짜를 비교하는 비교 함수
+            return new Date(b) - new Date(a);
+        });
+
+        const sortedNotifications = sortedDates.map((dateKey) => ({
+            date: dateKey,
+            notifications: groupedNotifications[dateKey],
+        }));
+
+        return sortedNotifications;
+    };
+
+    const sortedNotifications = groupAndSortNotifications(notificationList);
+
+
     return(
         <>
         <ThemeProvider theme={theme}>
             <NotificationMenu >
                 <div className="wrap">
+                {sortedNotifications.map((group) => (
+                <div key={group.date}>
                 <ul className="notification-list">
-                    <h3>7월 14일 (금)</h3>
-                    <Divider />
-                    <li>
-                        <div className="img-box">
-                            <img src="/img/team/sample.png"></img>
-                        </div>
-                        <div className="text-box">
-                            <h4>~~~님께서 <br/>
-                            ~~공고에 참여신청을 하셨습니다.</h4>
-                            <p>오전 10시 52분</p>
-                        </div>
-                    </li>
-                    <li>
-                        <div className="img-box">
-                            <img src="/img/team/sample.png"></img>
-                        </div>
-                        <div className="text-box">
-                            <h4>~~~님께서 <br/>
-                            ~~공고에 참여신청을 하셨습니다.</h4>
-                            <p>오전 10시 52분</p>
-                        </div>
-                    </li>
+                <h3>{group.date}</h3>
+                    {group.notifications.map((notification) => (
+                    <li key={notification.content}>
+                    {/* 공지사항 내용을 링크로 표시 */}
+                      <div className="img-box">
+                      <a href="/mypage/teamManagement">
+                        <img src={notification.recruitmentProfileImage} alt="이미지" />
+                    </a>
+                      </div>
+                      <div className="text-box">
+                      <a href="/mypage/teamManagement">
+                        <h4>
+                          {notification.content}<br/>
+                        </h4>
+                    </a>
+                        <p>{notification.createdDate}</p>
+                      </div>
+                      
+                    
+                  </li>
+                    ))}
                 </ul>
-                <ul className="notification-list">
+                </div>
+            ))}
+                
+                {/* <ul className="notification-list">
                     <h3>7월 13일 (목)</h3>
                     <Divider />
                     <li>
@@ -75,7 +126,7 @@ export default function Notice(){
                             <p>오전 10시 52분</p>
                         </div>
                     </li>
-                </ul>
+                </ul> */}
                 </div>
             </NotificationMenu>
         </ThemeProvider>

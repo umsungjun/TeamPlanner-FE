@@ -31,8 +31,80 @@ import { useOnHoverOutside } from "../../hooks/useOnHoverOutside";
 import Notice from "./Notcie";
 import { API } from "../../api/api";
 import { useNavigate } from 'react-router-dom';
+import { API_BASE_URL } from "../../common/constant/constant";
+
+
+let eventSource = null;
 
 export default function Nav(){
+
+    useEffect(() => {
+        // 코드가 이미 실행되었는지 확인
+        if (localStorage.getItem('codeExecuted') !== 'true') {
+            // 쿠키에서 accessToken 추출
+            let accessToken = null;
+            const cookies = document.cookie.split(';');
+            for (const cookie of cookies) {
+                const [name, value] = cookie.trim().split("=");
+                if (name === "accessToken") {
+                    accessToken = value;
+                    break;
+                }
+            }
+
+            // accessToken이 존재하면 헤더에 인증 정보를 추가하여 EventSource 생성
+            if (accessToken) {  
+                const userInfoString = localStorage.getItem('userInfo');
+
+                if (userInfoString) {
+                    const userInfo = JSON.parse(userInfoString);
+                    const memberId = userInfo.memberId;
+
+                    eventSource = new EventSource(API_BASE_URL + `/api/v1/notifications/subscribe/${memberId}`, {
+                        headers: {
+                            'Authorization': 'Bearer ' + accessToken
+                        }
+                    });
+
+
+                    // 연결이 열렸을 때 처리
+                    eventSource.addEventListener('open', () => {
+                        console.log("연결이 열렸습니다.");
+                    });
+
+                    // 연결이 닫혔을 때 처리
+                    eventSource.addEventListener('error', (error) => {
+                        if (error.target.readyState === EventSource.CLOSED) {
+                            console.log("연결이 닫혔습니다.");
+                            // localStorage.setItem('codeExecuted', 'false');
+                        } else {
+                            console.error("연결 오류:", error);
+                            // localStorage.setItem('codeExecuted', 'false');
+                        }
+                    });
+
+                    eventSource.addEventListener('sse', event => {
+                        console.log("이벤트" + event.data);
+                    });
+
+                    // 코드가 실행되었음을 표시
+                    localStorage.setItem('codeExecuted', 'true');
+                } else {
+                    console.error("userInfo가 로컬 스토리지에 없습니다. 사용자 정보를 찾을 수 없음.");
+                    // localStorage.setItem('codeExecuted', 'false');
+                }
+            } else {
+                console.error("accessToken이 없습니다. 인증 정보를 찾을 수 없음.");
+                // localStorage.setItem('codeExecuted', 'false');
+            }
+        }
+
+        window.addEventListener("beforeunload", function() {
+         eventSource.close();
+         console.log("연결 끊김");
+         localStorage.setItem('codeExecuted', false);
+        })
+    }, []); // 빈 배열을 전달하여 이펙트가 컴포넌트가 마운트될 때 한 번만 실행되도록 함
 
     const navigate = useNavigate();
     const [search, setSearch] = useState('');
@@ -68,6 +140,7 @@ export default function Nav(){
         // toggleLogin();
         deleteCookie("accessToken")
         deleteCookie("refreshToken")
+        localStorage.removeItem("codeExecuted");
         localStorage.removeItem("userInfo")
         setUserInfo(null);
     };
@@ -107,6 +180,23 @@ export default function Nav(){
   
  
 
+
+
+
+    useEffect(()=>{
+
+        API.get(`/api/v1/notifications`)
+          .then((res) => {  
+            setNotificationCount(res.data.length);
+          })
+          .catch((error) => {
+            alert(error);
+          });
+    },[])
+
+  
+  const [notificationCount, setNotificationCount] = useState(0);
+  
 
     return(
         <>
@@ -203,17 +293,25 @@ export default function Nav(){
                                 </StyledMenuItem>
                             </Menu>
                            {/*수정 */}
-                           <Button onMouseOver={() => setMenuDropDownOpen(true)}>
-                                    <NotificationBadge badgeContent={4} color="primary">
-                                        <NotificationsIcon color="action" />
-                                    </NotificationBadge>
+                           {userInfo ? (
+                            <div>
+                                {/* 알림 버튼 */}
+                                <Button onMouseOver={() => setMenuDropDownOpen(true)}>
+                                {/* Badge 컴포넌트로 알림 수를 표시 */}
+                                <NotificationBadge badgeContent={notificationCount} color="primary">
+                                    <NotificationsIcon color="action" />
+                                </NotificationBadge>
                                 </Button>
-                                {
-                                    isMenuDropDownOpen &&
-                                    <div onMouseLeave={() => setMenuDropDownOpen(false)}>
-                                        <Notice/> 
-                                    </div>
-                                }
+                                
+                                {/* 알림 목록 */}
+                                {isMenuDropDownOpen && (
+                                <div onMouseLeave={() => setMenuDropDownOpen(false)}>
+                                    <Notice />
+                                </div>
+                                )}
+                            </div>
+                            ) : null}
+                          
                         </div>
                     </div>
                 </PC>
@@ -261,7 +359,7 @@ export default function Nav(){
                                     {/*수정 */}
                                     {/*0809 수정 */}
                                     <Button onClick={() => setMenuDropDownOpen(!isMenuDropDownOpen)}>
-                                        <NotificationBadge badgeContent={4} color="primary">
+                                        <NotificationBadge badgeContent={notificationCount} color="primary">
                                             <NotificationsIcon color="action" />
                                         </NotificationBadge>
                                     </Button>
