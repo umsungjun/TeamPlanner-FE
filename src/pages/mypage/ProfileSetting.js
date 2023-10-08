@@ -96,17 +96,20 @@ export default function ProfileSetting(){
     };
     
     //localStorage
-    const initialUserInfo = JSON.parse(localStorage.getItem('userInfo')) || {
-        accessToken: '',
-        memberId: null,
-        nickname: '',
-        profileImg: '',
-        refreshToken: '',
-        username: '',
-    };
+    const [userInfo, setUserInfo] = useState(JSON.parse(localStorage.getItem('userInfo')));
 
-    const [userInfo, setUserInfo] = useState(initialUserInfo);
+    const updateLocalStorage = () =>{
 
+        setUserInfo((prevData) => ({
+            ...prevData,
+            profileImg: formData2.basicProfile.profileImage
+        }));
+    }
+    useEffect(() => {
+        localStorage.removeItem("userInfo");
+        localStorage.setItem("userInfo",JSON.stringify(userInfo));
+    },[userInfo]);
+    
      //fetched data
     const [profileData, setProfileData] = useState({
         basicProfile:[],
@@ -278,7 +281,7 @@ export default function ProfileSetting(){
                 const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
 
                 // 확장자를 제외한 파일 이름
-                const username = usernameAndExtension.split(".")[0];
+                const username = userInfo.username;
 
                 setFormData((prevData) => ({
                     ...prevData,
@@ -347,8 +350,6 @@ export default function ProfileSetting(){
         .catch(error =>{
             alert("이미지가 오류로인해 업로드되지 못했습니다.",error.response);  
         })
-        setUserInfo({ ...userInfo, profileImg: formData.profileImage});
-        localStorage.setItem("userInfo",JSON.stringify(userInfo));
     }
 
     const updateBirth = () => {
@@ -902,6 +903,7 @@ export default function ProfileSetting(){
         if (submitPermit1&&submitPermit2){
             uploadImageToS3();
             submitFormData2();
+            updateLocalStorage();
         }
         if (!imageFileChanged&&submitPermit2){
             submitFormData2();
