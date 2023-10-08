@@ -94,7 +94,22 @@ export default function ProfileSetting(){
         setEdit((prevEdit) => !prevEdit);
         setFormData(remains);
     };
+    
+    //localStorage
+    const [userInfo, setUserInfo] = useState(JSON.parse(localStorage.getItem('userInfo')));
 
+    const updateLocalStorage = () =>{
+
+        setUserInfo((prevData) => ({
+            ...prevData,
+            profileImg: formData2.basicProfile.profileImage
+        }));
+    }
+    useEffect(() => {
+        localStorage.removeItem("userInfo");
+        localStorage.setItem("userInfo",JSON.stringify(userInfo));
+    },[userInfo]);
+    
      //fetched data
     const [profileData, setProfileData] = useState({
         basicProfile:[],
@@ -266,7 +281,7 @@ export default function ProfileSetting(){
                 const usernameAndExtension = formData.basicProfile.profileImage.split("/").pop();
 
                 // 확장자를 제외한 파일 이름
-                const username = usernameAndExtension.split(".")[0];
+                const username = userInfo.username;
 
                 setFormData((prevData) => ({
                     ...prevData,
@@ -888,6 +903,7 @@ export default function ProfileSetting(){
         if (submitPermit1&&submitPermit2){
             uploadImageToS3();
             submitFormData2();
+            updateLocalStorage();
         }
         if (!imageFileChanged&&submitPermit2){
             submitFormData2();
