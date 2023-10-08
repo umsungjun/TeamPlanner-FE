@@ -21,6 +21,7 @@ import Chat from "./pages/chat/Chat";
 import ChatBox from "./component/chat/ChatBox";
 import Update from "./pages/team/Update";
 import { useState ,useEffect} from "react";
+import { API } from "../src/api/api";
 
 
 axios.defaults.withCredentials = true;
@@ -33,10 +34,12 @@ function App() {
   const handleClick = () => {
       setOpen(!open);
   };
+
   useEffect(() => {
     // Check for login status whenever the component mounts or updates
     setIsLoggedIn(!!localStorage.getItem("userInfo"));
   }, []);
+
   return (
     <AuthProvider>
       <>

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import styled from "@emotion/styled";
 import {createTheme,IconButton,ThemeProvider} from '@mui/material';
 import Box from "@mui/material/Box";
@@ -20,18 +20,21 @@ import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import Checkbox from '@mui/material/Checkbox';
 import { API } from "../../api/api";
+import { subDays, isBefore ,isSameDay} from "date-fns"; // date-fns의 subDays 함수와 isBefore 함수를 사용합니다.
+import dayjs from 'dayjs';
+
 const label = { inputProps: { 'aria-label': 'Checkbox demo' } };
 
 export default function ProduceModal({selectedMember,recruitmentId}){
 
-
+    const [maxMemberSize,setMaxMembmerSize]= useState([]);
       
 
     const [inputs, setInputs] = useState({
         selectedUserIds: selectedMember,
         recruitId : recruitmentId,
         teamName: "",
-        startDate: "",
+        startDate: null,
         endDate: "",
         maxTeamSize: "",
     });
@@ -40,16 +43,36 @@ export default function ProduceModal({selectedMember,recruitmentId}){
 
 
       
-      const handleDateChange = (name, date) => {
-
+    const handleDateChange = (name, date) => {
         const formatDateToString = (date) => {
-            return date.format("YYYY-MM-DD HH:mm:ss");
-          };
-        const updatedInputs = {
-            ...inputs,
-            [name]: formatDateToString(date), // 해당 name에 따라 변환된 날짜 값을 업데이트
+          return date.format("YYYY-MM-DD HH:mm:ss");
         };
-        
+    
+        const today = dayjs(); // Use Day.js for date operations
+    
+        if (name === "startDate" && date.isBefore(today)) {
+          alert("시작 날짜는 현재 날짜 이후로 선택해야 합니다.");
+          setInputs({
+            ...inputs,
+            startDate: today, // Set the startDate to the current date
+          });
+          return; // Do not update the state if the start date is invalid
+        }
+
+        if (inputs.startDate && name === "endDate" && date.isBefore(inputs.startDate)) {
+            alert("마감 날짜는 시작날짜 보다 커야 합니다.");
+            setInputs({
+                ...inputs,
+                endDate: null, // Set the startDate to the current date
+              });
+            return; // Do not update the state if the end date is invalid
+          }
+    
+        const updatedInputs = {
+          ...inputs,
+          [name]: formatDateToString(date),
+        };
+    
         setInputs(updatedInputs);
       };
 
@@ -108,6 +131,25 @@ export default function ProduceModal({selectedMember,recruitmentId}){
         setOpenModal(false);   
     }
 
+
+    const today = new Date(); // 현재 날짜를 가져옵니다.
+    const minSelectableDate = subDays(today, 1); // 현재 날짜 이전의 날짜를 가져옵니다.
+  
+    const shouldDisableDate = (date) => {
+        // 시작 날짜가 현재 날짜보다 이전인 경우 true를 반환하여 해당 날짜를 비활성화합니다.
+        return isBefore(date, today) || isSameDay(date, today);
+      };
+
+
+      useEffect(() => {
+        API.get(`/api/v1/recruitment/${recruitmentId}`)
+        .then(resp => {
+            setMaxMembmerSize(resp.data.maxMemberSize)
+
+        })
+      }, [recruitmentId]);
+
+   
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -137,7 +179,9 @@ export default function ProduceModal({selectedMember,recruitmentId}){
                                     <div className="date">
                                         <h3>시작 날짜</h3>
                                         <LocalizationProvider dateAdapter={AdapterDayjs} fullWidth>
-                                        <DatePicker  value={inputs.startDate} onChange={(date) => handleDateChange('startDate', date)}/>
+                                        <DatePicker  value={inputs.startDate}
+                                        onChange={(date) => handleDateChange("startDate", date)}
+                                        shouldDisableDate={shouldDisableDate}/>
                                         </LocalizationProvider>
                                     </div>
                                     <div className="date">
@@ -154,7 +198,7 @@ export default function ProduceModal({selectedMember,recruitmentId}){
                                                 labelId="demo-simple-select-label"
                                                 id="demo-simple-select"
                                                 name="maxTeamSize"
-                                                value={maxTeamSize}
+                                                value={maxMemberSize}
                                                 onChange={onInputChange}
                                                 fullWidth
                                                 sx={{fontSize : "1.4rem"}}
