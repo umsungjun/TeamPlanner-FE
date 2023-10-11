@@ -74,7 +74,7 @@ export default function Nav(){
 
                     // 연결이 닫혔을 때 처리
                     eventSource.addEventListener('error', (error) => {
-                        if (error.target.readyState === EventSource.CLOSED) {
+                        if (error.target.readyState === (EventSource && EventSource.CLOSED)) {
                             console.log("연결이 닫혔습니다.");
                             // localStorage.setItem('codeExecuted', 'false');
                         } else {
@@ -100,9 +100,12 @@ export default function Nav(){
         }
 
         window.addEventListener("beforeunload", function() {
-         eventSource.close();
-         console.log("연결 끊김");
-         localStorage.setItem('codeExecuted', false);
+            if(eventSource){
+                eventSource.close();
+                console.log("연결 끊김");
+                localStorage.setItem('codeExecuted', false);
+            }
+        
         })
     }, []); // 빈 배열을 전달하여 이펙트가 컴포넌트가 마운트될 때 한 번만 실행되도록 함
 
@@ -183,16 +186,21 @@ export default function Nav(){
 
 
 
-    useEffect(()=>{
-
-        API.get(`/api/v1/notifications`)
-          .then((res) => {  
-            setNotificationCount(res.data.length);
-          })
-          .catch((error) => {
-            alert(error);
-          });
-    },[])
+      useEffect(() => {
+        // localStorage에서 userInfo 가져오기
+        const userInfo = localStorage.getItem('userInfo');
+      
+        // userInfo가 존재하는 경우에만 API 호출
+        if (userInfo) {
+          API.get(`/api/v1/notifications`)
+            .then((res) => {  
+              setNotificationCount(res.data.length);
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        }
+      }, []);
 
   
   const [notificationCount, setNotificationCount] = useState(0);
@@ -281,16 +289,22 @@ export default function Nav(){
                                 'aria-labelledby': 'basic-button',
                                 }}
                             >
-                                <StyledMenuItem onClick={handleClose}>
                                 <Link to="/mypage/profileSetting">
+                                <div>
+                                    <StyledMenuItem onClick={handleClose}>
+
                                         마이페이지
-                                    </Link>
-                                </StyledMenuItem>
+                                    </StyledMenuItem>
+                                </div>
+                                </Link>
+
+                                <Link to="/" onClick={handleLogout}>
                                 <StyledMenuItem onClick={handleClose}>
-                                    <Link to="/" onClick={handleLogout}>
+                                    
                                         로그아웃
-                                    </Link>
+                                    
                                 </StyledMenuItem>
+                                </Link>
                             </Menu>
                            {/*수정 */}
                            {userInfo ? (

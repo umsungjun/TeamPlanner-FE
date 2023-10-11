@@ -429,10 +429,10 @@ export default function ChatBox({handleClick, open}){
                                 }
                                 {activeIndex !== null && tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
                             </ChatingBox>
-                            {!tabContArr.length > 0 &&  
+                            {/* {!tabContArr.length > 0 &&  
                                 <IconButton onClick={handleClick} style={{ width: '5%' , height: '10%' }}>
                                     <CloseIcon/>
-                                </IconButton>}
+                                </IconButton>} */}
                         </Chat>
                         : <></>
                     }

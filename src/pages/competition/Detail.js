@@ -333,17 +333,11 @@ export default function Detail() {
                   {/* 팀원 모집글 탭 */}
                   <TeamCardWrap>
                   {
-                    recruitmentList.length > 0 ? (
                       recruitmentList.map(r =>  
                         <Card>
                           <TaemCard {...r}/>
                         </Card>
                       )
-                    ) : (
-                      
-                         <h1>모집글이 존재하지 않습니다</h1>
-                  
-                    )
                   }
                     {/* <Card>
                       <TaemCard />

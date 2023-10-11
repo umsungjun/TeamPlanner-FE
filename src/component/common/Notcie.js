@@ -26,18 +26,23 @@ export default function Notice(){
 
 
     const[notificationList,setNotificationList]=useState([]);
-    useEffect(()=>{
-
-        API.get(`/api/v1/notifications`)
-          .then((res) => {  
-            setNotificationList(res.data);
-            const notificationCount = res.data.length;
-        localStorage.setItem('notificationCount', notificationCount.toString());
-          })
-          .catch((error) => {
-            alert(error);
-          });
-    },[])
+    useEffect(() => {
+        // localStorage에서 userInfo 가져오기
+        const userInfo = localStorage.getItem('userInfo');
+      
+        // userInfo가 존재하는 경우에만 API 호출
+        if (userInfo) {
+          API.get(`/api/v1/notifications`)
+            .then((res) => {  
+              setNotificationList(res.data);
+              const notificationCount = res.data.length;
+              localStorage.setItem('notificationCount', notificationCount.toString());
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        }
+      }, []);
 
 
 
