@@ -30,27 +30,6 @@ const Item = styled(Box)(({ theme }) => ({
   // boxShadow : 0
 }));
 
-const NotFoundText = styled.p`
-  font-size: 2rem; /* 폰트 크기 조정 */
-  color: #555; /* 원하는 텍스트 색상을 지정하세요 */
-  margin-bottom: 100px; /* 아래쪽 패딩 추가 */
-`;
-
-const NotFoundData = styled.div`
-  position: absolute;
-  bottom: 0; /* 화살표를 아래로 내리기 */
-  left: 50%;
-  transform: translate(-50%, -50%);
-  width: 50%;
-  height: 50%;
-  text-align: center;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-`;
-
-
 
 
 export default function Index() {
@@ -306,10 +285,7 @@ export default function Index() {
                     
                     
                   );
-                }) : 
-                <NotFoundData>
-                    <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText>
-                </NotFoundData>}
+                }) : "데이터가 존재하지 않습니다"}
                   </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
@@ -364,10 +340,7 @@ export default function Index() {
                     </Card>     
                   
                   );
-                }): 
-                <NotFoundData>
-                    <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText>
-                </NotFoundData>}
+                }): "데이터가 존재하지 않습니다"}
                 </Grid>
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>

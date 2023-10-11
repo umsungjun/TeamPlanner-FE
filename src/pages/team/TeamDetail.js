@@ -118,8 +118,6 @@ export default function TeamDetail({done}){
             console.log(`err = ${err}`);
         })
     }
-
-    console.log(authorNickname,JSON.parse(userInfo).nickname)
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -143,7 +141,7 @@ export default function TeamDetail({done}){
                                                 <h2>현재인원/최대인원 : <strong>{currentMemberSize}/{maxMemberSize}</strong></h2>
                                             </div>
                                         </li>
-                                        { authorNickname != JSON.parse(userInfo).nickname && (
+                                        { JSON.parse(userInfo) && authorNickname != JSON.parse(userInfo).nickname && (
                                             
                                         <li className="button-wrap">
                                             {

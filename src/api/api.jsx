@@ -94,9 +94,7 @@ API.interceptors.response.use(
                     removeCookie("accessToken");
                     localStorage.removeItem("userInfo");
                     window.location.href = `/login?redirect=${window.location.pathname}`;
-     
                     alert("로그인이 필요합니다.");
-
                     return new Promise(() => {});
                 default:
                     console.log('switch default error', error)
