@@ -30,7 +30,7 @@ const Item = styled(Box)(({ theme }) => ({
   // boxShadow : 0
 }));
 
-const NotFoundText = styled.p`
+const NotFoundText = styled.span`
   font-size: 2rem; /* 폰트 크기 조정 */
   color: #555; /* 원하는 텍스트 색상을 지정하세요 */
   margin-bottom: 100px; /* 아래쪽 패딩 추가 */
@@ -38,12 +38,9 @@ const NotFoundText = styled.p`
 
 const NotFoundData = styled.div`
   position: absolute;
-  bottom: 0; /* 화살표를 아래로 내리기 */
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
-  width: 50%;
-  height: 50%;
-  text-align: center;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -390,7 +387,7 @@ export default function Index() {
               </div>
             </CompetitionList>
             )}
-             {history.pathname !== "/" && (
+             {data.length > 0 && history.pathname !== "/" && (
               <BasicPagination
                 totalPages={totalPages}
                 currentPage={currentPage}

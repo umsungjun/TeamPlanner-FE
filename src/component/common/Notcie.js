@@ -22,40 +22,57 @@ import Badge from '@mui/material/Badge';
 import CloseIcon from '@mui/icons-material/Close';
 import NotificationsIcon from '@mui/icons-material/Notifications';
 import { API } from "../../api/api";
-export default function Notice(){
+export default function Notice(notifications){
 
+    
+    const [notificationList,setNotificationList]= useState(notifications);
+  
 
-    const[notificationList,setNotificationList]=useState([]);
-    useEffect(() => {
-        // localStorage에서 userInfo 가져오기
-        const userInfo = localStorage.getItem('userInfo');
+    // const[notificationList,setNotificationList]=useState([]);
+    // useEffect(() => {
+    //     // localStorage에서 userInfo 가져오기
+    //     const userInfo = localStorage.getItem('userInfo');
       
-        // userInfo가 존재하는 경우에만 API 호출
-        if (userInfo) {
-          API.get(`/api/v1/notifications`)
-            .then((res) => {  
-              setNotificationList(res.data);
-              const notificationCount = res.data.length;
-              localStorage.setItem('notificationCount', notificationCount.toString());
-            })
-            .catch((error) => {
-              alert(error);
-            });
-        }
-      }, []);
+    //     // userInfo가 존재하는 경우에만 API 호출
+    //     if (userInfo) {
+    //       API.get(`/api/v1/notifications`)
+    //         .then((res) => {  
+    //           setNotificationList(res.data);
+    //           const notificationCount = res.data.length;
+    //           localStorage.setItem('notificationCount', notificationCount.toString());
+    //         })
+    //         .catch((error) => {
+    //           alert(error);
+    //         });
+    //     }
+    //   }, []);
+
+    const NoAlert = styled.div`
+        width: 100%;
+        font-size: 1.5rem;
+
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+
+        display: flex;
+        justify-content: center;
+        aling-items: center;
+    `
 
 
 
         // 공지사항을 날짜별로 그룹화하고 최신순으로 정렬하는 함수
-    const groupAndSortNotifications = (notifications) => {
+    const groupAndSortNotifications = (notificationList) => {
         // 날짜별로 그룹화
         const groupedNotifications = {};
-        notifications.forEach((notification) => {
-            const dateKey = notification.createdDate.split('T')[0]; // 날짜 부분만 사용
+        notificationList.notifications.forEach((notifications) => {
+            const dateKey = notifications.createdDate.split('T')[0]; // 날짜 부분만 사용
             if (!groupedNotifications[dateKey]) {
                 groupedNotifications[dateKey] = [];
             }
-            groupedNotifications[dateKey].push(notification);
+            groupedNotifications[dateKey].push(notifications);
         });
 
         // 날짜로 정렬된 배열 생성 (최신순으로)
@@ -71,42 +88,41 @@ export default function Notice(){
 
         return sortedNotifications;
     };
-
     const sortedNotifications = groupAndSortNotifications(notificationList);
 
+    
 
     return(
         <>
         <ThemeProvider theme={theme}>
             <NotificationMenu >
                 <div className="wrap">
-                {sortedNotifications.map((group) => (
-                <div key={group.date}>
-                <ul className="notification-list">
-                <h3>{group.date}</h3>
-                    {group.notifications.map((notification) => (
-                    <li key={notification.content}>
-                    {/* 공지사항 내용을 링크로 표시 */}
-                      <div className="img-box">
-                      <a href="/mypage/teamManagement">
-                        <img src={notification.recruitmentProfileImage} alt="이미지" />
-                    </a>
-                      </div>
-                      <div className="text-box">
-                      <a href="/mypage/teamManagement">
-                        <h4>
-                          {notification.content}<br/>
-                        </h4>
-                    </a>
-                        <p>{notification.createdDate}</p>
-                      </div>
-                      
-                    
-                  </li>
-                    ))}
-                </ul>
-                </div>
-            ))}
+                {sortedNotifications && sortedNotifications.length > 0 ? (
+                    sortedNotifications.map((group) => (
+                        <div key={group.date}>
+                        <ul className="notification-list">
+                            <h3>{group.date}</h3>
+                            {group.notifications.map((notification) => (
+                            <li key={notification.content}>
+                                <div className="img-box">
+                                <a href="/mypage/teamManagement">
+                                    <img src={notification.recruitmentProfileImage} alt="이미지" />
+                                </a>
+                                </div>
+                                <div className="text-box">
+                                <a href="/mypage/teamManagement">
+                                    <h4>{notification.content}<br/></h4>
+                                </a>
+                                <p>{notification.createdDate}</p>
+                                </div>
+                            </li>
+                            ))}
+                        </ul>
+                        </div>
+                    ))
+                    ) : (
+                    <NoAlert>알림이 없습니다.</NoAlert>
+                    )}
                 
                 {/* <ul className="notification-list">
                     <h3>7월 13일 (목)</h3>
@@ -211,9 +227,9 @@ const NotificationMenu = styled(Box)`
     }
     @media ${() => theme.device.mobile} {
         right: 0;
-        top: 5rem;
         &>div{
             width: 100%;
+            min-width: 35em;
         }
     }
 `;
