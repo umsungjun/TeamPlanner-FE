@@ -50,7 +50,7 @@ API.interceptors.response.use(
         if (error?.response?.data?.code) {
             switch (error?.response?.data?.code) {
                 case -70000:
-                    console.log("expired access token");
+                    console.log("error");
                     removeCookie("accessToken");
                     
                     const cookies = document.cookie.split(";");

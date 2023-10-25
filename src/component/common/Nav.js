@@ -38,6 +38,15 @@ let eventSource = null;
 
 export default function Nav(){
 
+         {/*수정 */}
+    const dropdownRef = useRef(null); // Create a reference for dropdown container
+    const [isMenuDropDownOpen, setMenuDropDownOpen] = useState(false);
+    const[notificationList,setNotificationList]=useState([]);
+    let [notificationCount, setNotificationCount] = useState(() => {
+        return localStorage.getItem("USER") ? localStorage.getItem("USER") : 0;
+    });
+      
+
     useEffect(() => {
         // 코드가 이미 실행되었는지 확인
         if (localStorage.getItem('codeExecuted') !== 'true') {
@@ -69,33 +78,38 @@ export default function Nav(){
 
                     // 연결이 열렸을 때 처리
                     eventSource.addEventListener('open', () => {
-                        console.log("연결이 열렸습니다.");
+                        console.log("연결이 열렸습니다. test ");
                     });
 
                     // 연결이 닫혔을 때 처리
                     eventSource.addEventListener('error', (error) => {
                         if (error.target.readyState === (EventSource && EventSource.CLOSED)) {
                             console.log("연결이 닫혔습니다.");
-                            // localStorage.setItem('codeExecuted', 'false');
+                            localStorage.setItem('codeExecuted', 'false');
                         } else {
                             console.error("연결 오류:", error);
-                            // localStorage.setItem('codeExecuted', 'false');
+                            localStorage.setItem('codeExecuted', 'false');
                         }
                     });
 
                     eventSource.addEventListener('sse', event => {
                         console.log("이벤트" + event.data);
+                        if(event.data){
+                            setNotificationCount(notificationCount + 1);
+                            localStorage.setItem(`USER`, notificationCount + 1);
+                        }
                     });
 
                     // 코드가 실행되었음을 표시
                     localStorage.setItem('codeExecuted', 'true');
+
                 } else {
                     console.error("userInfo가 로컬 스토리지에 없습니다. 사용자 정보를 찾을 수 없음.");
-                    // localStorage.setItem('codeExecuted', 'false');
+                    localStorage.setItem('codeExecuted', 'false');
                 }
             } else {
                 console.error("accessToken이 없습니다. 인증 정보를 찾을 수 없음.");
-                // localStorage.setItem('codeExecuted', 'false');
+                localStorage.setItem('codeExecuted', 'false');
             }
         }
 
@@ -143,8 +157,7 @@ export default function Nav(){
         // toggleLogin();
         deleteCookie("accessToken")
         deleteCookie("refreshToken")
-        localStorage.removeItem("codeExecuted");
-        localStorage.removeItem("userInfo")
+        localStorage.clear();
         setUserInfo(null);
     };
     
@@ -165,10 +178,6 @@ export default function Nav(){
     const handleClose2 = () => {
       setAnchorEl(null);
     };
-
-     {/*수정 */}
-     const dropdownRef = useRef(null); // Create a reference for dropdown container
-     const [isMenuDropDownOpen, setMenuDropDownOpen] = useState(false);
    
      // Function to close dropdown
      const closeHoverMenu = () => {
@@ -180,32 +189,50 @@ export default function Nav(){
      const handleClose = () => {
         setAnchorEl(null);
       };
-  
- 
 
-
-
-
-      useEffect(() => {
-        // localStorage에서 userInfo 가져오기
+      useEffect(()=>{
         const userInfo = localStorage.getItem('userInfo');
       
         // userInfo가 존재하는 경우에만 API 호출
-        if (userInfo) {
+        if (userInfo && isMenuDropDownOpen) {
           API.get(`/api/v1/notifications`)
             .then((res) => {  
-              setNotificationCount(res.data.length);
+              setNotificationList(res.data);
+              // 초기화
+            let notificationCount = 0;
+            
+            // 리스트를 순회하면서 readCount가 1인 경우 카운트 증가
+            notificationList.forEach(notification => {
+            if (notification.readCount === 1) {
+                notificationCount++;
+            }
+            });
+              setNotificationCount(0);
+              localStorage.removeItem("USER");
             })
             .catch((error) => {
               alert(error);
             });
         }
-      }, []);
+      },[isMenuDropDownOpen])
 
-  
-  const [notificationCount, setNotificationCount] = useState(0);
-  
 
+      useEffect(()=>{
+        
+          API.get(`/api/v1/notifications`)
+            .then((res) => {  
+              setNotificationList(res.data);
+            })
+            .catch((error) => {
+              alert(error);
+            });
+        
+      },[])
+  
+ 
+    useEffect(()=>{
+        console.log("알림카운트 갱신",notificationCount);
+    },[notificationCount])
     return(
         <>
         <ThemeProvider theme={theme}>
@@ -320,7 +347,7 @@ export default function Nav(){
                                 {/* 알림 목록 */}
                                 {isMenuDropDownOpen && (
                                 <div onMouseLeave={() => setMenuDropDownOpen(false)}>
-                                    <Notice />
+                                    <Notice notifications= {notificationList}/>
                                 </div>
                                 )}
                             </div>
@@ -382,7 +409,7 @@ export default function Nav(){
                                         isMenuDropDownOpen &&
                                         <div onClick={() => setMenuDropDownOpen(false)}>
                                             {/*0808 수정 */}
-                                            <Notice handle={setMenuDropDownOpen}/> 
+                                            <Notice notifications= {notificationList} handle={setMenuDropDownOpen}/> 
                                         </div>
                                      }
                                 </div>

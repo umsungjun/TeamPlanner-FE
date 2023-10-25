@@ -36,9 +36,11 @@ export default function ProduceModal({selectedMember,recruitmentId}){
         teamName: "",
         startDate: null,
         endDate: "",
-        maxTeamSize: "",
+        maxTeamSize: maxMemberSize,
     });
-    const { maxTeamSize } = inputs;
+
+
+    console.log(maxMemberSize);
 
 
 
@@ -49,7 +51,7 @@ export default function ProduceModal({selectedMember,recruitmentId}){
         };
     
         const today = dayjs(); // Use Day.js for date operations
-    
+        
         if (name === "startDate" && date.isBefore(today)) {
           alert("시작 날짜는 현재 날짜 이후로 선택해야 합니다.");
           setInputs({
@@ -107,6 +109,8 @@ export default function ProduceModal({selectedMember,recruitmentId}){
 
     const onInputChange = (e) => {
         const { name, value } = e.target;
+        setMaxMembmerSize(value)
+        console.log(name,value);
         setInputs({
           ...inputs,
           [name]: value,
@@ -148,6 +152,8 @@ export default function ProduceModal({selectedMember,recruitmentId}){
 
         })
       }, [recruitmentId]);
+
+
 
    
     return(

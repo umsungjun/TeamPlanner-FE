@@ -127,16 +127,19 @@ export default function ChatBox({handleClick, open}){
     const disconnectChatRoom = (roomId) => {
         // Parse roomId as an integer
         roomId = parseInt(roomId);
-        
-        API.post(`/api/v1/chat/chatroom/${roomId}`)
-          .then((res) => {
-            setRoomId("");
-            setActiveIndex(null);
-            console.log("disconnet Chat room API Response", res.data);
-          })
-          .catch((error) => {
-            console.error("API Error", error);
-          });
+        handleClick2();
+        if(roomId){
+            API.post(`/api/v1/chat/chatroom/${roomId}`)
+            .then((res) => {
+              setRoomId("");
+              setActiveIndex(null);
+              console.log("disconnet Chat room API Response", res.data);
+            })
+            .catch((error) => {
+              console.error("API Error", error);
+            });
+        }
+       
       };
     /*
     * 채팅방을 가져오는 api 
@@ -204,6 +207,7 @@ export default function ChatBox({handleClick, open}){
                 
             });
         }
+        
         
         //해당 메세지를 제대로 받았으면 count 값 -=1
         // if(newChat.readCount>0){
@@ -405,7 +409,7 @@ export default function ChatBox({handleClick, open}){
                                 </Mobile>
                             </div>
                             <ChatingBox>
-                                {activeIndex === null && 
+                                {activeIndex === null ?
                                     <>
                                         <ChatingWrap>
                                             <ul className="user-title">
@@ -426,8 +430,7 @@ export default function ChatBox({handleClick, open}){
                                             </div>
                                         </ChatingList>
                                     </>
-                                }
-                                {activeIndex !== null && tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
+                                : tabContArr.length > 0 && tabContArr[activeIndex].tabCont}
                             </ChatingBox>
                             {/* {!tabContArr.length > 0 &&  
                                 <IconButton onClick={handleClick} style={{ width: '5%' , height: '10%' }}>

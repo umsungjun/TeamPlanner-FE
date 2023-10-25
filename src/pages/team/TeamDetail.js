@@ -13,7 +13,7 @@ import Comment from "../../component/recruitmentComment/Comment";
 import Button from "@mui/material/Button";
 import ApplicationModal from "../../component/modal/ApplicationModal";
 import { useParams } from "react-router";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { API } from "../../api/api";
 import { now } from "moment/moment";
 import CheckBtn from "../../component/button/CheckBtn";
@@ -158,7 +158,9 @@ export default function TeamDetail({done}){
                                 <div className="content">
                                     <div className="profile dp-flex">
                                     <div className="dp-flex">
-                                        <Avatar src={authorProfileImg}></Avatar>
+                                    <Link to={`/profile/${authorNickname}`}>
+                                    <Avatar src={authorProfileImg}></Avatar>
+                                    </Link>
                                         <h3>{authorNickname}</h3>
                                     </div>
                                     { userInfo && authorNickname == JSON.parse(userInfo).nickname && (
