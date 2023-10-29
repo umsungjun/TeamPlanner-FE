@@ -19,7 +19,6 @@ import AttendCard from "../../component/card/AttendCard";
 import ProduceModal from "../../component/modal/ProduceModal";
 import { API } from "../../api/api";
 import TeamCard2Less from "../../component/card/TeamCard2Less";
-import { South } from "@mui/icons-material";
 
 
 function CustomTabPanel(props) {
@@ -72,7 +71,6 @@ export default function TeamManagement(){
     useEffect(() => {
       API.get("/api/v1/member/applicant-list")
       .then(res => {
-        console.log(res.data);
         setApplicant(res.data);
           
       })
@@ -163,7 +161,8 @@ export default function TeamManagement(){
                                     <ul>
 
                                     {teams.map((team) => {
-                                        if(new Date(team.endDate) >= new Date()){
+                                        
+                                        if(team.teamStateEnum=="ONGOING"){
                                                 
                                             if(team.memberInfos.length >=5){
                                                 return (
@@ -200,7 +199,7 @@ export default function TeamManagement(){
 
             
 
-                                    if(new Date(team.endDate) < new Date()){
+                                    if(team.teamStateEnum=="DEADLINE"){
                                         if(team.memberInfos.length >=5){
                                             return (
                                                 <li>

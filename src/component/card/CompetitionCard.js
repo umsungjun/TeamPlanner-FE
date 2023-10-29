@@ -84,6 +84,10 @@ const Card = styled(Box)`
             line-height: 150%;
             font-weight: bold;
             margin-bottom: .5rem;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            width: 100%;
         }
         .padding-wrap{
             padding: 2rem;

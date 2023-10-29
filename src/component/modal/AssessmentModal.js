@@ -15,6 +15,7 @@ import SolidBtn from "../../component/button/SolideBtn";
 import CloseIcon from '@mui/icons-material/Close';
 import theme from "../../style/theme";
 import Rating from '@mui/material/Rating';
+import IconContainerComponent from '@mui/material/Rating';
 import { API } from "../../api/api";
 import TextField from '@mui/material/TextField';
 import AssessmentModal2 from "./AssessmentModal2";
@@ -39,6 +40,8 @@ ChartJS.register(
     Tooltip,
     Legend
   );
+
+  
 
 //   export const data = { 
 //     labels: ['창의성', '리더쉽', '성실함', '기술력', '커뮤니케이션'],
@@ -77,7 +80,9 @@ export const options = {
 }
 
 
-export default function AssessmentModal({nickname,endDate,teamId,memberId}){
+export default function AssessmentModal({nickname,endDate,teamId,memberId,teamStateEnum}){
+
+    
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -114,7 +119,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
     API.get(`/api/v1/profile/${nickname}`)
         .then(res => {
 
-            if (new Date(endDate) > new Date()) {
+            if (teamStateEnum=="ONGOING") {
             
 
             const evaluations = res.data.evaluations;
@@ -132,7 +137,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                 datasets: [
                     {
                         ...chartData.datasets[0],
-                        data: [valueAvg, value2Avg, value3Avg, value4Avg, value5Avg]
+                        data: [valueAvg*1.6, value2Avg*1.6, value3Avg*1.6, value4Avg*1.6, value5Avg*1.6]
                     }
                 ]
             });
@@ -146,7 +151,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
         }
     })
 
-    if (new Date(endDate) > new Date()) {
+    if (teamStateEnum=="ONGOING") {
         setOpen(true);
     } else {
         setOpen2(true);
@@ -163,11 +168,11 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
     };
 
 
-    const [value, setValue] = React.useState(5);
-    const [value2, setValue2] = React.useState(5);
-    const [value3, setValue3] = React.useState(5);
-    const [value4, setValue4] = React.useState(5);
-    const [value5, setValue5] = React.useState(5);
+    const [value, setValue] = React.useState(4);
+    const [value2, setValue2] = React.useState(4);
+    const [value3, setValue3] = React.useState(4);
+    const [value4, setValue4] = React.useState(4);
+    const [value5, setValue5] = React.useState(4);
     const [valueSum, setValueSum] = React.useState(50);
 
 
@@ -214,7 +219,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
             <div>
 
                     {
-                       new Date(endDate) > new Date() ?
+                       teamStateEnum=="ONGOING" ?
                     <StyledMenuItem variant="outlined" onClick={handleClickOpen}>
                         평가보기
                     </StyledMenuItem>
@@ -255,7 +260,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                                     <h3>창의성</h3>
                                     <Rating
                                         name="simple-controlled"
-                                        value={value/2}
+                                        value={value}
                                         // onChange={(event, newValue) => {
                                         //     setValue(newValue);
                                         // }}
@@ -267,7 +272,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                                     <h3>리더십</h3>
                                     <Rating
                                         name="simple-controlled"
-                                        value={value2/2}
+                                        value={value2}
                                         // onChange={(event, newValue) => {
                                         //     setValue2(newValue);
                                         // }}
@@ -277,7 +282,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                                     <h3>성실함</h3>
                                     <Rating
                                         name="simple-controlled"
-                                        value={value3/2}
+                                        value={value3}
                                         // onChange={(event, newValue) => {
                                         //     setValue3(newValue);
                                         // }}
@@ -289,7 +294,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                                     <h3>기술력</h3>
                                     <Rating
                                         name="simple-controlled"
-                                        value={value4/2}
+                                        value={value4}
                                         // onChange={(event, newValue) => {
                                         //     setValue4(newValue);
                                         // }}
@@ -299,7 +304,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                                     <h3>커뮤니케이션</h3>
                                     <Rating
                                         name="simple-controlled"
-                                        value={value5/2}
+                                        value={value5}
                                         // onChange={(event, newValue) => {
                                         //     setValue5(newValue);
                                         // }}
@@ -377,7 +382,7 @@ export default function AssessmentModal({nickname,endDate,teamId,memberId}){
                             <li>
                                 <div>
                                     <h3>총 점</h3>
-                                    <h4> {valueSum}/ 50</h4>
+                                    <h4> {valueSum}/ 40</h4>
                                 </div>
                                 <div>
                                     <h3>창의성</h3>

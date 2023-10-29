@@ -76,15 +76,14 @@ export default function Participation(){
                                     <ParticipationList>
                                         <h2>{data[e][0].boardName}</h2>
                                         <ul>
-                                            {
-                                            data[e].map(p => {
-                                                return (
-                                                <li>
-                                                    <ParticipationCard {...p} fetchData={fetchData} />
-                                                </li>   
-                                                ) 
-                                            })
-                                            }
+                                        {data[e].map(p => (
+                                            p.state !== "ACCEPT" ? null : (
+                                                <li key={p.id}> {/* Key props는 필수입니다 */}
+                                                <ParticipationCard {...p} fetchData={fetchData} />
+                                                </li>
+                                            )
+                                            ))}
+
                                         </ul>
                                     </ParticipationList>
                                     )

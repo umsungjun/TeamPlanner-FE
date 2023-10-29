@@ -1307,20 +1307,22 @@ export default function ProfileSetting(){
                                                         >
                                                         {activity.endDate}
                                                         </span>
-                                                        <h4 onClick={() => handleEditActivity(index)}>
+                                                        {/* <h4 onClick={() => handleEditActivity(index)}>
                                                             {activity.isEditing ? (
-                                                                <input id={`activities[${index}].subject`} value={activity.subject} onChange={(e) => handleActivityInputChange(e, index)}></input>
+                                                                <input style={{fontSize: "14px", padding: "0", paddingTop: ".2em", paddingBottom: ".2em"}} id={`activities[${index}].subject`} value={activity.subject} onChange={(e) => handleActivityInputChange(e, index)}></input>
                                                             ) : (
                                                                 activity.subject
                                                             )}
-                                                        </h4>
-                                                        <p onClick={() => handleEditActivity(index)}>
+                                                        </h4> */}
+                                                        <input style={{fontSize: "16px", padding: "0", paddingTop: ".3em", paddingBottom: ".3em", border: "none", fontWeight: "700"}} id={`activities[${index}].subject`} value={activity.subject} onChange={(e) => handleActivityInputChange(e, index)} placeholder="제목을 입력해주세요"></input>
+                                                        <input style={{fontSize: "14px", padding: "0", paddingTop: ".3em", paddingBottom: ".3em", border: "none"}} id={`activities[${index}].detail`} value={activity.detail} onChange={(e) => handleActivityInputChange(e, index)} placeholder="내용을 입력해주세요"></input>
+                                                        {/* <p onClick={() => handleEditActivity(index)}>
                                                             {activity.isEditing ? (
-                                                                <input id={`activities[${index}].detail`} value={activity.detail} onChange={(e) => handleActivityInputChange(e, index)}></input>
+                                                                <input style={{fontSize: "14px", padding: "0", paddingTop: ".2em", paddingBottom: ".2em"}} id={`activities[${index}].detail`} value={activity.detail} onChange={(e) => handleActivityInputChange(e, index)}></input>
                                                             ) : (
                                                                 activity.detail
                                                             )}
-                                                        </p>
+                                                        </p> */}
                                                         <IconButton onClick={() => handleRemoveActivity(index)}>
                                                             <RemoveCircleOutlineIcon />
                                                         </IconButton>
@@ -1369,13 +1371,14 @@ export default function ProfileSetting(){
                                                             >
                                                             {certification.gainDate}
                                                             </span>
-                                                            <h4 onClick={() => handleEditCertification(index)}>
+                                                            {/* <h4 onClick={() => handleEditCertification(index)}>
                                                                 {certification.isEditing ? (
                                                                     <input id={`certifications[${index}].name`} value={certification.name} onChange={(e) => handleCertificationInputChange(e, index)}></input>
                                                                 ) : (
                                                                     certification.name
                                                                 )}
-                                                            </h4>
+                                                            </h4> */}
+                                                            <input style={{fontSize: "15px", padding: "0", paddingTop: ".3em", paddingBottom: ".3em", border: "none"}} id={`certifications[${index}].name`} value={certification.name} onChange={(e) => handleCertificationInputChange(e, index)} placeholder="제목을 입력해주세요"></input>
                                                         </li>
                                                         <IconButton onClick={() => handleRemoveCertification(index)}>
                                                             <RemoveCircleOutlineIcon />

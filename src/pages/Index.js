@@ -280,7 +280,8 @@ export default function Index() {
 
                   let title;
                   if (item.activitiyName.length >= 8) {
-                    title = item.activitiyName.slice(0, 8) + "...";
+                    // title = item.activitiyName.slice(0, 8) + "...";
+                    title = item.activitiyName;
                   } else {
                     title = item.activitiyName;
                   }
