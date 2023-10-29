@@ -129,9 +129,9 @@ export default function Profile({handleClick}){
             if(res.data.roomCheck===false){
                 window.alert("이미 채팅방이 존재합니다");
             }else{
-                handleClick(img,nickname);
-                localStorage.setItem("img",img);
+                localStorage.setItem("img",imageFileURL);
                 localStorage.setItem("targetNickname",nickname);
+                handleClick(img,nickname);
             }
         }).catch(err => {
             console.log('err', err)
@@ -215,11 +215,11 @@ export default function Profile({handleClick}){
             {
             ...prevData.datasets[0],
             data: [
-                avgStats.stat1,
-                avgStats.stat2,
-                avgStats.stat3,
-                avgStats.stat4,
-                avgStats.stat5,
+                avgStats.stat1*2,
+                avgStats.stat2*2,
+                avgStats.stat3*2,
+                avgStats.stat4*2,
+                avgStats.stat5*2,
             ],
             },
         ],
@@ -257,6 +257,7 @@ export default function Profile({handleClick}){
         }
       }, [nickname]);
 
+     
 
     return(
         <>

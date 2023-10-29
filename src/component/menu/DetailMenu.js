@@ -52,6 +52,7 @@ export default function DetailMenu(){
 
 const MenuWrap = styled(List)`
     width: 100%;
+    margin-top:4em;
     span{
         font-size: 1.6rem;
         color: #3b3b3b;

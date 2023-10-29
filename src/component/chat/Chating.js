@@ -22,7 +22,6 @@ import SockJS from 'sockjs-client';
 import {Stomp} from '@stomp/stompjs';
 import { AuthContext } from "../../AuthContext";
 import { API_BASE_URL } from "../../common/constant/constant";
-
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import CollectionsIcon from '@mui/icons-material/Collections';
 
@@ -189,7 +188,10 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
             // connectToWebSocket(() => {
             //     createChatRoomthenSend(res.data);
             // });
-            connectToWebSocket(res.data, createChatRoomthenSend);
+            if(res){
+                connectToWebSocket(res.data, createChatRoomthenSend);
+            }
+            
         })
         } else {
             // connectToWebSocket(chattingRoomId,isPresentChatRoomthenSend);

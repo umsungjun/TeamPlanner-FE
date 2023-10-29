@@ -62,7 +62,7 @@ export default function TeamCard2({type}){
                                 <li>
                                     
                                     {
-                                        new Date(type.endDate) > new Date() ?
+                                        type.teamStateEnum=="ONGOING" ?
                                         <h4 className="ing">진행 중</h4>
                                         :
                                         <h4>마감</h4>

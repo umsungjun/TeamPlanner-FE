@@ -1,13 +1,21 @@
+import axios from "axios";
+import { setupCache } from "axios-cache-adapter";
+
 import { getCookie, removeCookie, setCookie } from "../util/cookie";
 import { API_BASE_URL } from "../common/constant/constant";
 import { useNavigate } from "react-router-dom";
 import CommonModal from "../component/modal/CommonModal";
-import axios from "axios";
+import { cacheAdapterEnhancer } from 'axios-extensions';
+  
+const cache = setupCache({
+    maxAge: 15 * 60 * 1000
+  })
 
 export const API = axios.create({
     baseURL: API_BASE_URL,
-    headers: {},
+	headers: { 'Cache-Control': 'no-cache' },
     timeout: 5000,
+	// adapter: cacheAdapterEnhancer(axios.defaults.adapter)
   });
 
 API.interceptors.request.use(
@@ -87,7 +95,7 @@ API.interceptors.response.use(
                 case -7: // 리프레시토큰 찾을수없음
                 case -4: // 리프레시토큰 만료됨
                     removeCookie("refreshToken");
-                case -101: // unauthorized HTTP status, (unauthenticated.) 
+                case -101: //unauthorized HTTP  status, (unauthenticated.) 
                     // re-login required.
                     console.log("refreshToken expired");
                     removeCookie("refreshToken");
