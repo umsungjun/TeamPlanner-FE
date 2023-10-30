@@ -179,34 +179,25 @@ export default function Nav(){
       setAnchorEl(null);
     };
    
-     // Function to close dropdown
-     const closeHoverMenu = () => {
-       setMenuDropDownOpen(false);
-     };
+    //  // Function to close dropdown
+    //  const closeHoverMenu = () => {
+    //    setMenuDropDownOpen(false);
+    //  };
    
-     useOnHoverOutside(dropdownRef, closeHoverMenu); // Call the hook
+    //  useOnHoverOutside(dropdownRef, closeHoverMenu); // Call the hook
      
      const handleClose = () => {
         setAnchorEl(null);
       };
 
       useEffect(()=>{
-        const userInfo = localStorage.getItem('userInfo');
       
         // userInfo가 존재하는 경우에만 API 호출
-        if (userInfo && isMenuDropDownOpen) {
-          API.get(`/api/v1/notifications`)
+        if (isMenuDropDownOpen) {
+          API.put(`/api/v1/notifications`)
             .then((res) => {  
               setNotificationList(res.data);
               // 초기화
-            let notificationCount = 0;
-            
-            // 리스트를 순회하면서 readCount가 1인 경우 카운트 증가
-            notificationList.forEach(notification => {
-            if (notification.readCount === 1) {
-                notificationCount++;
-            }
-            });
               setNotificationCount(0);
               localStorage.removeItem("USER");
             })
@@ -218,15 +209,24 @@ export default function Nav(){
 
 
       useEffect(()=>{
-        
-          API.get(`/api/v1/notifications`)
+        const userInfo = localStorage.getItem('userInfo');
+          if(userInfo){
+            API.get(`/api/v1/notifications`)
             .then((res) => {  
               setNotificationList(res.data);
+               // 리스트를 순회하면서 readCount가 1인 경우 카운트 증가
+               let notificationCount=0
+                res.data.forEach(notification => {
+                if (notification.readCount === 1) {
+                    notificationCount++;
+                }
+                });
+                setNotificationCount(notificationCount);
             })
             .catch((error) => {
               alert(error);
             });
-        
+          }
       },[])
   
  
@@ -310,7 +310,7 @@ export default function Nav(){
                             <Menu
                                 id="basic-menu"
                                 anchorEl={anchorEl}
-                                open={open2}
+                                open={localStorage.getItem("userInfo") && open2}
                                 onClose={handleClose}
                                 MenuListProps={{
                                 'aria-labelledby': 'basic-button',
@@ -394,16 +394,19 @@ export default function Nav(){
                                 
                                 }
                             </ProfileBtn>
+                            
                                     <MenuBtn onClick={handleClick}>
                                         <MenuIcon />
                                     </MenuBtn>
                                     {/*수정 */}
                                     {/*0809 수정 */}
+                            { userInfo ? (
                                     <Button onClick={() => setMenuDropDownOpen(!isMenuDropDownOpen)}>
                                         <NotificationBadge badgeContent={notificationCount} color="primary">
                                             <NotificationsIcon color="action" />
                                         </NotificationBadge>
                                     </Button>
+                             ): ("")}
                                     {/*0809 수정 */}
                                     {
                                         isMenuDropDownOpen &&
@@ -412,8 +415,10 @@ export default function Nav(){
                                             <Notice notifications= {notificationList} handle={setMenuDropDownOpen}/> 
                                         </div>
                                      }
+                            
                                 </div>
                             </div>
+                            
                             <div className="search-bar">
                                 <StyledInputBase
                                       sx={{ ml: 1, flex: 1 }}
@@ -447,7 +452,7 @@ export default function Nav(){
                                             <StyledListItemText primary="동아리" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink href="" underline="none">
+                                    <StyledLink Link to="/recruitment" underline="none">
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="팀원 모집게시판" />
                                         </ListItemButton>

@@ -35,5 +35,10 @@ const TitleWrap = styled(Box)`
         color: #3b3b3b;
         font-weight: bold;
         line-height: 150%;
+        margin-bottom: 0.5rem;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        width: 100%;
     }
 `;

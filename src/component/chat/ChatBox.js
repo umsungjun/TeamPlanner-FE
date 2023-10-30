@@ -1,3 +1,6 @@
+
+
+
 import React, { useState } from "react";
 import { useContext, useEffect, useRef} from "react";
 import styled from "@emotion/styled";
@@ -71,6 +74,7 @@ export default function ChatBox({handleClick, open}){
         connectToWebSocket(() => {
             subscribeSocket();
         });
+        window.location.reload();
         console.log("onError")
     }
 
@@ -79,7 +83,7 @@ export default function ChatBox({handleClick, open}){
    // 함수로 소켓 연결 설정과 정리를 분리
    const connectToWebSocket = (onConnectedCallback) => {
     // Clean up existing subscriptions
-    if (client && client.connected) {
+    if (client && client.current && client.current.connected) {
         // If connected, just execute the callback and return
         onConnectedCallback(roomId);
         return;

@@ -12,7 +12,7 @@ import ArrowRightIcon from '@mui/icons-material/ArrowRight';
 import ArrowLeftIcon from '@mui/icons-material/ArrowLeft';
 import moment from "moment"; // Moment.js 라이브러리
 import { useHistory } from 'react-router-dom';
-
+import { API } from "../../api/api";
 
 // Import Swiper React components
 import { Swiper, SwiperSlide } from 'swiper/react';
@@ -24,10 +24,7 @@ import "swiper/css/scrollbar";
 
 SwiperCore.use([Pagination, Navigation, Autoplay]);
 
-export default function     TeamCard2Less({type}){
-
-
-
+export default function TeamCard2Less({type}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -62,6 +59,22 @@ export default function     TeamCard2Less({type}){
         window.location.href = url;
     };
 
+
+    const handleTeamClose = () => {
+        console.log(type.id);
+        if (window.confirm("정말로 마감하시겠습니까?"),{}) {
+            API.put(`/api/v1/team/${type.id}`,)
+            .then(res => {
+                if (res.status === 200) {
+                    window.alert("팀이 정상적으로 마감되었습니다");
+                    window.location.reload();
+                    // 마감 처리 후 필요한 작업을 수행할 수 있습니다.
+                  }
+            }).catch(err => {
+                console.log(`err = ${err}`);
+            })
+        }
+    };
     return(
         <>
           <ThemeProvider theme={theme}>
@@ -79,15 +92,28 @@ export default function     TeamCard2Less({type}){
                                 </li>
                                 <li>
                                     {
-                                        new Date(type.endDate) > new Date() ?
-                                        <h4 className="ing">진행 중</h4>
+                                        type.teamStateEnum=="ONGOING" ?
+
+                                        <div>
+                                            <h4 className="ing">진행 중</h4>
+                                    
+                                        </div>
                                         :
                                         <h4>마감</h4>
                                     }
                                 </li>
                             </ul>
-                            <h2>활동명 : {type.activityName}</h2>
-                            <p>{moment(type.startDate).format("YYYY-MM-DD")} ~ {moment(type.endDate).format("YYYY-MM-DD")}</p>
+                            <h2>{type.activityName}</h2>
+                           
+                           
+                            <p>{moment(type.startDate).format("YYYY-MM-DD")} ~ {moment(type.endDate).format("YYYY-MM-DD")} </p>
+                            {
+                                type.teamStateEnum==="ONGOING" && type.teamLeader == JSON.parse(localStorage.getItem("userInfo")).username ?
+                                ( <p> <Button onClick={handleTeamClose}>활동 마감</Button></p>)
+                                :
+                                ("")
+                            }
+                           
                         </div>
                         
                         <div className="profile-img2">
@@ -176,7 +202,7 @@ export default function     TeamCard2Less({type}){
                                 </li>
                                 <li>
                                     {
-                                        new Date(type.endDate) > new Date() ?
+                                        type.teamStateEnum=="ONGOING" ?
                                         <h4 className="ing">진행 중</h4>
                                         :
                                         <h4>마감</h4>
@@ -271,7 +297,7 @@ export default function     TeamCard2Less({type}){
                 }}
             >
                 <StyledMenuItem onClick={handleProfileClick}>프로필 보기</StyledMenuItem>
-                <MenuItem><AssessmentModal nickname={currentNickname} endDate={endDate} teamId={teamId} memberId={memberId}/></MenuItem>
+                <MenuItem><AssessmentModal nickname={currentNickname} endDate={endDate} teamId={teamId} memberId={memberId} teamStateEnum={type.teamStateEnum}/></MenuItem>
             </StyledMenu>
           </ThemeProvider>
         </>
@@ -427,7 +453,7 @@ const TeamCard2Wrap = styled(Box)`
             width: 100%;
             img{
                 width: 100%;
-                height: auto;
+                // height: auto;
             }
         }
     }

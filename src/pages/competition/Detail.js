@@ -223,21 +223,21 @@ export default function Detail() {
                       <div className="dp-flex">
                         <h3>공유하기</h3>
                         <div className="sns-button-list">
-                          <IconButton>
+                          {/* <IconButton>
                             <img src="/img/icon/sns/facebook.png"></img>
                           </IconButton>
                           <IconButton>
                             <img src="/img/icon/sns/twiter.png"></img>
-                          </IconButton>
+                          </IconButton> */}
                           <IconButton>
                           <NaverButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
-                          <IconButton>
+                          {/* <IconButton>
                             <img src="/img/icon/sns/band.png"></img>
                           </IconButton>
                           <IconButton>
                             <img src="/img/icon/sns/kakaostory.png"></img>
-                          </IconButton>
+                          </IconButton> */}
                           <IconButton>
                             <KakaoButton activityName={data.activitiyName} activityImg={data.activityImg} boardId={boardId} />
                           </IconButton>
