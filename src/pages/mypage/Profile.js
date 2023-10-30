@@ -92,6 +92,8 @@ export default function Profile({handleClick}){
 
     const [educations, setEducations] = useState([]);
 
+    const [fetchedAll, setFetchedAll] = useState(false);
+
     
     //fetched data
     const [profileData, setProfileData] = useState({
@@ -99,7 +101,8 @@ export default function Profile({handleClick}){
         techStacks:[],
         activities:[],
         certifications:[],
-        evaluations:[]
+        evaluations:[],
+        recommendedUsers:[]
     });
 
 
@@ -228,8 +231,18 @@ export default function Profile({handleClick}){
 
     //useEffect
     useEffect(()=>{
-        fetchEnum();
-        fetchProfile();
+        const fetchData = async () => {
+            try {
+              await Promise.all([fetchEnum(), fetchProfile()]);
+              // 여기서 모든 API 호출이 완료됨
+              // 원하는 작업을 수행할 수 있음
+              setFetchedAll(true);
+            } catch (error) {
+              console.error('API 호출 오류:', error);
+            }
+          };
+        
+          fetchData();
     },[]);
 
     useEffect(()=>{
@@ -257,8 +270,9 @@ export default function Profile({handleClick}){
         }
       }, [nickname]);
 
-     
-
+  
+  
+    if (fetchedAll)
     return(
         <>
             <ThemeProvider theme={theme}>
@@ -331,39 +345,39 @@ export default function Profile({handleClick}){
                                     <ul className="info-list">
                                         <li className="dp-flex">
                                             <h4>성별</h4>
-                                            <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label}</p>
+                                            <p>{genders.find(option => option.value === profileData.basicProfile.gender)?.label ? genders.find(option => option.value === profileData.basicProfile.gender)?.label : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>생년월일</h4>
-                                            <p>{profileData.basicProfile.birth}</p>
+                                            <p>{profileData.basicProfile.birth ? profileData.basicProfile.birth : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>직업</h4>
-                                            <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label}</p>        
+                                            <p>{jobs.find(option => option.value === profileData.basicProfile.job)?.label ? jobs.find(option => option.value === profileData.basicProfile.job)?.label : "미입력"}</p>        
                                         </li>
                                         <li className="dp-flex">
                                             <h4>최종학력</h4>
-                                            <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label}</p>
+                                            <p>{educations.find(option => option.value === profileData.basicProfile.education)?.label ? educations.find(option => option.value === profileData.basicProfile.education)?.label : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>입학날짜</h4>
-                                            <p>{profileData.basicProfile.admissionDate}</p>
+                                            <p>{profileData.basicProfile.admissionDate ? profileData.basicProfile.admissionDate : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>졸업날짜</h4>
-                                            <p>{profileData.basicProfile.graduationDate}</p>
+                                            <p>{profileData.basicProfile.graduationDate ? profileData.basicProfile.graduationDate : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>카카오아이디</h4>
-                                            <p>{profileData.basicProfile.kakaoId}</p>
+                                            <p>{profileData.basicProfile.kakaoId ? profileData.basicProfile.kakaoId : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>연락처(이메일)</h4>
-                                            <p>{profileData.basicProfile.contactEmail}</p>
+                                            <p>{profileData.basicProfile.contactEmail ? profileData.basicProfile.contactEmail : "미입력"}</p>
                                         </li>
                                         <li className="dp-flex">
                                             <h4>거주지</h4>
-                                            <p>{profileData.basicProfile.address}</p>
+                                            <p>{profileData.basicProfile.address ? profileData.basicProfile.address : "미입력"}</p>
                                         </li>
                                     </ul>
                                 </div>
@@ -394,24 +408,20 @@ export default function Profile({handleClick}){
                                     </ul>
                                 </div>
                                 <RecomandTeam>
-                                    <h3><strong>사용자</strong> 님과 비슷한 프로필을 추천해드려요</h3>
+                                    <h3><strong>{nickname}</strong> 님과 비슷한 프로필을 추천해드려요</h3>
                                     <div className="recomand-team-wrap">
                                         <ul className="scorll-wrap">
-                                            <li>
-                                                <RecomandTeamCard />
+                                            {profileData.recommendedUsers.map((recommendedUser, index) => (
+                                                <li key={index}>
+                                                <RecomandTeamCard
+                                                    nickname={recommendedUser.nickname}
+                                                    profileImage={recommendedUser.profileImage}
+                                                    profileIntro={recommendedUser.profileIntro}
+                                                    similarities={recommendedUser.similarities}
+                                                />
                                             </li>
-                                            <li>
-                                                <RecomandTeamCard />
-                                            </li>
-                                            <li>
-                                                <RecomandTeamCard />
-                                            </li>
-                                            <li>
-                                                <RecomandTeamCard />
-                                            </li>
-                                            <li>
-                                                <RecomandTeamCard />
-                                            </li>
+                                            ))}
+                                            
                                         </ul>
                                     </div>
                                 </RecomandTeam>
