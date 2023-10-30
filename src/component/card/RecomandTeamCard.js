@@ -6,7 +6,7 @@ import theme from "../../style/theme";
 import Box from "@mui/material/Box";
 import VerifiedUserIcon from '@mui/icons-material/VerifiedUser';
 
-export default function RecomandTeamCard(){
+export default function RecomandTeamCard({nickname,profileImage,profileIntro,similarities}){
     const theme = createTheme({
         typography:{
             fontFamily : "Pretendard"
@@ -22,18 +22,20 @@ export default function RecomandTeamCard(){
            <ThemeProvider theme={theme}>
                 <RecommendTeamCardWrap>
                     <div className="padding">
-                        <div className="img-box">
-                            <img src="/img/profile/profile.png" alt="프로필 이미지" />
-                        </div>
+                        <a href={`/profile/${nickname}`}>
+                            <div className="img-box">
+                                <img src={profileImage} alt="프로필 이미지" />
+                            </div>
+                        </a>
                         <div className="user-title">
-                            <h2>사용자 1</h2>
+                            <h2>{nickname}</h2>
                             <VerifiedUserIcon/>
                         </div>
-                        <p>DB / 빅데이터 / DS, 웹서버</p>
+                        <p>{profileIntro}</p>
                         <div className="tag-wrap">
-                            <h4 className="tag">#데이터베이스</h4>
-                            <h4 className="tag">#웹크롤링</h4>
-                            <h4 className="tag">#API</h4>
+                            <h4 className="tag">#{similarities[0]}</h4>
+                            <h4 className="tag">#{similarities[1]}</h4>
+                            <h4 className="tag">#{similarities[2]}</h4>
                         </div>
                     </div>
                 </RecommendTeamCardWrap>
