@@ -20,7 +20,7 @@ import queryString from 'query-string';
 import { useLocation } from 'react-router-dom';
 import { API } from "../../api/api";
 import { Link } from "react-router-dom";
-
+import loader from '../../loader.gif';
 const Item = styled(Box)(({ theme }) => ({
     padding: theme.spacing(1),
   }));
@@ -87,6 +87,10 @@ export default function Search(){
     const [closedTotalPages, setClosedTotalPages] = useState(0);
 
 
+    // 로딩
+    const [loading, setLoading] = useState(true);
+
+
     
     useEffect(() => {
         const updatedSearchQuery = queryParams.s;
@@ -103,6 +107,7 @@ export default function Search(){
                 setTotalElements(res.data.totalElements);
                 setContent(res.data.content);
                 setTotalPages(res.data.totalPages);
+                setLoading(false);
                 
             })
             .catch(err => {
@@ -186,49 +191,32 @@ export default function Search(){
                                         </Box>
                                     </TabWrap>
                                     <StyledTabPanel value={value} index={0}>
-                                        <Grid container spacing={1}>
-
-                                        {content.length > 0 ? (
-                                            content.map((item) => (
-                                                <Card item xs={12} md={6} key={item.id}>
-                                                    <Link to={`/competition/detail/${item.boardId}`}>
-                                                        <Item><SearchCard item={item}/></Item>
-                                                    </Link>
-                                                </Card>
-                                            ))
+                                        {loading ? ( // If loading is true, display the loader
+                                            <LoadingSpinner src={loader} alt="Loading..." />
                                         ) : (
-                                         <NoResult>
-                                                <div className="no-result-title">
-                                                    <SearchIcon/>
-                                                    <h1>검색 결과가 없습니다.</h1>
-                                                </div>
-                                                <h2>단어의 철자가 정확한지 확인하세요.<br/>
-                                                다른 검색어를 사용해보세요.<br/>
-                                                더 일반적인 검색어를 사용해보세요.</h2>
-                                        </NoResult>
+                                            <div>
+                                                <Grid container spacing={1}>
+                                                    {content.length > 0 ? (
+                                                        content.map((item) => (
+                                                            <Card item xs={12} md={6} key={item.id}>
+                                                                <Link to={`/competition/detail/${item.boardId}`}>
+                                                                    <Item><SearchCard item={item} /></Item>
+                                                                </Link>
+                                                            </Card>
+                                                        ))
+                                                    ) : (
+                                                        <NoResult>
+                                                            {/* No results content */}
+                                                        </NoResult>
+                                                    )}
+                                                </Grid>
+                                                <BasicPagination
+                                                    totalPages={totalPages}
+                                                    currentPage={currentPage}
+                                                    onChange={(event) => setCurrentPage(event)}
+                                                />
+                                            </div>
                                         )}
-
-                                            {/* <Card item xs={12} md={6}>
-                                                <Item><TeamRecruiteCard state={"ing"}/></Item>
-                                            </Card>
-                                            <Card item xs={12} md={6}>
-                                                <Item><TeamRecruiteCard state={"ing"}/></Item>
-                                            </Card>
-                                            <Card item xs={12} md={6}>
-                                                <Item><TeamRecruiteCard state={"ing"}/></Item>
-                                            </Card>
-                                            <Card item xs={12} md={6}>
-                                                <Item><TeamRecruiteCard state={"ing"}/></Item>
-                                            </Card>
-                                            <Card item xs={12} md={6}>
-                                                <Item><TeamRecruiteCard state={"ing"}/></Item>
-                                            </Card> */}
-                                        </Grid>
-                                        <BasicPagination 
-                                            totalPages={totalPages}
-                                            currentPage={currentPage}
-                                            onChange={(event) => setCurrentPage(event)}
-                                        />
                                     </StyledTabPanel>
                                     <StyledTabPanel value={value} index={1} >
 
@@ -346,6 +334,7 @@ export default function Search(){
                 </Container>
                 <Footer />
             </ThemeProvider>
+            
         </>
     )
 }
@@ -411,6 +400,15 @@ const Content = styled(Box)`
             }
         }
     }
+`;
+
+
+const LoadingSpinner = styled.img`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5%;
 `;
 
 const SearchTabWrap = styled(Box)`

@@ -98,6 +98,8 @@ const MsgListBoxWrap = styled(Box)`
         align-items: center;
         justify-content: center;
         margin-right: 2rem;
+        background-position-x: center;
+        background-position-y: center;
         svg{
             color: #fff;
             width: 4rem;

@@ -7,17 +7,13 @@ import { Box, IconButton,Button } from "@mui/material";
 import SearchIcon from '@mui/icons-material/Search';
 import AccountCircleIcon from '@mui/icons-material/AccountCircle';
 import InputBase from '@mui/material/InputBase';
-
-
+import { useLocation } from 'react-router-dom';
 import MySVG from '../../logo.svg';
-
 import MenuIcon from '@mui/icons-material/Menu';
-
 import List from '@mui/material/List';
 import ListItemButton from '@mui/material/ListItemButton';
 import ListItemText from '@mui/material/ListItemText';
 import Collapse from '@mui/material/Collapse';
-
 import Menu from '@mui/material/Menu';
 import MenuItem from '@mui/material/MenuItem';
 import Badge from '@mui/material/Badge';
@@ -37,6 +33,8 @@ import { API_BASE_URL } from "../../common/constant/constant";
 let eventSource = null;
 
 export default function Nav(){
+
+    const location = useLocation();
 
          {/*수정 */}
     const dropdownRef = useRef(null); // Create a reference for dropdown container
@@ -246,18 +244,18 @@ export default function Nav(){
                             <ul>
                                 <li>
                                     {/* <a href="">공모전</a> */}
-                                    <Link to="/contest">공모전</Link>
+                                    <StyledLink><Link to="/contest" className={location.pathname === '/contest' ? 'selected' : ''}>공모전</Link></StyledLink>
                                 </li>
                                 <li>
-                                    <Link to="/externalActivity">대외활동</Link>
+                                <StyledLink><Link to="/externalActivity" className={location.pathname === '/externalActivity' ? 'selected' : ''}>대외활동</Link></StyledLink>
                                     {/* <a href="">대외활동</a> */}
                                 </li>
                                 <li>
-                                    <Link to="/club">동아리</Link>
+                                <StyledLink><Link to="/club" className={location.pathname === '/club' ? 'selected' : ''}>동아리</Link></StyledLink>
                                     {/* <a href="">동아리</a> */}
                                 </li>
                                 <li>
-                                    <Link to="/recruitment">팀원 모집게시판</Link>
+                                <StyledLink> <Link to="/recruitment" className={location.pathname === '/recruitment' ? 'selected' : ''}>팀원 모집게시판</Link></StyledLink>
                                     {/* <a href="">팀원 모집게시판</a> */}
                                 </li>
                             </ul>
@@ -316,22 +314,25 @@ export default function Nav(){
                                 'aria-labelledby': 'basic-button',
                                 }}
                             >
-                                <Link to="/mypage/profileSetting">
+                               
                                 <div>
+                                
                                     <StyledMenuItem onClick={handleClose}>
-
+                                    <Link to="/mypage/profileSetting">
                                         마이페이지
+                                        </Link>
                                     </StyledMenuItem>
+                                    
                                 </div>
-                                </Link>
+                                
 
-                                <Link to="/" onClick={handleLogout}>
+                                
                                 <StyledMenuItem onClick={handleClose}>
-                                    
+                                <Link to="/" onClick={handleLogout}>  
                                         로그아웃
-                                    
+                                        </Link>    
                                 </StyledMenuItem>
-                                </Link>
+                                
                             </Menu>
                            {/*수정 */}
                            {userInfo ? (
@@ -437,22 +438,23 @@ export default function Nav(){
                             </div>
                             <StyledCollapse in={open} timeout="auto" unmountOnExit>
                                 <List component="div" disablePadding sx={{mt : 2}}>
-                                    <StyledLink Link to="/contest" underline="none">
+                                    <StyledLink Link to="/contest" underline="none" className={location.pathname === '/contest' ? 'selected' : ''}>
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="공모전" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink Link to="/externalActivity" underline="none">
+                                    <StyledLink Link to="/externalActivity" underline="none" className={location.pathname === '/externalActivity' ? 'selected' : ''}>
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="대외활동" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink Link to="/club" underline="none">
+                                    <StyledLink Link to="/club" underline="none" className={location.pathname === '/club' ? 'selected' : ''}>
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="동아리" />
                                         </ListItemButton>
                                     </StyledLink>
-                                    <StyledLink Link to="/recruitment" underline="none">
+
+                                    <StyledLink Link to="/recruitment" underline="none" className={location.pathname === '/recruitment' ? 'selected' : ''}>
                                         <ListItemButton sx={{ p : 1}}>
                                             <StyledListItemText primary="팀원 모집게시판" />
                                         </ListItemButton>
@@ -614,6 +616,12 @@ const StyledListItemText = styled(ListItemText)`
 
 const StyledLink = styled(Link)`
     width: 100%;
+    .selected { /* Reference the class correctly */
+        // background-color: #EDA900;
+        font-weight:700;
+        color: rgba(255, 115, 0, 0.8) !important;
+        text-decoration: underline; /* Add this line for underline effect */
+    }
 `;
 
 const StyledCollapse = styled(Collapse)`
@@ -641,6 +649,7 @@ const NotificationBadge = styled(Badge)`
         }
     }
 `
+
 const StyledMenuItem = styled(MenuItem)`
     a{
         font-size: 1.6rem;

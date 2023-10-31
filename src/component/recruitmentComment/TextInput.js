@@ -120,6 +120,7 @@ const TextInputWrap = styled(Box)`
   margin-top: 1rem;
   button {
     width: 15%;
+    height: 5rem;
   }
   @media ${() => theme.device.mobile} {
     button {
@@ -132,7 +133,7 @@ const StyledTextField = styled(TextField)`
   width: 84%;
   .MuiInputBase-root {
     padding: 1.5rem 2rem !important;
-    height: 8rem;
+    height: 5rem;
   }
   textarea {
     font-size: 1.6rem;

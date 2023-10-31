@@ -19,7 +19,8 @@ export default function TaemCard({
     authorNickname,
     authorProfileImg,
     commentCount,
-    boardId
+    boardId,
+    recruitmentBoardCategory
     
 }){
 
@@ -54,7 +55,7 @@ export default function TaemCard({
                             </li>
                             <li className="img-box">
                                 <div className="img-cover">
-                                    {/* <h4>강원</h4> */}
+                                    <h4>{recruitmentBoardCategory}</h4>
                                     <div className="personnel">
                                         <h5>최소인원 / 최대인원</h5>
                                         <strong>{currentMemberSize}/{maxMemberSize}</strong>

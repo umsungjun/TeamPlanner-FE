@@ -49,7 +49,14 @@ export default function TeamRecruiteCard({
             <RecruitCardWrap>
                 <div className="recruiteCardWrap">
                     <div className="team-img">
-                        <img src={recruitmentBoardImg} width="100%"/>
+                    <img
+                        src={recruitmentBoardImg}
+                        style={{
+                            maxWidth: '100%', /* Ensure the image doesn't exceed the container width */
+                            height: '100%', /* Maintain the aspect ratio */
+                        }}
+                        />
+
                     </div>
                     <div className="team-info">
                         <div className="dp-wrap">
@@ -91,7 +98,7 @@ const RecruitCardWrap = styled(Box)`
         justify-content: space-between;
         .team-img{
             width: 38%;
-            height: 21rem;
+            height: 28rem;
             img{
                 width: 100%;
                 height: 100%;

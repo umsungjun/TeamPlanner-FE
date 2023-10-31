@@ -358,14 +358,15 @@ export default function Detail() {
                   <div className="dp-end">
                      {/*3차추가 */}
                      { <>
-                    <CommonModal button={
+                    {/* <CommonModal button={
+                    
+                    } /> */}
+
                     <FilledBtn text={"글쓰기"} handle={() => {
                       if (localStorage.getItem("userInfo")) {
-                        console.log("/recruitment/write?boardId=" + boardId); 
                         window.location.href=`/recruitment/write?boardId=${boardId}`
                       }}}
                       />
-                    } />
                       </>
                      }
                   </div>
@@ -610,7 +611,7 @@ const StyledTabPanel = styled(CustomTabPanel)`
   justify-content: flex-end;
   /*3차 수정*/
   button{
-      width: 100%;
+      width: 15%;
       padding: 1rem 5rem !important;
   }
   /*3차 수정*/

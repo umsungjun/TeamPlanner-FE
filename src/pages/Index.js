@@ -14,9 +14,8 @@ import { useLocation } from "react-router-dom";
 import { contest } from "./category";
 import { externalActivity } from "./category";
 import { club } from "./category";
-import loader from '../loader.gif';
 import ChatBox from "../component/chat/ChatBox";
-
+import loader from '../loader.gif';
 
 const Item = styled(Box)(({ theme }) => ({
 
@@ -220,6 +219,9 @@ export default function Index() {
 
   return (
     <>
+      {loading ? ( // If loading is true, display the loader
+      <LoadingSpinner src={loader} alt="Loading..." />
+      ) : (
       <ThemeProvider theme={theme}>
         <Nav />
         <Container>
@@ -287,8 +289,11 @@ export default function Index() {
                   }
                   {/*수정*/}
                   return (
-                     
-                           
+                      <>
+                       
+                       {loading ? ( // If loading is true, display the loader
+                        <LoadingSpinner src={loader} alt="Loading..." />
+                        ):(
                         <Card item xs={6} md={2}>
                         <Item><CompetitionCard  
                             id={item.boardId}
@@ -300,8 +305,9 @@ export default function Index() {
                             commentCount={item.commentCount}/>
                         </Item>
                           
-                        </Card>     
-                    
+                        </Card>  
+                        )}   
+                      </>
                     
                   );
                 }) : 
@@ -389,17 +395,21 @@ export default function Index() {
             </CompetitionList>
             )}
              {data.length > 0 && history.pathname !== "/" && (
+              <div style={{ marginBottom: '70px' }}>
               <BasicPagination
+                style={{ margin: '70px 0' }} // Add margin for spacing
                 totalPages={totalPages}
                 currentPage={currentPage}
                 onChange={(event) => setCurrentPage(event)}
               />
+              </div>
              )}
           </PaddingWrap>
         </Container>
         <Footer />
         {/* {localStorage.getItem("userInfo") && <ChatBox/>} */}
       </ThemeProvider>
+      )}
     </>
   );
 }
@@ -455,6 +465,14 @@ const KeywordWrap = styled(Box)`
   }
 `;
 
+const LoadingSpinner = styled.img`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5%;
+`;
+
 const CompetitionList = styled(Box)`
   .title {
     display: flex;
@@ -497,4 +515,5 @@ const CompetitionList = styled(Box)`
 
 {/*수정*/}
 const Card = styled(Grid)`
+  margin-bottom: 50px; /* Adjust the value to control the space */
 `;

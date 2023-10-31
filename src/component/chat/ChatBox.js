@@ -19,6 +19,7 @@ import {Stomp} from '@stomp/stompjs';
 import { API } from "../../api/api";
 import { AuthContext } from "../../AuthContext";
 import { API_BASE_URL } from "../../common/constant/constant";
+import loader from '../../loader.gif';
 
 export default function ChatBox({handleClick, open}){
     
@@ -43,6 +44,8 @@ export default function ChatBox({handleClick, open}){
 
     
 
+    const [loading, setLoading] = useState(true);
+    
     const [open2, setOpen2] = React.useState(false);
 
     const handleClick2 = () => {
@@ -63,6 +66,8 @@ export default function ChatBox({handleClick, open}){
     const client = useRef(null); // Use a ref to hold the client instance
     const [tmp, setTmp] = useState([]);
     const [readCountNotification,setReadCountNotification]=useState(false);
+    const chatListRef = useRef(null);
+    const [isChatLoading, setIsChatLoading] = useState(true);
 
 
     function onConnected() {
@@ -159,11 +164,19 @@ export default function ChatBox({handleClick, open}){
                     // 소켓을 구독할 수 있습니다.
                    
                     connectToWebSocket(() => {
-                        subscribeSocket();
-                    });
-                    setChatList(res.data.chattings);
+                        subscribeSocket().then(() => {
+                            setChatList(res.data.chattings);
+                            setIsChatLoading(false);
+                            // alert("로드 완료!");
+                            if (chatListRef.current) {
+                                console.log(chatListRef.current)
+                                chatListRef.current.style.pointerEvents = "auto";
                     
-                   
+                            }
+                        });
+                    });
+
+                    
                 })
                 .catch(error => {
                     console.error("채팅방 정보를 가져오는 데 실패했습니다:", error);
@@ -282,34 +295,31 @@ export default function ChatBox({handleClick, open}){
     }
 
 
-    const subscribeSocket = () => {
-        
+    const subscribeSocket = async () => {
         if (roomId) {
-            let sameCheck = false;
             if (previousRoomId !== null) {
                 client.current.unsubscribe(`/sub/chattings/rooms/${previousRoomId}`);
             }
             // 현재 채팅방에 대한 구독을 설정합니다.
-            if (tmp) {
-                tmp.map((item) => {
-                    if (item.roomId === roomId) {
-                        sameCheck = true;
-                        return false;
-                    }
-                })
-            }
-
-            if (!sameCheck) {
+            const isRoomAlreadySubscribed = tmp.some(item => item.roomId === roomId);
+            if (!isRoomAlreadySubscribed) {
                 console.log("구독하는 중 ...");
-                let socket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
-                if (socket) {
-                    setTmp((tmp) => [...tmp, { roomId: roomId, socket: socket.id }])
-                }
+                const socket = await new Promise((resolve, reject) => {
+                    const newSocket = client.current.subscribe(`/sub/chattings/rooms/${roomId}`, onMessageReceived);
+                    if (newSocket) {
+                        setTmp([...tmp, { roomId: roomId, socket: newSocket.id }]);
+                        resolve(newSocket);
+                    } else {
+                        reject(new Error("Socket subscription failed"));
+                    }
+                });
+    
                 // 이전 채팅방 ID를 업데이트합니다.
                 previousRoomId = roomId;
             }
         }
     }
+    
 
 
     chatRoomList.map((item, key) => {
@@ -317,7 +327,13 @@ export default function ChatBox({handleClick, open}){
             tabContArr.push(
                 {
                     tabTitle:(
-                        <div className={activeIndex !== null && activeIndex === key ? "is-active" : ""} onClick={()=>tabClickHandler(key, item.roomId)}>
+                        <div style={{filter: activeIndex !== key && "grayscale(100%)", pointerEvents: !activeIndex || activeIndex !== key && isChatLoading && "none", cursor: "pointer"}}className={activeIndex !== null && activeIndex === key ? "is-active" : ""} onClick={(event)=> {
+                            tabClickHandler(key, item.roomId)
+                            event.target.style.pointerEvents = "none";
+                            setIsChatLoading(true);
+                            }}
+                            ref={chatListRef}
+                        >
                             <MsgListBox 
                             id={item.roomId} 
                             none={true} 
@@ -594,6 +610,13 @@ const MsgList = styled(Box)`
     }
 `;
 
+const LoadingSpinner = styled.img`
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 5%;
+`;
 
 const ChatingBox = styled(Box)`
     width: 65%;

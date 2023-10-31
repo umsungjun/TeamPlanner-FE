@@ -329,7 +329,11 @@ const connectToWebSocket = (roomId, onConnectedCallback) => {
                                 ) : (
                                     <ReceiveMsg>
                                         <UserImg>
-                                        <img src={profileImage} height={35} style={{ borderRadius: '50%' }}/>
+                                        <img src={profileImage} height={35} style={{ borderRadius: '50%' 
+                                                                                    , width: '120%',
+                                                                                     height: '120%',
+                                                                                     backgroundPositionX: 'center',
+                                                                                     backgroundPositionY: 'center'}}/>
                                         </UserImg>
                                         
                                         <div className="msg-wrap">
@@ -533,6 +537,8 @@ export const ChatingWrap = styled(Box)`
 const UserImg = styled(Box)`
     background-color: #BDBDBD;
     border-radius: 100px;
+    width: 100%;
+    height: 100%;
     min-width: 3rem;
     width: 3rem;
     height: 3rem;
@@ -604,6 +610,7 @@ const ReceiveMsg = styled(Box)`
             }
         }
     }
+
     @media ${() => theme.device.mobile} {
         .msg-wrap{
             .msg-box-wrap{

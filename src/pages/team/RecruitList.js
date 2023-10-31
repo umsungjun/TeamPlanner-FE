@@ -303,8 +303,6 @@ const Content = styled(Box)`
 const Card = styled(Grid)`
 `;
 
-
-
 const SearchTabWrap = styled(Box)`
     width: 100%;
     margin-top: 2rem;
