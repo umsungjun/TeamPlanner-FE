@@ -21,6 +21,7 @@ import { useLocation } from 'react-router-dom';
 import { API } from "../../api/api";
 import { Link } from "react-router-dom";
 import loader from '../../loader.gif';
+import MiniLoader from "../../style/MiniLoader";
 const Item = styled(Box)(({ theme }) => ({
     padding: theme.spacing(1),
   }));
@@ -94,6 +95,7 @@ export default function Search(){
     
     useEffect(() => {
         const updatedSearchQuery = queryParams.s;
+        setLoading(true);
         setSearchWord(updatedSearchQuery);
     }, [queryParams.s]);
 
@@ -192,7 +194,7 @@ export default function Search(){
                                     </TabWrap>
                                     <StyledTabPanel value={value} index={0}>
                                         {loading ? ( // If loading is true, display the loader
-                                            <LoadingSpinner src={loader} alt="Loading..." />
+                                             <MiniLoader/>
                                         ) : (
                                             <div>
                                                 <Grid container spacing={1}>

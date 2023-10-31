@@ -16,6 +16,7 @@ import { externalActivity } from "./category";
 import { club } from "./category";
 import ChatBox from "../component/chat/ChatBox";
 import loader from '../loader.gif';
+import MiniLoader from "../style/MiniLoader";
 
 const Item = styled(Box)(({ theme }) => ({
 
@@ -209,19 +210,12 @@ export default function Index() {
     setCurrentPage(1);
   }, [translatedPath]);
 
-  const Loading = styled.img`
-    position: absolute;
-    left: 50%;
-    transform: translate(0, -50%);
-    width: 5%;
-  `
+
 
 
   return (
     <>
-      {loading ? ( // If loading is true, display the loader
-      <LoadingSpinner src={loader} alt="Loading..." />
-      ) : (
+    
       <ThemeProvider theme={theme}>
         <Nav />
         <Container>
@@ -277,6 +271,11 @@ export default function Index() {
                 </li>
               </ul>
               <div className="competition-list">
+              
+              {loading ? ( // If loading is true, display the loader
+              // <LoadingSpinner src={loader} alt="Loading..." />
+              <MiniLoader/>
+              ) : (
               <Grid container spacing={1}>
                 {data.length > 0 ? data.map((item) => {
 
@@ -292,7 +291,7 @@ export default function Index() {
                       <>
                        
                        {loading ? ( // If loading is true, display the loader
-                        <LoadingSpinner src={loader} alt="Loading..." />
+                            <MiniLoader/>
                         ):(
                         <Card item xs={6} md={2}>
                         <Item><CompetitionCard  
@@ -310,11 +309,12 @@ export default function Index() {
                       </>
                     
                   );
-                }) : 
-                <NotFoundData>
-                    <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText>
-                </NotFoundData>}
-                  </Grid>
+                }) : ("")
+                // <NotFoundData>
+                //     <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText>
+                // </NotFoundData>
+                }
+                  </Grid>)}
                 {/* <Card>
                                 <CompetitionCard id={"box1"}/>
                             </Card>
@@ -337,6 +337,7 @@ export default function Index() {
             </CompetitionList>
             {history.pathname === "/" && (
             <CompetitionList className="mt-5">
+              
               <ul className="title">
                 <li>
                   <h2>최신 {translatedPath}</h2>
@@ -344,8 +345,11 @@ export default function Index() {
                 </li>
               </ul>
               <div className="competition-list">
+              {loading ? ( // If loading is true, display the loader
+                        <MiniLoader/>
+                        ):(
               <Grid container spacing={1}>
-                {!loading2 ? data2.map((item) => {
+                {!loading ? data2.map((item) => {
 
                   let title;
                   if (item.activitiyName.length >= 8) {
@@ -370,9 +374,11 @@ export default function Index() {
                   );
                 }): 
                 <NotFoundData>
-                    <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText>
+                    {/* <NotFoundText>데이터가 존재하지 않습니다.</NotFoundText> */}
                 </NotFoundData>}
-                </Grid>
+                
+                </Grid>)}
+                
                 {/* <Card>
                                 <CompetitionCard id={"box2"}/>
                             </Card>
@@ -409,7 +415,7 @@ export default function Index() {
         <Footer />
         {/* {localStorage.getItem("userInfo") && <ChatBox/>} */}
       </ThemeProvider>
-      )}
+  
     </>
   );
 }
